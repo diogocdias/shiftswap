@@ -1,22 +1,29 @@
 import { useState } from 'react';
+import LoginPage from './LoginPage';
 
 // Simple router implementation
 function Router() {
     const [currentPage, setCurrentPage] = useState('home');
 
-    const navigate = (page) => {
+    const navigate = (page: string) => {
         setCurrentPage(page);
         window.scrollTo(0, 0);
     };
 
     return currentPage === 'home' ? (
         <ShiftSwapHome navigate={navigate} />
-    ) : (
+    ) : currentPage === 'features' ? (
         <FeaturesPage navigate={navigate} />
+    ) : (
+        <LoginPage navigate={navigate} />
     );
 }
 
-function ShiftSwapHome({ navigate }) {
+interface PageProps {
+    navigate: (page: string) => void;
+}
+
+function ShiftSwapHome({ navigate }: PageProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -36,6 +43,12 @@ function ShiftSwapHome({ navigate }) {
                             <a href="#services" className="text-gray-600 hover:text-gray-900 transition">Services</a>
                             <a href="#about" className="text-gray-600 hover:text-gray-900 transition">About</a>
                             <a href="#contact" className="text-gray-600 hover:text-gray-900 transition">Contact</a>
+                            <button
+                                onClick={() => navigate('login')}
+                                className="text-gray-600 hover:text-gray-900 transition"
+                            >
+                                Login
+                            </button>
                             <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
                                 Get Started
                             </button>
@@ -202,7 +215,7 @@ function ShiftSwapHome({ navigate }) {
     );
 }
 
-function FeaturesPage({ navigate }) {
+function FeaturesPage({ navigate }: PageProps) {
     const features = [
         {
             step: 1,
