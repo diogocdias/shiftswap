@@ -9,9 +9,12 @@ export default function ShiftSwapHome() {
             <nav className="bg-white border-b border-gray-200">
                 <div className="container mx-auto px-6 py-4">
                     <div className="flex justify-between items-center">
-                        <div className="flex items-center space-x-2">
-                            <span className="text-2xl">📋</span>
-                            <span className="text-xl font-semibold text-gray-800">ShiftSwap</span>
+                        <div className="flex items-center">
+                            <img
+                                src="/shiftswap_side.png"
+                                alt="ShiftSwap"
+                                className="h-10 w-auto"
+                            />
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
                             <a href="#services" className="text-gray-600 hover:text-gray-900 transition">Services</a>
@@ -276,9 +279,12 @@ export default function ShiftSwapHome() {
                 <div className="container mx-auto px-6">
                     <div className="grid md:grid-cols-4 gap-8 mb-8">
                         <div>
-                            <div className="flex items-center space-x-2 mb-4">
-                                <span className="text-2xl">📋</span>
-                                <span className="text-xl font-semibold">ShiftSwap</span>
+                            <div className="flex flex-col items-center">
+                                <img
+                                    src="/shiftswap_side.png"
+                                    alt="ShiftSwap"
+                                    className="h-10 w-auto"
+                                />
                             </div>
                             <p className="text-gray-400">
                                 Simplifying healthcare scheduling since 2024.
