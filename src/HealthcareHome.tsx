@@ -1,6 +1,22 @@
 import { useState } from 'react';
 
-export default function ShiftSwapHome() {
+// Simple router implementation
+function Router() {
+    const [currentPage, setCurrentPage] = useState('home');
+
+    const navigate = (page) => {
+        setCurrentPage(page);
+        window.scrollTo(0, 0);
+    };
+
+    return currentPage === 'home' ? (
+        <ShiftSwapHome navigate={navigate} />
+    ) : (
+        <FeaturesPage navigate={navigate} />
+    );
+}
+
+function ShiftSwapHome({ navigate }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -36,7 +52,7 @@ export default function ShiftSwapHome() {
                 </div>
             </nav>
 
-            {/* Hero Section - Clean & Spacious */}
+            {/* Hero Section */}
             <section className="bg-gradient-to-b from-blue-50 to-white py-20 md:py-32">
                 <div className="container mx-auto px-6">
                     <div className="max-w-3xl mx-auto text-center">
@@ -50,7 +66,10 @@ export default function ShiftSwapHome() {
                             <button className="bg-blue-600 text-white px-8 py-4 rounded text-lg font-medium hover:bg-blue-700 transition">
                                 Book a Demo
                             </button>
-                            <button className="bg-white text-blue-600 px-8 py-4 rounded text-lg font-medium border-2 border-blue-600 hover:bg-blue-50 transition">
+                            <button
+                                onClick={() => navigate('features')}
+                                className="bg-white text-blue-600 px-8 py-4 rounded text-lg font-medium border-2 border-blue-600 hover:bg-blue-50 transition"
+                            >
                                 Learn More
                             </button>
                         </div>
@@ -78,7 +97,7 @@ export default function ShiftSwapHome() {
                 </div>
             </section>
 
-            {/* Services Section - Clean Cards */}
+            {/* Services Section */}
             <section id="services" className="py-20 bg-gray-50">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16">
@@ -114,146 +133,8 @@ export default function ShiftSwapHome() {
                             <h3 className="text-2xl font-semibold text-gray-900 mb-3">One Platform. No paperwork.</h3>
                             <p className="text-gray-600 leading-relaxed">
                                 ShiftSwap consolidates all scheduling and shift management into a single platform,
-                                eliminating the need for paperwork and manual tracking. Enjoy seamless communication and real-time updates.
+                                eliminating the need for paperwork and manual tracking.
                             </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Image + Text Section */}
-            <section className="py-20 bg-white">
-                <div className="container mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-                        <div>
-                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Streamlined Shift Management
-                            </h2>
-                            <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                                Say goodbye to spreadsheets and endless emails. ShiftSwap provides a centralized hub
-                                for all your scheduling needs, making it easy for managers and staff to stay coordinated.
-                            </p>
-                            <ul className="space-y-4">
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-gray-700">Real-time schedule updates</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-gray-700">Automated conflict detection</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-gray-700">Mobile access for on-the-go management</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg h-96 flex items-center justify-center">
-                            <div className="text-8xl">📊</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Alternate Image + Text Section */}
-            <section className="py-20 bg-gray-50">
-                <div className="container mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-                        <div className="bg-gradient-to-br from-green-100 to-green-50 rounded-lg h-96 flex items-center justify-center order-2 md:order-1">
-                            <div className="text-8xl">✅</div>
-                        </div>
-                        <div className="order-1 md:order-2">
-                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Built for Healthcare Teams
-                            </h2>
-                            <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                                We understand the unique challenges of healthcare scheduling. ShiftSwap is designed
-                                specifically for healthcare facilities, with features that address your specific needs.
-                            </p>
-                            <ul className="space-y-4">
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-green-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-gray-700">Credential and certification tracking</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-green-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-gray-700">Compliance with labor regulations</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-green-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-gray-700">Department-specific scheduling rules</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials */}
-            <section className="py-20 bg-white">
-                <div className="container mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                            What Healthcare Professionals Say
-                        </h2>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="bg-gray-50 p-8 rounded-lg">
-                            <div className="flex mb-4">
-                                {[...Array(5)].map((_, i) => (
-                                    <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                    </svg>
-                                ))}
-                            </div>
-                            <p className="text-gray-700 mb-4 italic">
-                                "ShiftSwap has completely transformed how we manage our nursing staff. The time saved is incredible."
-                            </p>
-                            <p className="font-semibold text-gray-900">Dr. Sarah Johnson</p>
-                            <p className="text-gray-600 text-sm">Nurse Manager, City Hospital</p>
-                        </div>
-
-                        <div className="bg-gray-50 p-8 rounded-lg">
-                            <div className="flex mb-4">
-                                {[...Array(5)].map((_, i) => (
-                                    <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                    </svg>
-                                ))}
-                            </div>
-                            <p className="text-gray-700 mb-4 italic">
-                                "The swap functionality is a game-changer. Our staff love the flexibility and it reduces scheduling conflicts."
-                            </p>
-                            <p className="font-semibold text-gray-900">Michael Chen</p>
-                            <p className="text-gray-600 text-sm">Operations Director, Medical Center</p>
-                        </div>
-
-                        <div className="bg-gray-50 p-8 rounded-lg">
-                            <div className="flex mb-4">
-                                {[...Array(5)].map((_, i) => (
-                                    <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                    </svg>
-                                ))}
-                            </div>
-                            <p className="text-gray-700 mb-4 italic">
-                                "Simple, intuitive, and powerful. This is the scheduling tool we've been waiting for."
-                            </p>
-                            <p className="font-semibold text-gray-900">Emily Rodriguez</p>
-                            <p className="text-gray-600 text-sm">HR Manager, Healthcare Network</p>
                         </div>
                     </div>
                 </div>
@@ -266,7 +147,7 @@ export default function ShiftSwapHome() {
                         Ready to Simplify Your Scheduling?
                     </h2>
                     <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-                        Join hundreds of healthcare facilities already using ShiftSwap to manage their teams more efficiently.
+                        Join hundreds of healthcare facilities already using ShiftSwap.
                     </p>
                     <button className="bg-white text-blue-600 px-10 py-4 rounded text-lg font-semibold hover:bg-gray-100 transition shadow-lg">
                         Schedule a Demo
@@ -295,14 +176,12 @@ export default function ShiftSwapHome() {
                             <ul className="space-y-2 text-gray-400">
                                 <li><a href="#" className="hover:text-white transition">Features</a></li>
                                 <li><a href="#" className="hover:text-white transition">Pricing</a></li>
-                                <li><a href="#" className="hover:text-white transition">Security</a></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4">Company</h4>
                             <ul className="space-y-2 text-gray-400">
                                 <li><a href="#" className="hover:text-white transition">About</a></li>
-                                <li><a href="#" className="hover:text-white transition">Careers</a></li>
                                 <li><a href="#" className="hover:text-white transition">Contact</a></li>
                             </ul>
                         </div>
@@ -322,3 +201,190 @@ export default function ShiftSwapHome() {
         </div>
     );
 }
+
+function FeaturesPage({ navigate }) {
+    const features = [
+        {
+            step: 1,
+            title: "Create Your Schedule",
+            description: "Start by setting up your team's basic schedule. Define shift types, set working hours, and assign staff members to their preferred roles. Our intelligent system helps ensure fair distribution and compliance with labor regulations.",
+            icon: "📅"
+        },
+        {
+            step: 2,
+            title: "Automated Optimization",
+            description: "Let ShiftSwap's algorithm optimize your schedule based on staff preferences, skill requirements, and coverage needs. The system automatically detects conflicts and suggests the best arrangements to maximize efficiency.",
+            icon: "⚡"
+        },
+        {
+            step: 3,
+            title: "Enable Shift Swapping",
+            description: "Empower your staff to request shift swaps directly through the platform. Managers receive instant notifications and can approve or deny requests with one click, maintaining full control while giving staff flexibility.",
+            icon: "🔄"
+        },
+        {
+            step: 4,
+            title: "Real-Time Updates",
+            description: "Everyone stays informed with instant notifications for schedule changes, approved swaps, and upcoming shifts. Access the schedule from any device, anywhere, ensuring your team is always up to date.",
+            icon: "📱"
+        }
+    ];
+
+    return (
+        <div className="relative bg-white min-h-screen">
+            {/* Navigation */}
+            <nav className="bg-white border-b border-gray-200">
+                <div className="container mx-auto px-6 py-4">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                            <img
+                                src="/shiftswap_side.png"
+                                alt="ShiftSwap"
+                                className="h-10 w-auto"
+                            />
+                        </div>
+                        <button
+                            onClick={() => navigate('home')}
+                            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+                        >
+                            Home
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Hero Section */}
+            <section className="bg-gradient-to-b from-blue-50 to-white py-16">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                            How ShiftSwap Works
+                        </h1>
+                        <p className="text-xl text-gray-600">
+                            Four simple steps to transform your healthcare scheduling
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Features Section */}
+            <section className="py-16">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-6xl mx-auto space-y-24">
+                        {features.map((feature, index) => (
+                            <div
+                                key={feature.step}
+                                className={`grid md:grid-cols-2 gap-12 items-center ${
+                                    index % 2 === 1 ? 'md:flex-row-reverse' : ''
+                                }`}
+                            >
+                                <div className={index % 2 === 1 ? 'md:order-2' : ''}>
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="text-5xl">{feature.icon}</div>
+                                        <div className="text-sm font-semibold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+                                            Step {feature.step}
+                                        </div>
+                                    </div>
+                                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                                        {feature.title}
+                                    </h2>
+                                    <p className="text-lg text-gray-600 leading-relaxed">
+                                        {feature.description}
+                                    </p>
+                                </div>
+
+                                {/* Calendar/Schedule Mockup */}
+                                <div className={`bg-gradient-to-br ${
+                                    index % 2 === 0 ? 'from-blue-50 to-blue-100' : 'from-green-50 to-green-100'
+                                } rounded-lg p-8 shadow-lg ${index % 2 === 1 ? 'md:order-1' : ''}`}>
+                                    <div className="bg-white rounded-lg p-6 shadow">
+                                        {/* Calendar Header */}
+                                        <div className="flex justify-between items-center mb-4 pb-4 border-b">
+                                            <h3 className="font-semibold text-gray-800">Schedule Overview</h3>
+                                            <div className="text-sm text-gray-500">Week 47</div>
+                                        </div>
+
+                                        {/* Calendar Grid */}
+                                        <div className="space-y-2">
+                                            <div className="grid grid-cols-7 gap-2 text-xs text-gray-500 font-medium mb-2">
+                                                <div>Mon</div>
+                                                <div>Tue</div>
+                                                <div>Wed</div>
+                                                <div>Thu</div>
+                                                <div>Fri</div>
+                                                <div>Sat</div>
+                                                <div>Sun</div>
+                                            </div>
+                                            <div className="grid grid-cols-7 gap-2">
+                                                {[...Array(7)].map((_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className={`aspect-square rounded p-2 text-xs ${
+                                                            i === 2 || i === 5
+                                                                ? 'bg-blue-600 text-white font-semibold'
+                                                                : i === 1 || i === 4
+                                                                    ? 'bg-blue-100 text-blue-800'
+                                                                    : 'bg-gray-50 text-gray-400'
+                                                        }`}
+                                                    >
+                                                        <div>{25 + i}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Shift Details */}
+                                            <div className="mt-6 pt-4 border-t space-y-2">
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+                                                    <span className="text-gray-700">Day Shift (8am-4pm)</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <div className="w-3 h-3 rounded-full bg-blue-300"></div>
+                                                    <span className="text-gray-700">Night Shift (8pm-6am)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-20 bg-blue-600">
+                <div className="container mx-auto px-6 text-center">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                        Ready to Get Started?
+                    </h2>
+                    <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+                        See ShiftSwap in action with a personalized demo
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button className="bg-white text-blue-600 px-10 py-4 rounded text-lg font-semibold hover:bg-gray-100 transition shadow-lg">
+                            Schedule a Demo
+                        </button>
+                        <button
+                            onClick={() => navigate('home')}
+                            className="bg-transparent border-2 border-white text-white px-10 py-4 rounded text-lg font-semibold hover:bg-white hover:text-blue-600 transition"
+                        >
+                            Back to Home
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-gray-900 text-white py-12">
+                <div className="container mx-auto px-6">
+                    <div className="text-center text-gray-400 text-sm">
+                        <p>© 2024 ShiftSwap. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    );
+}
+
+export default Router;
