@@ -1,8 +1,8 @@
-import HealthcareHome from './HealthcareHome'
+import ShiftSwapHome from './public/ShiftSwapHome.tsx'
 import './App.css'
 
 function App() {
-    return <HealthcareHome />
+    return <ShiftSwapHome />
 }
 
 export default App

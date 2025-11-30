@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import LoginPage from './LoginPage';
-import Dashboard from './Dashboard';
+import LoginPage from './LoginPage.tsx';
+import Dashboard from '../dashboard/Dashboard.tsx';
 
 // Simple router implementation
 function Router() {
