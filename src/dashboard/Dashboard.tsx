@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ScheduleTab from './ScheduleTab';
 
 interface DashboardProps {
     navigate: (page: string) => void;
@@ -292,45 +293,7 @@ function Dashboard({ navigate }: DashboardProps) {
                     )}
 
                     {/* Schedule Tab */}
-                    {activeTab === 'schedule' && (
-                        <div className="space-y-6">
-                            <div className="bg-white rounded-lg border border-gray-200">
-                                <div className="p-6 border-b border-gray-200">
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="text-xl font-semibold text-gray-900">
-                                            {userRole === 'admin' ? 'All Schedules' : 'Your Upcoming Shifts'}
-                                        </h2>
-                                        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                                            View Calendar
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="divide-y divide-gray-200">
-                                    {upcomingShifts.map((shift) => (
-                                        <div key={shift.id} className="p-6 hover:bg-gray-50 transition">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="text-center">
-                                                        <div className="text-2xl font-bold text-gray-900">{shift.date.split(' ')[1]}</div>
-                                                        <div className="text-xs text-gray-500 uppercase">{shift.date.split(' ')[0]}</div>
-                                                        <div className="text-xs text-gray-500">{shift.day}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-medium text-gray-900">{shift.type}</div>
-                                                        <div className="text-sm text-gray-600">{shift.time}</div>
-                                                        <div className="text-sm text-gray-500">{shift.location}</div>
-                                                    </div>
-                                                </div>
-                                                <button className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                                                    Request Swap
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {activeTab === 'schedule' && <ScheduleTab />}
 
                     {/* Team Tab */}
                     {activeTab === 'team' && (
