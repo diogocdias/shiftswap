@@ -1,17 +1,97 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface DashboardProps {
     navigate: (page: string) => void;
 }
 
+interface MenuItem {
+    id: string;
+    label: string;
+    icon: string;
+    badge?: number;
+    order: number;
+}
+
+// TODO: REMOVE THIS MOCK API WHEN BACKEND CMS IS READY
+// This simulates the CMS API response for menu items based on user role
+const mockFetchMenuItems = async (sessionId: string): Promise<MenuItem[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Mock: Extract role from session (in real implementation, backend validates session)
+    const userDataString = sessionStorage.getItem('mockUser');
+    const userData = userDataString ? JSON.parse(userDataString) : null;
+    const userRole = userData?.role || 'user';
+
+    // Mock CMS responses for different roles
+    const menuItemsByRole: Record<string, MenuItem[]> = {
+        user: [
+            { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
+            { id: 'schedule', label: 'My Schedule', icon: '📅', order: 2 },
+            { id: 'requests', label: 'Requests', icon: '🔄', badge: 2, order: 3 },
+        ],
+        teamleader: [
+            { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
+            { id: 'schedule', label: 'Schedule', icon: '📅', order: 2 },
+            { id: 'team', label: 'Team', icon: '👥', order: 3 },
+            { id: 'requests', label: 'Requests', icon: '🔄', badge: 2, order: 4 },
+            { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
+        ],
+        admin: [
+            { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
+            { id: 'schedule', label: 'All Schedules', icon: '📅', order: 2 },
+            { id: 'team', label: 'All Staff', icon: '👥', order: 3 },
+            { id: 'requests', label: 'All Requests', icon: '🔄', badge: 2, order: 4 },
+            { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
+            { id: 'settings', label: 'Settings', icon: '⚙️', order: 6 },
+        ],
+    };
+
+    return menuItemsByRole[userRole] || menuItemsByRole.user;
+};
+// END TODO
+
 function Dashboard({ navigate }: DashboardProps) {
     const [activeTab, setActiveTab] = useState('overview');
+    const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+    const [isLoadingMenu, setIsLoadingMenu] = useState(true);
 
     // Get mock user data from sessionStorage
     const userDataString = sessionStorage.getItem('mockUser');
     const userData = userDataString ? JSON.parse(userDataString) : null;
     const userName = userData?.name || 'User';
     const userRole = userData?.role || 'user';
+
+    // Fetch menu items from CMS API on component mount
+    useEffect(() => {
+        const loadMenuItems = async () => {
+            setIsLoadingMenu(true);
+            try {
+                // TODO: REPLACE WITH ACTUAL CMS API CALL
+                // const response = await fetch('/api/cms/menu', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ sessionId: userData?.sessionId })
+                // });
+                // const items = await response.json();
+
+                const items = await mockFetchMenuItems(userData?.sessionId || '');
+                // END TODO
+
+                setMenuItems(items.sort((a, b) => a.order - b.order));
+            } catch (error) {
+                console.error('Failed to load menu items:', error);
+                // Fallback to basic menu if CMS fails
+                setMenuItems([
+                    { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
+                ]);
+            } finally {
+                setIsLoadingMenu(false);
+            }
+        };
+
+        loadMenuItems();
+    }, [userData?.sessionId]);
 
     const handleLogout = () => {
         sessionStorage.removeItem('mockUser');
@@ -38,37 +118,6 @@ function Dashboard({ navigate }: DashboardProps) {
         { id: 5, name: 'Lisa Anderson', role: 'CNA', status: 'off', shift: '-' },
     ];
 
-    // Define menu items based on user role
-    const getMenuItems = () => {
-        const commonItems = [
-            { id: 'overview', label: 'Overview', icon: '🏠' },
-            { id: 'schedule', label: 'My Schedule', icon: '📅' },
-            { id: 'requests', label: 'Requests', icon: '🔄', badge: swapRequests.length },
-        ];
-
-        const teamLeaderItems = [
-            { id: 'overview', label: 'Overview', icon: '🏠' },
-            { id: 'schedule', label: 'Schedule', icon: '📅' },
-            { id: 'team', label: 'Team', icon: '👥' },
-            { id: 'requests', label: 'Requests', icon: '🔄', badge: swapRequests.length },
-            { id: 'analytics', label: 'Analytics', icon: '📊' },
-        ];
-
-        const adminItems = [
-            { id: 'overview', label: 'Overview', icon: '🏠' },
-            { id: 'schedule', label: 'All Schedules', icon: '📅' },
-            { id: 'team', label: 'All Staff', icon: '👥' },
-            { id: 'requests', label: 'All Requests', icon: '🔄', badge: swapRequests.length },
-            { id: 'analytics', label: 'Analytics', icon: '📊' },
-            { id: 'settings', label: 'Settings', icon: '⚙️' },
-        ];
-
-        if (userRole === 'admin') return adminItems;
-        if (userRole === 'teamleader') return teamLeaderItems;
-        return commonItems;
-    };
-
-    const menuItems = getMenuItems();
 
     return (
         <div className="flex h-screen bg-gray-50">
@@ -110,16 +159,16 @@ function Dashboard({ navigate }: DashboardProps) {
                 {/* User Profile */}
                 <div className="border-t border-gray-200 p-4">
                     <div className="relative group">
-                        <button className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium text-lg">
+                        <button className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium text-lg hover:bg-blue-700 transition">
                             {userName.charAt(0)}
                         </button>
-                        {/* Tooltip */}
-                        <div className="absolute left-full ml-2 bottom-0 hidden group-hover:block bg-gray-900 text-white text-sm py-2 px-3 rounded whitespace-nowrap">
-                            <div className="font-medium">{userName}</div>
-                            <div className="text-xs text-gray-300 capitalize">{userRole}</div>
+                        {/* Tooltip - positioned to prevent gap */}
+                        <div className="absolute left-full bottom-0 ml-1 hidden group-hover:block bg-gray-900 text-white text-sm py-3 px-4 rounded whitespace-nowrap before:content-[''] before:absolute before:right-full before:top-0 before:bottom-0 before:w-2 before:bg-transparent">
+                            <div className="font-medium mb-1">{userName}</div>
+                            <div className="text-xs text-gray-300 capitalize mb-2">{userRole}</div>
                             <button
                                 onClick={handleLogout}
-                                className="mt-2 text-xs text-red-300 hover:text-red-200"
+                                className="text-xs text-red-300 hover:text-red-200 bg-red-900/30 px-3 py-1 rounded"
                             >
                                 Logout
                             </button>
@@ -284,7 +333,7 @@ function Dashboard({ navigate }: DashboardProps) {
                     )}
 
                     {/* Team Tab */}
-                    {activeTab === 'team' && (userRole === 'admin' || userRole === 'teamleader') && (
+                    {activeTab === 'team' && (
                         <div className="bg-white rounded-lg border border-gray-200">
                             <div className="p-6 border-b border-gray-200">
                                 <h2 className="text-xl font-semibold text-gray-900">
@@ -364,7 +413,7 @@ function Dashboard({ navigate }: DashboardProps) {
                     )}
 
                     {/* Analytics Tab */}
-                    {activeTab === 'analytics' && (userRole === 'admin' || userRole === 'teamleader') && (
+                    {activeTab === 'analytics' && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -391,7 +440,7 @@ function Dashboard({ navigate }: DashboardProps) {
                     )}
 
                     {/* Settings Tab */}
-                    {activeTab === 'settings' && userRole === 'admin' && (
+                    {activeTab === 'settings' && (
                         <div className="bg-white rounded-lg border border-gray-200 p-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-6">System Settings</h2>
                             <div className="space-y-6">
