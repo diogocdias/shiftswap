@@ -4,6 +4,13 @@ interface LoginPageProps {
     navigate: (page: string) => void;
 }
 
+// TODO: REMOVE THIS MOCK AUTHENTICATION WHEN BACKEND IS READY
+// This is temporary mock authentication for development
+const MOCK_USERS = {
+    'admin@shiftswap.com': { name: 'Admin User', role: 'admin' },
+    'user@shiftswap.com': { name: 'Regular User', role: 'user' }
+};
+
 function LoginPage({ navigate }: LoginPageProps) {
     const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
     const [formData, setFormData] = useState({
@@ -13,11 +20,48 @@ function LoginPage({ navigate }: LoginPageProps) {
         facility: '',
         confirmPassword: ''
     });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle authentication logic here
-        console.log('Form submitted:', mode, formData);
+        setError('');
+        setSuccess('');
+
+        // TODO: REMOVE THIS MOCK AUTHENTICATION WHEN BACKEND IS READY
+        // Replace with actual API calls to your backend
+        if (mode === 'login') {
+            // Mock login - only check if email exists, accept any password
+            if (MOCK_USERS[formData.email as keyof typeof MOCK_USERS]) {
+                const user = MOCK_USERS[formData.email as keyof typeof MOCK_USERS];
+                setSuccess(`Welcome back, ${user.name}!`);
+
+                // Store mock user data in sessionStorage
+                sessionStorage.setItem('mockUser', JSON.stringify({
+                    email: formData.email,
+                    name: user.name,
+                    role: user.role
+                }));
+
+                // Redirect to dashboard after successful login
+                setTimeout(() => {
+                    navigate('dashboard');
+                }, 1500);
+            } else {
+                setError('User not found. Try: admin@shiftswap.com or user@shiftswap.com');
+            }
+        } else if (mode === 'signup') {
+            // Mock signup - just show success message
+            setSuccess(`Account created for ${formData.email}! You can now log in.`);
+            setTimeout(() => {
+                setMode('login');
+                setSuccess('');
+            }, 2000);
+        } else if (mode === 'forgot') {
+            // Mock forgot password - just show success message
+            setSuccess(`Password reset link sent to ${formData.email}!`);
+        }
+        // END TODO
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +133,23 @@ function LoginPage({ navigate }: LoginPageProps) {
                                     <p className="text-gray-600">
                                         Sign in to your ShiftSwap account
                                     </p>
+                                    {/* TODO: REMOVE - Mock login hint */}
+                                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                                        <strong>Demo Mode:</strong> Use admin@shiftswap.com or user@shiftswap.com (any password works)
+                                    </div>
                                 </div>
+
+                                {error && (
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {success && (
+                                    <div className="p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                                        {success}
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -170,7 +230,23 @@ function LoginPage({ navigate }: LoginPageProps) {
                                     <p className="text-gray-600">
                                         Join ShiftSwap and simplify your scheduling
                                     </p>
+                                    {/* TODO: REMOVE - Mock signup hint */}
+                                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                                        <strong>Demo Mode:</strong> Account creation is simulated
+                                    </div>
                                 </div>
+
+                                {error && (
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {success && (
+                                    <div className="p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                                        {success}
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -277,7 +353,23 @@ function LoginPage({ navigate }: LoginPageProps) {
                                     <p className="text-gray-600">
                                         Enter your email and we'll send you a reset link
                                     </p>
+                                    {/* TODO: REMOVE - Mock password reset hint */}
+                                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                                        <strong>Demo Mode:</strong> Password reset is simulated
+                                    </div>
                                 </div>
+
+                                {error && (
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {success && (
+                                    <div className="p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                                        {success}
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">

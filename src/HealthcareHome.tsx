@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import LoginPage from './LoginPage';
+import Dashboard from './Dashboard';
 
 // Simple router implementation
 function Router() {
@@ -9,6 +10,10 @@ function Router() {
         setCurrentPage(page);
         window.scrollTo(0, 0);
     };
+
+    if (currentPage === 'dashboard') {
+        return <Dashboard navigate={navigate} />;
+    }
 
     return currentPage === 'home' ? (
         <ShiftSwapHome navigate={navigate} />
@@ -58,10 +63,56 @@ function ShiftSwapHome({ navigate }: PageProps) {
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                {mobileMenuOpen ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                )}
                             </svg>
                         </button>
                     </div>
+
+                    {/* Mobile Menu */}
+                    {mobileMenuOpen && (
+                        <div className="md:hidden pt-4 pb-2 space-y-2">
+                            <a
+                                href="#services"
+                                className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded transition"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Services
+                            </a>
+                            <a
+                                href="#about"
+                                className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded transition"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                About
+                            </a>
+                            <a
+                                href="#contact"
+                                className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded transition"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Contact
+                            </a>
+                            <button
+                                onClick={() => {
+                                    navigate('login');
+                                    setMobileMenuOpen(false);
+                                }}
+                                className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded transition"
+                            >
+                                Login
+                            </button>
+                            <button
+                                className="block w-full text-left px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Get Started
+                            </button>
+                        </div>
+                    )}
                 </div>
             </nav>
 
