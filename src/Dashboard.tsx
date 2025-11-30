@@ -75,7 +75,7 @@ function Dashboard({ navigate }: DashboardProps) {
             {/* Left Sidebar */}
             <aside className="w-20 bg-white border-r border-gray-200 flex flex-col">
                 {/* Logo */}
-                <div className="h-20 flex items-center justify-center border-b border-gray-200">
+                <div className="h-16 flex items-center justify-center border-b border-gray-200">
                     <img
                         src="/shiftswap_logo.png"
                         alt="ShiftSwap"
@@ -131,7 +131,7 @@ function Dashboard({ navigate }: DashboardProps) {
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto">
                 {/* Top Bar */}
-                <header className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-10">
+                <header className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-10 h-16 flex items-center">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900">
