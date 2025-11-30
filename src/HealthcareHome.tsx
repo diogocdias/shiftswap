@@ -45,7 +45,7 @@ function ShiftSwapHome({ navigate }: PageProps) {
                             />
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#services" className="text-gray-600 hover:text-gray-900 transition">Services</a>
+                            <a href="#product" className="text-gray-600 hover:text-gray-900 transition">Product</a>
                             <a href="#about" className="text-gray-600 hover:text-gray-900 transition">About</a>
                             <a href="#contact" className="text-gray-600 hover:text-gray-900 transition">Contact</a>
                             <button
@@ -76,11 +76,11 @@ function ShiftSwapHome({ navigate }: PageProps) {
                     {mobileMenuOpen && (
                         <div className="md:hidden pt-4 pb-2 space-y-2">
                             <a
-                                href="#services"
+                                href="#product"
                                 className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded transition"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Services
+                                Product
                             </a>
                             <a
                                 href="#about"
@@ -161,12 +161,12 @@ function ShiftSwapHome({ navigate }: PageProps) {
                 </div>
             </section>
 
-            {/* Services Section */}
-            <section id="services" className="py-20 bg-gray-50">
+            {/* Product Section */}
+            <section id="product" className="py-20 bg-gray-50">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                            Our Services
+                            Our Product
                         </h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                             Everything you need to manage shifts efficiently in one simple platform
