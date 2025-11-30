@@ -8,6 +8,7 @@ interface LoginPageProps {
 // This is temporary mock authentication for development
 const MOCK_USERS = {
     'admin@shiftswap.com': { name: 'Admin User', role: 'admin' },
+    'teamleader@shiftswap.com': { name: 'Team Leader', role: 'teamleader' },
     'user@shiftswap.com': { name: 'Regular User', role: 'user' }
 };
 
@@ -48,7 +49,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                     navigate('dashboard');
                 }, 1500);
             } else {
-                setError('User not found. Try: admin@shiftswap.com or user@shiftswap.com');
+                setError('User not found. Try: admin@shiftswap.com, teamleader@shiftswap.com, or user@shiftswap.com');
             }
         } else if (mode === 'signup') {
             // Mock signup - just show success message
@@ -125,7 +126,7 @@ function LoginPage({ navigate }: LoginPageProps) {
 
                         {/* Login Form */}
                         {mode === 'login' && (
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-6">
                                 <div>
                                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
                                         Welcome Back
@@ -135,7 +136,12 @@ function LoginPage({ navigate }: LoginPageProps) {
                                     </p>
                                     {/* TODO: REMOVE - Mock login hint */}
                                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                                        <strong>Demo Mode:</strong> Use admin@shiftswap.com or user@shiftswap.com (any password works)
+                                        <strong>Demo Mode:</strong> Try these accounts (any password works):
+                                        <ul className="mt-2 ml-4 list-disc">
+                                            <li>admin@shiftswap.com (Admin)</li>
+                                            <li>teamleader@shiftswap.com (Team Leader)</li>
+                                            <li>user@shiftswap.com (User)</li>
+                                        </ul>
                                     </div>
                                 </div>
 
@@ -201,7 +207,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                 </div>
 
                                 <button
-                                    type="submit"
+                                    onClick={handleSubmit}
                                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
                                 >
                                     Sign In
@@ -210,19 +216,18 @@ function LoginPage({ navigate }: LoginPageProps) {
                                 <div className="text-center text-sm text-gray-600">
                                     Don't have an account?{' '}
                                     <button
-                                        type="button"
                                         onClick={() => setMode('signup')}
                                         className="text-blue-600 hover:text-blue-700 font-medium"
                                     >
                                         Sign up
                                     </button>
                                 </div>
-                            </form>
+                            </div>
                         )}
 
                         {/* Sign Up Form */}
                         {mode === 'signup' && (
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-6">
                                 <div>
                                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
                                         Create Account
@@ -324,7 +329,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                 </div>
 
                                 <button
-                                    type="submit"
+                                    onClick={handleSubmit}
                                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
                                 >
                                     Create Account
@@ -333,19 +338,18 @@ function LoginPage({ navigate }: LoginPageProps) {
                                 <div className="text-center text-sm text-gray-600">
                                     Already have an account?{' '}
                                     <button
-                                        type="button"
                                         onClick={() => setMode('login')}
                                         className="text-blue-600 hover:text-blue-700 font-medium"
                                     >
                                         Sign in
                                     </button>
                                 </div>
-                            </form>
+                            </div>
                         )}
 
                         {/* Forgot Password Form */}
                         {mode === 'forgot' && (
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-6">
                                 <div>
                                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
                                         Reset Password
@@ -387,7 +391,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                 </div>
 
                                 <button
-                                    type="submit"
+                                    onClick={handleSubmit}
                                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
                                 >
                                     Send Reset Link
@@ -396,14 +400,13 @@ function LoginPage({ navigate }: LoginPageProps) {
                                 <div className="text-center text-sm text-gray-600">
                                     Remember your password?{' '}
                                     <button
-                                        type="button"
                                         onClick={() => setMode('login')}
                                         className="text-blue-600 hover:text-blue-700 font-medium"
                                     >
                                         Sign in
                                     </button>
                                 </div>
-                            </form>
+                            </div>
                         )}
                     </div>
 
