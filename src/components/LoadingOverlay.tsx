@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react';
 
+/* Usage example:
+<LoadingOverlay
+  isLoading={isLoadingMenu}
+  timeout={5000}
+  onTimeout={() => {
+    // Handle timeout
+    setIsLoadingMenu(false);
+    showErrorMessage();
+  }}
+/>
+ */
+
 interface LoadingOverlayProps {
     isLoading: boolean;
     timeout?: number;
