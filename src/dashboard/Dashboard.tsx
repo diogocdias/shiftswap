@@ -123,13 +123,13 @@ function Dashboard({ navigate }: DashboardProps) {
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Left Sidebar */}
-            <aside className="w-20 bg-white border-r border-gray-200 flex flex-col">
+            <aside className="w-14 md:w-20 bg-white border-r border-gray-200 flex flex-col">
                 {/* Logo */}
-                <div className="h-16 flex items-center justify-center border-b border-gray-200">
+                <div className="h-10 md:h-16  md:py-3 flex items-center justify-center border-b border-gray-200">
                     <img
                         src="/shiftswap_logo.png"
                         alt="ShiftSwap"
-                        className="h-10 w-10"
+                        className="h-8 w-8 md:h-10 md:w-10"
                     />
                 </div>
 
@@ -139,17 +139,17 @@ function Dashboard({ navigate }: DashboardProps) {
                         <button
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
-                            className={`w-full h-16 flex flex-col items-center justify-center gap-1 relative transition ${
+                            className={`w-full h-14 md:h-16 flex flex-col items-center justify-center gap-1 relative transition ${
                                 activeTab === item.id
                                     ? 'text-blue-600 bg-blue-50'
                                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                             }`}
                             title={item.label}
                         >
-                            <span className="text-2xl">{item.icon}</span>
-                            <span className="text-xs font-medium">{item.label.split(' ')[0]}</span>
+                            <span className="text-xl md:text-2xl">{item.icon}</span>
+                            <span className="text-xs font-medium hidden md:block">{item.label.split(' ')[0]}</span>
                             {item.badge && item.badge > 0 && (
-                                <span className="absolute top-2 right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                                <span className="absolute top-1 right-1 md:top-2 md:right-2 bg-red-500 text-white text-xs w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center">
                                     {item.badge}
                                 </span>
                             )}
@@ -158,9 +158,9 @@ function Dashboard({ navigate }: DashboardProps) {
                 </nav>
 
                 {/* User Profile */}
-                <div className="border-t border-gray-200 p-4">
+                <div className="border-t border-gray-200 p-2 md:p-4">
                     <div className="relative group">
-                        <button className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium text-lg hover:bg-blue-700 transition">
+                        <button className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium text-base md:text-lg hover:bg-blue-700 transition">
                             {userName.charAt(0)}
                         </button>
                         {/* Tooltip - positioned to prevent gap */}
@@ -181,18 +181,18 @@ function Dashboard({ navigate }: DashboardProps) {
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto">
                 {/* Top Bar */}
-                <header className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-10 h-16 flex items-center">
-                    <div className="flex items-center justify-between">
+                <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+                    <div className="h-10 md:h-16 px-3 md:px-8 py-3 md:py-4 flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
+                            <h1 className="text-lg md:text-2xl font-bold text-gray-900">
                                 {menuItems.find(item => item.id === activeTab)?.label}
                             </h1>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-xs md:text-sm text-gray-500 hidden sm:block">
                                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                             </p>
                         </div>
                         <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                         </button>
@@ -200,53 +200,53 @@ function Dashboard({ navigate }: DashboardProps) {
                 </header>
 
                 {/* Content */}
-                <div className="p-8">
+                <div className="p-3 md:p-8">
                     {/* Overview Tab */}
                     {activeTab === 'overview' && (
                         <>
                             {/* Welcome Message */}
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                            <div className="mb-6 md:mb-8">
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                                     Welcome back, {userName.split(' ')[0]}! 👋
                                 </h2>
-                                <p className="text-gray-600">Here's what's happening today</p>
+                                <p className="text-sm md:text-base text-gray-600">Here's what's happening today</p>
                             </div>
 
                             {/* Stats Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                                <div className="bg-white rounded-lg p-6 border border-gray-200">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+                                <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-gray-600 text-sm">Upcoming Shifts</span>
-                                        <span className="text-2xl">📅</span>
+                                        <span className="text-gray-600 text-xs md:text-sm">Upcoming Shifts</span>
+                                        <span className="text-xl md:text-2xl">📅</span>
                                     </div>
-                                    <div className="text-3xl font-bold text-gray-900">{upcomingShifts.length}</div>
+                                    <div className="text-2xl md:text-3xl font-bold text-gray-900">{upcomingShifts.length}</div>
                                     <div className="text-xs text-gray-500 mt-1">This week</div>
                                 </div>
 
-                                <div className="bg-white rounded-lg p-6 border border-gray-200">
+                                <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-gray-600 text-sm">Swap Requests</span>
-                                        <span className="text-2xl">🔄</span>
+                                        <span className="text-gray-600 text-xs md:text-sm">Swap Requests</span>
+                                        <span className="text-xl md:text-2xl">🔄</span>
                                     </div>
-                                    <div className="text-3xl font-bold text-gray-900">{swapRequests.length}</div>
+                                    <div className="text-2xl md:text-3xl font-bold text-gray-900">{swapRequests.length}</div>
                                     <div className="text-xs text-gray-500 mt-1">Pending approval</div>
                                 </div>
 
-                                <div className="bg-white rounded-lg p-6 border border-gray-200">
+                                <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-gray-600 text-sm">Hours This Week</span>
-                                        <span className="text-2xl">⏱️</span>
+                                        <span className="text-gray-600 text-xs md:text-sm">Hours This Week</span>
+                                        <span className="text-xl md:text-2xl">⏱️</span>
                                     </div>
-                                    <div className="text-3xl font-bold text-gray-900">32</div>
+                                    <div className="text-2xl md:text-3xl font-bold text-gray-900">32</div>
                                     <div className="text-xs text-gray-500 mt-1">8 hours remaining</div>
                                 </div>
 
-                                <div className="bg-white rounded-lg p-6 border border-gray-200">
+                                <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-gray-600 text-sm">Team Members</span>
-                                        <span className="text-2xl">👥</span>
+                                        <span className="text-gray-600 text-xs md:text-sm">Team Members</span>
+                                        <span className="text-xl md:text-2xl">👥</span>
                                     </div>
-                                    <div className="text-3xl font-bold text-gray-900">{teamMembers.length}</div>
+                                    <div className="text-2xl md:text-3xl font-bold text-gray-900">{teamMembers.length}</div>
                                     <div className="text-xs text-gray-500 mt-1">
                                         {teamMembers.filter(m => m.status === 'on-shift').length} on shift now
                                     </div>
@@ -254,36 +254,36 @@ function Dashboard({ navigate }: DashboardProps) {
                             </div>
 
                             {/* Quick Actions & Next Shift */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                                 <div className="lg:col-span-2">
-                                    <div className="bg-white rounded-lg border border-gray-200 p-6">
-                                        <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <button className="text-left px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition flex items-center gap-3">
-                                                <span className="text-xl">🔄</span>
-                                                <span className="font-medium">Request Swap</span>
+                                    <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+                                        <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">Quick Actions</h3>
+                                        <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                            <button className="text-left px-3 md:px-4 py-2 md:py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition flex items-center gap-2 md:gap-3">
+                                                <span className="text-lg md:text-xl">🔄</span>
+                                                <span className="font-medium text-sm md:text-base">Request Swap</span>
                                             </button>
-                                            <button className="text-left px-4 py-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center gap-3">
-                                                <span className="text-xl">📅</span>
-                                                <span className="font-medium">View Schedule</span>
+                                            <button className="text-left px-3 md:px-4 py-2 md:py-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center gap-2 md:gap-3">
+                                                <span className="text-lg md:text-xl">📅</span>
+                                                <span className="font-medium text-sm md:text-base">View Schedule</span>
                                             </button>
-                                            <button className="text-left px-4 py-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center gap-3">
-                                                <span className="text-xl">📝</span>
-                                                <span className="font-medium">Time Off</span>
+                                            <button className="text-left px-3 md:px-4 py-2 md:py-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center gap-2 md:gap-3">
+                                                <span className="text-lg md:text-xl">📝</span>
+                                                <span className="font-medium text-sm md:text-base">Time Off</span>
                                             </button>
-                                            <button className="text-left px-4 py-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center gap-3">
-                                                <span className="text-xl">👥</span>
-                                                <span className="font-medium">Team Chat</span>
+                                            <button className="text-left px-3 md:px-4 py-2 md:py-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition flex items-center gap-2 md:gap-3">
+                                                <span className="text-lg md:text-xl">👥</span>
+                                                <span className="font-medium text-sm md:text-base">Team Chat</span>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-6 text-white">
-                                    <div className="text-sm opacity-90 mb-2">Next Shift</div>
-                                    <div className="text-2xl font-bold mb-1">Monday, Dec 2</div>
-                                    <div className="text-sm opacity-90 mb-4">8:00 AM - 4:00 PM</div>
-                                    <div className="flex items-center gap-2 text-sm">
+                                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-4 md:p-6 text-white">
+                                    <div className="text-xs md:text-sm opacity-90 mb-2">Next Shift</div>
+                                    <div className="text-xl md:text-2xl font-bold mb-1">Monday, Dec 2</div>
+                                    <div className="text-xs md:text-sm opacity-90 mb-4">8:00 AM - 4:00 PM</div>
+                                    <div className="flex items-center gap-2 text-xs md:text-sm">
                                         <span>📍</span>
                                         <span>Ward A</span>
                                     </div>
