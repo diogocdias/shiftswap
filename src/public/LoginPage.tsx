@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 
 interface LoginPageProps {
     navigate: (page: string) => void;
@@ -23,11 +24,13 @@ function LoginPage({ navigate }: LoginPageProps) {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setSuccess('');
+        setIsSubmitting(true);
 
         // TODO: REMOVE THIS MOCK AUTHENTICATION WHEN BACKEND IS READY
         // Replace with actual API calls to your backend
@@ -63,6 +66,8 @@ function LoginPage({ navigate }: LoginPageProps) {
             setSuccess(`Password reset link sent to ${formData.email}!`);
         }
         // END TODO
+
+        setIsSubmitting(false);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -425,6 +430,15 @@ function LoginPage({ navigate }: LoginPageProps) {
                     </div>
                 </div>
             </section>
+
+            {/* Add Loading Overlay */}
+            <LoadingOverlay
+                isLoading={isSubmitting}
+                onTimeout={() => {
+                    setIsSubmitting(false);
+                    setError('Request timed out. Please try again.');
+                }}
+            />
         </div>
     );
 }

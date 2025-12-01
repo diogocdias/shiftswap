@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ScheduleTab from './ScheduleTab';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 
 interface DashboardProps {
     navigate: (page: string) => void;
@@ -23,6 +24,8 @@ const mockFetchMenuItems = async (sessionId: string): Promise<MenuItem[]> => {
     const userDataString = sessionStorage.getItem('mockUser');
     const userData = userDataString ? JSON.parse(userDataString) : null;
     const userRole = userData?.role || 'user';
+
+    console.log(sessionId); //TODO remove this line
 
     // Mock CMS responses for different roles
     const menuItemsByRole: Record<string, MenuItem[]> = {
@@ -98,6 +101,13 @@ function Dashboard({ navigate }: DashboardProps) {
         sessionStorage.removeItem('mockUser');
         navigate('home');
     };
+
+    const handleTimeout = () => {
+        setIsLoadingMenu(false);
+        // Show error message or take other action
+        console.error('Menu loading timed out');
+    };
+
 
     // Mock data for demonstration
     const upcomingShifts = [
@@ -428,6 +438,12 @@ function Dashboard({ navigate }: DashboardProps) {
                     )}
                 </div>
             </main>
+
+            {/* Add Loading Overlay */}
+            <LoadingOverlay
+                isLoading={isLoadingMenu}
+                onTimeout={handleTimeout}
+            />
         </div>
     );
 }
