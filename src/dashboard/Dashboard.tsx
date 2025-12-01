@@ -125,7 +125,7 @@ function Dashboard({ navigate }: DashboardProps) {
             {/* Left Sidebar */}
             <aside className="w-14 md:w-20 bg-white border-r border-gray-200 flex flex-col">
                 {/* Logo */}
-                <div className="h-10 md:h-16  md:py-3 flex items-center justify-center border-b border-gray-200">
+                <div className="h-10 lg:h-16  lg:py-3 flex items-center justify-center border-b border-gray-200">
                     <img
                         src="/shiftswap_logo.png"
                         alt="ShiftSwap"
@@ -182,14 +182,11 @@ function Dashboard({ navigate }: DashboardProps) {
             <main className="flex-1 overflow-y-auto">
                 {/* Top Bar */}
                 <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-                    <div className="h-10 md:h-16 px-3 md:px-8 py-3 md:py-4 flex items-center justify-between">
+                    <div className="h-10 lg:h-16 px-3 md:px-8 py-3 lg:py-4 flex items-center justify-between">
                         <div>
                             <h1 className="text-lg md:text-2xl font-bold text-gray-900">
                                 {menuItems.find(item => item.id === activeTab)?.label}
                             </h1>
-                            <p className="text-xs md:text-sm text-gray-500 hidden sm:block">
-                                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                            </p>
                         </div>
                         <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
                             <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
