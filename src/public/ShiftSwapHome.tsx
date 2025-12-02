@@ -101,12 +101,12 @@ function ShiftSwapHome({ navigate }: PageProps) {
                                     navigate('login');
                                     setMobileMenuOpen(false);
                                 }}
-                                className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded transition"
+                                className="block w-full text-center px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded transition"
                             >
                                 Login
                             </button>
                             <button
-                                className="block w-full text-left px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                                className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Get Started

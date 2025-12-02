@@ -109,13 +109,13 @@ function ScheduleTab() {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Header */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-900">Team Schedule</h2>
-                        <p className="text-sm text-gray-600 mt-1">{getWeekRange()}</p>
+                        <h2 className="text-lg font-semibold text-gray-900">Team Schedule</h2>
+                        <p className="text-xs text-gray-600 mt-0.5">{getWeekRange()}</p>
                     </div>
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                         {/* Name Filter */}
@@ -125,10 +125,10 @@ function ScheduleTab() {
                                 placeholder="Filter by name..."
                                 value={nameFilter}
                                 onChange={(e) => setNameFilter(e.target.value)}
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full sm:w-48"
+                                className="pl-8 pr-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs w-full sm:w-40"
                             />
                             <svg
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                                className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -138,9 +138,9 @@ function ScheduleTab() {
                             {nameFilter && (
                                 <button
                                     onClick={() => setNameFilter('')}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
@@ -148,13 +148,13 @@ function ScheduleTab() {
                         </div>
 
                         {/* Week Navigation */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                             <button
                                 onClick={() => navigateWeek('prev')}
-                                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                                className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
                                 title="Previous week"
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
@@ -167,16 +167,16 @@ function ScheduleTab() {
                                     setCurrentWeekStart(mondayDate);
                                     setShifts(generateMockShifts(mondayDate));
                                 }}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                                className="px-3 py-1.5 text-xs font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
                             >
                                 Today
                             </button>
                             <button
                                 onClick={() => navigateWeek('next')}
-                                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                                className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
                                 title="Next week"
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </button>
@@ -186,7 +186,7 @@ function ScheduleTab() {
 
                 {/* Filter Results Info */}
                 {nameFilter && (
-                    <div className="mt-3 text-sm text-gray-600">
+                    <div className="mt-2 text-xs text-gray-600">
                         Showing {filteredTeamMembers.length} of {MOCK_TEAM_MEMBERS.length} team members
                     </div>
                 )}
@@ -198,13 +198,13 @@ function ScheduleTab() {
                     <table className="w-full">
                         <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 sticky left-0 bg-gray-50 z-10">
+                            <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-900 sticky left-0 bg-gray-50 z-10 w-32">
                                 Team Member
                             </th>
                             {weekDays.map((day, index) => (
-                                <th key={index} className="px-4 py-4 text-center min-w-[100px]">
-                                    <div className="text-sm font-semibold text-gray-900">{getDayName(day)}</div>
-                                    <div className="text-xs text-gray-500 mt-1">{formatDate(day)}</div>
+                                <th key={index} className="px-1.5 py-1.5 text-center min-w-[70px] w-20">
+                                    <div className="text-xs font-semibold text-gray-900">{getDayName(day)}</div>
+                                    <div className="text-[10px] text-gray-500 mt-0.5">{formatDate(day)}</div>
                                 </th>
                             ))}
                         </tr>
@@ -212,17 +212,17 @@ function ScheduleTab() {
                         <tbody className="divide-y divide-gray-200">
                         {filteredTeamMembers.length === 0 ? (
                             <tr>
-                                <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={8} className="px-2 py-6 text-center text-gray-500 text-sm">
                                     No team members found matching "{nameFilter}"
                                 </td>
                             </tr>
                         ) : (
                             filteredTeamMembers.map((member) => (
                                 <tr key={member.id} className="hover:bg-gray-50 transition">
-                                    <td className="px-6 py-4 sticky left-0 bg-white z-10">
+                                    <td className="px-2 py-1.5 sticky left-0 bg-white z-10">
                                         <div>
-                                            <div className="font-medium text-gray-900">{member.name}</div>
-                                            <div className="text-sm text-gray-500">{member.role}</div>
+                                            <div className="font-medium text-gray-900 text-xs leading-tight">{member.name}</div>
+                                            <div className="text-[10px] text-gray-500">{member.role}</div>
                                         </div>
                                     </td>
                                     {weekDays.map((day, index) => {
@@ -230,9 +230,9 @@ function ScheduleTab() {
                                         const dayShifts = shifts[member.id]?.[dateKey] || [];
 
                                         return (
-                                            <td key={index} className="px-4 py-4 text-center relative">
+                                            <td key={index} className="px-1 py-1.5 text-center relative">
                                                 {dayShifts.length > 0 && (
-                                                    <div className="flex flex-col gap-1">
+                                                    <div className="flex flex-wrap gap-0.5 justify-center">
                                                         {dayShifts.map((shift, shiftIndex) => {
                                                             const shiftInfo = SHIFT_LEGENDS[shift];
                                                             const shiftKey = `${member.id}-${dateKey}-${shiftIndex}`;
@@ -240,16 +240,16 @@ function ScheduleTab() {
                                                             return (
                                                                 <div key={shiftIndex} className="relative inline-block">
                                                                     <div
-                                                                        className={`${shiftInfo.color} px-4 py-2 rounded-lg font-semibold text-sm cursor-pointer transition-transform hover:scale-110`}
+                                                                        className={`${shiftInfo.color} px-2 py-1 rounded font-semibold text-xs cursor-pointer transition-transform hover:scale-110`}
                                                                         onMouseEnter={() => setHoveredShift(shiftKey)}
                                                                         onMouseLeave={() => setHoveredShift(null)}
                                                                     >
                                                                         {shift}
                                                                     </div>
                                                                     {hoveredShift === shiftKey && (
-                                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-20 shadow-lg">
+                                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 text-white text-[10px] rounded whitespace-nowrap z-20 shadow-lg">
                                                                             <div className="font-semibold">{shiftInfo.label}</div>
-                                                                            <div className="text-gray-300 mt-1">{shiftInfo.time}</div>
+                                                                            <div className="text-gray-300 mt-0.5">{shiftInfo.time}</div>
                                                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                                                                                 <div className="border-4 border-transparent border-t-gray-900"></div>
                                                                             </div>
@@ -272,17 +272,17 @@ function ScheduleTab() {
             </div>
 
             {/* Legend */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Shift Legend</h3>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="bg-white rounded-lg border border-gray-200 p-3">
+                <h3 className="text-xs font-semibold text-gray-900 mb-2">Shift Legend</h3>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     {Object.entries(SHIFT_LEGENDS).map(([code, info]) => (
-                        <div key={code} className="flex items-center gap-2">
-                            <div className={`${info.color} w-8 h-8 rounded flex items-center justify-center font-semibold text-sm`}>
+                        <div key={code} className="flex items-center gap-1.5">
+                            <div className={`${info.color} w-6 h-6 rounded flex items-center justify-center font-semibold text-xs flex-shrink-0`}>
                                 {code}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-gray-900">{info.label}</div>
-                                <div className="text-xs text-gray-500 truncate">{info.time}</div>
+                                <div className="text-xs font-medium text-gray-900 truncate">{info.label}</div>
+                                <div className="text-[10px] text-gray-500 truncate">{info.time}</div>
                             </div>
                         </div>
                     ))}

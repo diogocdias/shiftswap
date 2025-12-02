@@ -133,13 +133,13 @@ function Dashboard({ navigate }: DashboardProps) {
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Left Sidebar */}
-            <aside className="w-14 md:w-20 bg-white border-r border-gray-200 flex flex-col">
+            <aside className="w-14 lg:w-20 bg-white border-r border-gray-200 flex flex-col">
                 {/* Logo */}
-                <div className="h-10 lg:h-16  lg:py-3 flex items-center justify-center border-b border-gray-200">
+                <div className="h-10 lg:h-16 lg:py-3 flex items-center justify-center border-b border-gray-200">
                     <img
                         src="/shiftswap_logo.png"
                         alt="ShiftSwap"
-                        className="h-8 w-8 md:h-10 md:w-10"
+                        className="h-8 w-8 lg:h-10 lg:w-10"
                     />
                 </div>
 
@@ -149,17 +149,17 @@ function Dashboard({ navigate }: DashboardProps) {
                         <button
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
-                            className={`w-full h-14 md:h-16 flex flex-col items-center justify-center gap-1 relative transition ${
+                            className={`w-full h-14 lg:h-16 flex flex-col items-center justify-center gap-1 relative transition ${
                                 activeTab === item.id
                                     ? 'text-blue-600 bg-blue-50'
                                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                             }`}
                             title={item.label}
                         >
-                            <span className="text-xl md:text-2xl">{item.icon}</span>
-                            <span className="text-xs font-medium hidden md:block">{item.label.split(' ')[0]}</span>
+                            <span className="text-xl lg:text-2xl">{item.icon}</span>
+                            <span className="text-xs font-medium hidden lg:block">{item.label.split(' ')[0]}</span>
                             {item.badge && item.badge > 0 && (
-                                <span className="absolute top-1 right-1 md:top-2 md:right-2 bg-red-500 text-white text-xs w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center">
+                                <span className="absolute top-1 right-1 lg:top-2 lg:right-2 bg-red-500 text-white text-xs w-4 h-4 lg:w-5 md:h-5 rounded-full flex items-center justify-center">
                                     {item.badge}
                                 </span>
                             )}
@@ -168,9 +168,9 @@ function Dashboard({ navigate }: DashboardProps) {
                 </nav>
 
                 {/* User Profile */}
-                <div className="border-t border-gray-200 p-2 md:p-4">
+                <div className="border-t border-gray-200 p-2 lg:p-4">
                     <div className="relative group">
-                        <button className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium text-base md:text-lg hover:bg-blue-700 transition">
+                        <button className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium text-base lg:text-lg hover:bg-blue-700 transition">
                             {userName.charAt(0)}
                         </button>
                         {/* Tooltip - positioned to prevent gap */}
@@ -192,14 +192,14 @@ function Dashboard({ navigate }: DashboardProps) {
             <main className="flex-1 overflow-y-auto">
                 {/* Top Bar */}
                 <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-                    <div className="h-10 lg:h-16 px-3 md:px-8 py-3 lg:py-4 flex items-center justify-between">
+                    <div className="h-10 lg:h-16 px-3 lg:px-8 py-3 lg:py-4 flex items-center justify-between">
                         <div>
-                            <h1 className="text-lg md:text-2xl font-bold text-gray-900">
+                            <h1 className="text-lg lg:text-2xl font-bold text-gray-900">
                                 {menuItems.find(item => item.id === activeTab)?.label}
                             </h1>
                         </div>
                         <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
-                            <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                         </button>
