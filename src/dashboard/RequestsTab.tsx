@@ -131,6 +131,29 @@ function RequestsTab() {
         alert('Swap request declined.');
     };
 
+    const handleShare = (request: SwapRequest) => {
+        const shareText = `🔄 Shift Swap Request\n\n` +
+            `From: ${request.from}\n` +
+            `To: ${request.to}\n\n` +
+            `Giving: ${request.fromShift.date} - ${request.fromShift.type} (${request.fromShift.time})\n` +
+            `Taking: ${request.toShift.date} - ${request.toShift.type} (${request.toShift.time})\n\n` +
+            `Status: ${request.status.toUpperCase()}\n\n` +
+            `Can you help cover this shift?`;
+
+        const encodedText = encodeURIComponent(shareText);
+
+        // Use native share if available (mobile devices)
+        if (navigator.share) {
+            navigator.share({
+                title: 'Shift Swap Request',
+                text: shareText
+            }).catch(err => console.log('Share cancelled', err));
+        } else {
+            // Fallback to WhatsApp Web
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        }
+    };
+
     // Filter requests based on selected filter
     const filteredRequests = requests.filter(req => {
         if (filter === 'all') return true;
@@ -174,9 +197,22 @@ function RequestsTab() {
                         </div>
                     </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusBadgeColor(request.status)}`}>
-                    {request.status}
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusBadgeColor(request.status)}`}>
+                        {request.status}
+                    </span>
+                    {request.status === 'pending' && (
+                        <button
+                            onClick={() => handleShare(request)}
+                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="Share this swap request"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Shift Details */}
