@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ScheduleTab from './ScheduleTab';
+import RequestsTab from './RequestsTab';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 
 interface DashboardProps {
@@ -340,47 +341,7 @@ function Dashboard({ navigate }: DashboardProps) {
                     )}
 
                     {/* Requests Tab */}
-                    {activeTab === 'requests' && (
-                        <div className="bg-white rounded-lg border border-gray-200">
-                            <div className="p-6 border-b border-gray-200">
-                                <h2 className="text-xl font-semibold text-gray-900">
-                                    {userRole === 'admin' ? 'All Swap Requests' : 'Swap Requests'}
-                                </h2>
-                            </div>
-                            <div className="divide-y divide-gray-200">
-                                {swapRequests.map((request) => (
-                                    <div key={request.id} className="p-6">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-medium text-gray-700">
-                                                    {request.from.split(' ').map(n => n[0]).join('')}
-                                                </div>
-                                                <div>
-                                                    <div className="font-medium text-gray-900">{request.from}</div>
-                                                    <div className="text-sm text-gray-600">wants to swap shifts</div>
-                                                </div>
-                                            </div>
-                                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                Pending
-                                            </span>
-                                        </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                                            <div className="text-sm text-gray-600 mb-1">Shift Details</div>
-                                            <div className="font-medium text-gray-900">{request.shift}</div>
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <button className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
-                                                Approve
-                                            </button>
-                                            <button className="flex-1 bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition font-medium">
-                                                Decline
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    {activeTab === 'requests' && <RequestsTab />}
 
                     {/* Analytics Tab */}
                     {activeTab === 'analytics' && (
