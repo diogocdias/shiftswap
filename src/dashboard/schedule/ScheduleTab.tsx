@@ -4,6 +4,8 @@ import {ShiftData, SwapFormData, SwapRequest, TeamMember} from "./Types.ts";
 import TeamView from "./components/TeamView.tsx";
 import {SHIFT_LEGENDS} from "./ShiftConstants.ts";
 import SwapRequestModal from "./components/SwapRequestModal.tsx";
+import GenerateScheduleModal from "./components/GenerateScheduleModal.tsx";
+import {LoadingOverlay} from "../../components/LoadingOverlay.tsx";
 
 
 // Mock data
@@ -69,6 +71,80 @@ const generateMonthShifts = (year: number, month: number, userId: string): Shift
     return shifts;
 };
 
+// Mock API function for generating team schedule
+// Generates realistic schedules: working shifts (M, A, N), rest days (R), or days off (D)
+// Rules:
+// - Working shifts can be single or double (consecutive like M+A or A+N)
+// - Rest and Day Off cannot be combined with working shifts
+// - Each person gets roughly 2 rest/off days per week
+const mockGenerateScheduleAPI = async (
+    startDate: string,
+    endDate: string,
+    teamMembers: TeamMember[]
+): Promise<ShiftData> => {
+    // Simulate API delay of 200ms
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const shifts: ShiftData = {};
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Working shift types only (for combining)
+    const workingShifts: Array<'M' | 'A' | 'N'> = ['M', 'A', 'N'];
+    // Valid double shift combinations (consecutive shifts that make sense)
+    const validDoubleShifts: Array<['M' | 'A' | 'N', 'M' | 'A' | 'N']> = [
+        ['M', 'A'], // Morning + Afternoon (12 hours)
+        ['A', 'N'], // Afternoon + Night (12 hours)
+    ];
+
+    teamMembers.forEach(member => {
+        shifts[member.id] = {};
+        let workingDaysInWeek = 0;
+        let currentWeekStart: Date | null = null;
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const currentDate = new Date(d);
+            const dateKey = currentDate.toISOString().split('T')[0];
+            const dayOfWeek = currentDate.getDay();
+
+            // Track weeks to ensure ~2 rest/off days per week
+            if (currentWeekStart === null || dayOfWeek === 1) {
+                currentWeekStart = new Date(currentDate);
+                workingDaysInWeek = 0;
+            }
+
+            // Determine if this should be a rest/off day
+            // Higher chance on weekends, and ensure roughly 2 per week
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const needsRestDay = workingDaysInWeek >= 5;
+            const restDayChance = isWeekend ? 0.6 : (needsRestDay ? 0.8 : 0.15);
+
+            if (Math.random() < restDayChance) {
+                // Assign rest day (R) or day off (D) - not combined with working shifts
+                const restType: 'R' | 'D' = Math.random() > 0.5 ? 'R' : 'D';
+                shifts[member.id][dateKey] = [restType];
+            } else {
+                workingDaysInWeek++;
+
+                // Determine if single or double shift (15% chance for double shift)
+                const isDoubleShift = Math.random() < 0.15;
+
+                if (isDoubleShift) {
+                    // Pick a valid double shift combination
+                    const combo = validDoubleShifts[Math.floor(Math.random() * validDoubleShifts.length)];
+                    shifts[member.id][dateKey] = [...combo];
+                } else {
+                    // Single working shift
+                    const shift = workingShifts[Math.floor(Math.random() * workingShifts.length)];
+                    shifts[member.id][dateKey] = [shift];
+                }
+            }
+        }
+    });
+
+    return shifts;
+};
+
 interface ScheduleTabProps {
     userRole: string;
 }
@@ -94,8 +170,11 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const [swapFormData, setSwapFormData] = useState<SwapFormData | null>(null);
     const [pendingSwaps, setPendingSwaps] = useState<SwapRequest[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [showGenerateModal, setShowGenerateModal] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const LOGGED_IN_USER_ID = '1';
+    const canGenerateSchedule = userRole === 'admin' || userRole === 'teamleader';
 
     // Team view functions
     const weekDays = Array.from({ length: 7 }, (_, i) => {
@@ -270,6 +349,34 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         setSwapFormData(null);
     };
 
+    const handleGenerateSchedule = async (startDate: string, endDate: string) => {
+        setIsGenerating(true);
+        try {
+            const generatedShifts = await mockGenerateScheduleAPI(startDate, endDate, MOCK_TEAM_MEMBERS);
+
+            // Merge the generated shifts with existing shifts
+            setShifts(prevShifts => {
+                const newShifts = { ...prevShifts };
+                Object.entries(generatedShifts).forEach(([memberId, memberShifts]) => {
+                    if (!newShifts[memberId]) {
+                        newShifts[memberId] = {};
+                    }
+                    Object.entries(memberShifts).forEach(([date, shifts]) => {
+                        newShifts[memberId][date] = shifts;
+                    });
+                });
+                return newShifts;
+            });
+
+            console.log('Schedule generated successfully:', { startDate, endDate, generatedShifts });
+        } catch (error) {
+            console.error('Failed to generate schedule:', error);
+            alert('Failed to generate schedule. Please try again.');
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             {/* Header with View Toggle */}
@@ -311,6 +418,19 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {/* Generate Schedule Button - Only for admin/teamleader in team view */}
+                        {scheduleView === 'team' && canGenerateSchedule && (
+                            <button
+                                onClick={() => setShowGenerateModal(true)}
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-xs"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Generate Schedule
+                            </button>
+                        )}
+
                         {/* Name Filter - Only show in team view */}
                         {scheduleView === 'team' && (
                             <div className="relative">
@@ -531,6 +651,23 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 teamMembers={MOCK_TEAM_MEMBERS}
                 loggedInUserId={LOGGED_IN_USER_ID}
                 getAvailableShifts={getAvailableShifts}
+            />
+
+            {/* Generate Schedule Modal */}
+            <GenerateScheduleModal
+                isOpen={showGenerateModal}
+                onClose={() => setShowGenerateModal(false)}
+                onGenerate={handleGenerateSchedule}
+            />
+
+            {/* Loading Overlay - shown while generating schedule */}
+            <LoadingOverlay
+                isLoading={isGenerating}
+                timeout={10000}
+                onTimeout={() => {
+                    setIsGenerating(false);
+                    alert('Schedule generation timed out. Please try again.');
+                }}
             />
         </div>
     );
