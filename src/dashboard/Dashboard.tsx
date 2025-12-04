@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import ScheduleTab from './ScheduleTab';
-import RequestsTab from './RequestsTab';
+import ScheduleTab from './schedule/ScheduleTab.tsx';
+import RequestsTab from './requests/RequestsTab.tsx';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 
 interface DashboardProps {
@@ -64,8 +64,8 @@ function Dashboard({ navigate }: DashboardProps) {
     // Get mock user data from sessionStorage
     const userDataString = sessionStorage.getItem('mockUser');
     const userData = userDataString ? JSON.parse(userDataString) : null;
-    const userName = userData?.name || 'User';
-    const userRole = userData?.role || 'user';
+    const userName: string = userData?.name || 'User';
+    const userRole: string = userData?.role || 'user';
 
     // Fetch menu items from CMS API on component mount
     useEffect(() => {
@@ -301,7 +301,7 @@ function Dashboard({ navigate }: DashboardProps) {
                     )}
 
                     {/* Schedule Tab */}
-                    {activeTab === 'schedule' && <ScheduleTab />}
+                    {activeTab === 'schedule' && <ScheduleTab userRole={userRole}/>}
 
                     {/* Team Tab */}
                     {activeTab === 'team' && (
