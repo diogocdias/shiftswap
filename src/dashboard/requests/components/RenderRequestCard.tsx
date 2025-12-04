@@ -9,6 +9,62 @@ interface RenderRequestCardProps {
     setShowShareModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+// Avatar component with initials
+const UserAvatar = ({ name }: { name: string }) => {
+    const initials = name.split(' ').map(n => n[0]).join('');
+
+    return (
+        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center font-semibold text-white text-sm shadow-sm flex-shrink-0">
+            {initials}
+        </div>
+    );
+};
+
+// Swap arrows icon - curved cycling arrows
+const SwapArrowsIcon = () => (
+    <div className="flex items-center justify-center px-4 md:px-8 flex-shrink-0">
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+            {/* Top arrow - light blue */}
+            <path
+                d="M16 3L19 6L16 9"
+                stroke="#5CBFDE"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M19 6H10C6.68629 6 4 8.68629 4 12"
+                stroke="#5CBFDE"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+            />
+            {/* Bottom arrow - dark blue */}
+            <path
+                d="M8 21L5 18L8 15"
+                stroke="#1E5F8B"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M5 18H14C17.3137 18 20 15.3137 20 12"
+                stroke="#1E5F8B"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+            />
+        </svg>
+    </div>
+);
+
+// Get shift type color
+const getShiftTypeColor = (shiftType: string) => {
+    const type = shiftType.toLowerCase();
+    if (type.includes('morning') || type.includes('day')) return 'text-blue-500';
+    if (type.includes('afternoon')) return 'text-orange-500';
+    if (type.includes('night')) return 'text-indigo-500';
+    return 'text-gray-500';
+};
+
 // Render a single request card
 export const renderRequestCard = ({
                                       request,
@@ -20,14 +76,6 @@ export const renderRequestCard = ({
                                   }: RenderRequestCardProps) => {
 
     const handleApprove = async (requestId: number) => {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`/api/swap-requests/${requestId}/approve`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' }
-        // });
-        // const result = await response.json();
-
-        // Mock API response
         await new Promise(resolve => setTimeout(resolve, 500));
         console.log('Approving request:', requestId);
 
@@ -39,14 +87,6 @@ export const renderRequestCard = ({
     };
 
     const handleDecline = async (requestId: number) => {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`/api/swap-requests/${requestId}/decline`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' }
-        // });
-        // const result = await response.json();
-
-        // Mock API response
         await new Promise(resolve => setTimeout(resolve, 500));
         console.log('Declining request:', requestId);
 
@@ -62,116 +102,129 @@ export const renderRequestCard = ({
         setShowShareModal(true);
     };
 
-    return <div key={request.id} className="p-6">
-        <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-                <div
-                    className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-medium text-blue-700">
-                    {request.from.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div>
-                    <div className="font-medium text-gray-900">{request.from}</div>
-                    <div className="text-sm text-gray-600">
-                        wants to swap shifts with <span className="font-medium text-gray-900">{request.to}</span>
+    // Extract short shift type (e.g., "Afternoon" from "Afternoon Shift")
+    const getShortShiftType = (type: string) => type.split(' ')[0];
+
+    return (
+        <div key={request.id} className="px-6 py-5 hover:bg-gray-50 transition">
+            <div className="flex items-center">
+                {/* Left Shift Section */}
+                <div className="flex items-center gap-4 flex-1">
+                    <UserAvatar name={request.from} />
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{request.from}</span>
+                            <span className={`text-sm ${getShiftTypeColor(request.fromShift.type)}`}>
+                                {getShortShiftType(request.fromShift.type)}
+                            </span>
+                        </div>
+                        <div className="text-base font-bold text-gray-900 mt-0.5">
+                            {request.fromShift.date}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            {request.fromShift.time}
+                        </div>
+                        <span className="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
+                            Your Shift
+                        </span>
                     </div>
                 </div>
-            </div>
-            <div className="flex items-center gap-2">
-                    <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusBadgeColor(request.status)}`}>
-                        {request.status}
-                    </span>
-                {request.status === 'pending' && canShare && (
-                    <button
-                        onClick={() => handleShare(request)}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                        title="Share this swap request"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                        </svg>
-                    </button>
-                )}
+
+                {/* Swap Arrows */}
+                <SwapArrowsIcon />
+
+                {/* Right Shift Section */}
+                <div className="flex items-center gap-4 flex-1">
+                    <UserAvatar name={request.to} />
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{request.to}</span>
+                            <span className={`text-sm ${getShiftTypeColor(request.toShift.type)}`}>
+                                {getShortShiftType(request.toShift.type)}
+                            </span>
+                        </div>
+                        <div className="text-base font-bold text-gray-900 mt-0.5">
+                            {request.toShift.date}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            {request.toShift.time}
+                        </div>
+                        <span className="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
+                            Proposed Swap
+                        </span>
+                    </div>
+                </div>
+
+                {/* Actions Section */}
+                <div className="flex items-center gap-3 pl-6 ml-6 border-l border-gray-200 flex-shrink-0">
+                    {/* Share button */}
+                    {request.status === 'pending' && canShare && (
+                        <button
+                            onClick={() => handleShare(request)}
+                            className="p-2 text-gray-400 hover:text-gray-600 transition"
+                            title="Share"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                            </svg>
+                        </button>
+                    )}
+
+                    {/* Accept/Decline buttons for pending requests */}
+                    {request.status === 'pending' && showActions && (
+                        <>
+                            <button
+                                onClick={() => handleApprove(request.id)}
+                                className="p-2 text-green-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                                title="Accept"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => handleDecline(request.id)}
+                                className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                                title="Decline"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </>
+                    )}
+
+                    {/* Status badges for completed requests */}
+                    {request.status === 'approved' && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-full">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span className="text-xs font-medium">Approved</span>
+                        </div>
+                    )}
+
+                    {request.status === 'declined' && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-500 rounded-full">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            <span className="text-xs font-medium">Declined</span>
+                        </div>
+                    )}
+
+                    {/* Pending indicator when no actions available */}
+                    {request.status === 'pending' && !showActions && !canShare && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded-full">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span className="text-xs font-medium">Pending</span>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
-
-        {/* Shift Details */}
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="text-xs font-medium text-red-900 mb-2 flex items-center gap-1">
-                    <span>←</span> {request.from} gives
-                </div>
-                <div className="font-semibold text-red-700">{request.fromShift.date}</div>
-                <div className="text-sm text-red-600">{request.fromShift.type}</div>
-                <div className="text-xs text-red-500 mt-1">{request.fromShift.time}</div>
-            </div>
-
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="text-xs font-medium text-green-900 mb-2 flex items-center gap-1">
-                    <span>→</span> {request.to} takes
-                </div>
-                <div className="font-semibold text-green-700">{request.toShift.date}</div>
-                <div className="text-sm text-green-600">{request.toShift.type}</div>
-                <div className="text-xs text-green-500 mt-1">{request.toShift.time}</div>
-            </div>
-        </div>
-
-        {/* Action Buttons - Only show for pending requests that user can manage */}
-        {request.status === 'pending' && showActions && (
-            <div className="flex gap-3">
-                <button
-                    onClick={() => handleApprove(request.id)}
-                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                    Approve
-                </button>
-                <button
-                    onClick={() => handleDecline(request.id)}
-                    className="flex-1 bg-white text-gray-700 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition font-medium"
-                >
-                    Decline
-                </button>
-            </div>
-        )}
-
-        {/* Status message for non-actionable requests */}
-        {request.status === 'pending' && !showActions && (
-            <div className="text-sm text-gray-600 italic">
-                Waiting for {request.to}'s approval
-            </div>
-        )}
-
-        {request.status === 'approved' && (
-            <div className="flex items-center gap-2 text-sm text-green-700">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
-                </svg>
-                This swap has been approved
-            </div>
-        )}
-
-        {request.status === 'declined' && (
-            <div className="flex items-center gap-2 text-sm text-red-700">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                This swap has been declined
-            </div>
-        )}
-    </div>
+    );
 };
-
-const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-        case 'pending':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'approved':
-            return 'bg-green-100 text-green-800';
-        case 'declined':
-            return 'bg-red-100 text-red-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-};
-
