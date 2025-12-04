@@ -93,9 +93,9 @@ function RequestsTab() {
                     </div>
 
                     {/* Status Filter */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col portrait:flex-col landscape:flex-row md:flex-row portrait:items-start landscape:items-center md:items-center gap-2">
                         <span className="text-xs text-gray-600">Filter:</span>
-                        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                        <div className="flex gap-1 bg-gray-100 rounded-lg p-1 flex-wrap">
                             <button
                                 onClick={() => setFilter('all')}
                                 className={`px-3 py-1 text-xs font-medium rounded transition ${
