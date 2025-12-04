@@ -93,50 +93,47 @@ function RequestsTab() {
                     </div>
 
                     {/* Status Filter */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600">Filter:</span>
-                        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                            <button
-                                onClick={() => setFilter('all')}
-                                className={`px-3 py-1 text-xs font-medium rounded transition ${
-                                    filter === 'all'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                All
-                            </button>
-                            <button
-                                onClick={() => setFilter('pending')}
-                                className={`px-3 py-1 text-xs font-medium rounded transition ${
-                                    filter === 'pending'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                Pending
-                            </button>
-                            <button
-                                onClick={() => setFilter('approved')}
-                                className={`px-3 py-1 text-xs font-medium rounded transition ${
-                                    filter === 'approved'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                Approved
-                            </button>
-                            <button
-                                onClick={() => setFilter('declined')}
-                                className={`px-3 py-1 text-xs font-medium rounded transition ${
-                                    filter === 'declined'
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                Declined
-                            </button>
-                        </div>
+                    <div className="flex gap-1.5 bg-gray-100 rounded-full p-1 w-full portrait:justify-center md:w-auto">
+                        <button
+                            onClick={() => setFilter('all')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full transition ${
+                                filter === 'all'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            All
+                        </button>
+                        <button
+                            onClick={() => setFilter('pending')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full transition ${
+                                filter === 'pending'
+                                    ? 'bg-yellow-100 text-yellow-700 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            Pending
+                        </button>
+                        <button
+                            onClick={() => setFilter('approved')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full transition ${
+                                filter === 'approved'
+                                    ? 'bg-green-100 text-green-700 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            Approved
+                        </button>
+                        <button
+                            onClick={() => setFilter('declined')}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full transition ${
+                                filter === 'declined'
+                                    ? 'bg-red-100 text-red-700 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            Declined
+                        </button>
                     </div>
                 </div>
             </div>
