@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ScheduleTab from './schedule/ScheduleTab.tsx';
 import RequestsTab from './requests/RequestsTab.tsx';
+import ProfileTab from './profile/ProfileTab.tsx';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 
 interface DashboardProps {
@@ -66,6 +67,7 @@ function Dashboard({ navigate }: DashboardProps) {
     const userData = userDataString ? JSON.parse(userDataString) : null;
     const userName: string = userData?.name || 'User';
     const userRole: string = userData?.role || 'user';
+    const userProfilePicture: string | null = userData?.profilePicture || null;
 
     // Fetch menu items from CMS API on component mount
     useEffect(() => {
@@ -171,19 +173,43 @@ function Dashboard({ navigate }: DashboardProps) {
                 {/* User Profile */}
                 <div className="border-t border-gray-200 p-2 lg:p-4">
                     <div className="relative group">
-                        <button className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium text-base lg:text-lg hover:bg-blue-700 transition">
-                            {userName.charAt(0)}
+                        <button
+                            onClick={() => setActiveTab('profile')}
+                            className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center font-medium text-base lg:text-lg transition overflow-hidden ${
+                                activeTab === 'profile'
+                                    ? 'ring-2 ring-blue-500 ring-offset-2'
+                                    : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1'
+                            } ${userProfilePicture ? '' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                            title="View Profile"
+                        >
+                            {userProfilePicture ? (
+                                <img
+                                    src={userProfilePicture}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                userName.charAt(0)
+                            )}
                         </button>
                         {/* Tooltip - positioned to prevent gap */}
-                        <div className="absolute left-full bottom-0 ml-1 hidden group-hover:block bg-gray-900 text-white text-sm py-3 px-4 rounded whitespace-nowrap before:content-[''] before:absolute before:right-full before:top-0 before:bottom-0 before:w-2 before:bg-transparent">
+                        <div className="absolute left-full bottom-0 ml-1 hidden group-hover:block bg-gray-900 text-white text-sm py-3 px-4 rounded whitespace-nowrap before:content-[''] before:absolute before:right-full before:top-0 before:bottom-0 before:w-2 before:bg-transparent z-50">
                             <div className="font-medium mb-1">{userName}</div>
                             <div className="text-xs text-gray-300 capitalize mb-2">{userRole}</div>
-                            <button
-                                onClick={handleLogout}
-                                className="text-xs text-red-300 hover:text-red-200 bg-red-900/30 px-3 py-1 rounded"
-                            >
-                                Logout
-                            </button>
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    onClick={() => setActiveTab('profile')}
+                                    className="text-xs text-blue-300 hover:text-blue-200 bg-blue-900/30 px-3 py-1 rounded"
+                                >
+                                    View Profile
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-xs text-red-300 hover:text-red-200 bg-red-900/30 px-3 py-1 rounded"
+                                >
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -196,7 +222,7 @@ function Dashboard({ navigate }: DashboardProps) {
                     <div className="h-10 lg:h-16 px-3 lg:px-8 py-3 lg:py-4 flex items-center justify-between">
                         <div>
                             <h1 className="text-lg lg:text-2xl font-bold text-gray-900">
-                                {menuItems.find(item => item.id === activeTab)?.label}
+                                {activeTab === 'profile' ? 'Profile' : menuItems.find(item => item.id === activeTab)?.label}
                             </h1>
                         </div>
                         <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
@@ -397,6 +423,9 @@ function Dashboard({ navigate }: DashboardProps) {
                             </div>
                         </div>
                     )}
+
+                    {/* Profile Tab */}
+                    {activeTab === 'profile' && <ProfileTab />}
                 </div>
             </main>
 
