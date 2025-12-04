@@ -218,10 +218,10 @@ export const renderRequestCard = ({
             {/* Desktop/Landscape Layout - Hidden on small portrait screens */}
             <div className="hidden landscape:flex md:flex items-center">
                 {/* Left Shift Section */}
-                <div className="flex items-center gap-4 flex-1">
+                <div className="flex items-center justify-center gap-4 flex-1">
                     <UserAvatar name={request.from} />
-                    <div>
-                        <div className="flex items-center gap-2">
+                    <div className="text-center">
+                        <div className="flex items-center justify-center gap-2">
                             <span className="text-sm font-medium text-gray-900">{request.from}</span>
                             <span className={`text-sm ${getShiftTypeColor(request.fromShift.type)}`}>
                                 {getShortShiftType(request.fromShift.type)}
@@ -243,10 +243,10 @@ export const renderRequestCard = ({
                 <SwapArrowsIcon />
 
                 {/* Right Shift Section */}
-                <div className="flex items-center gap-4 flex-1">
+                <div className="flex items-center justify-center gap-4 flex-1">
                     <UserAvatar name={request.to} />
-                    <div>
-                        <div className="flex items-center gap-2">
+                    <div className="text-center">
+                        <div className="flex items-center justify-center gap-2">
                             <span className="text-sm font-medium text-gray-900">{request.to}</span>
                             <span className={`text-sm ${getShiftTypeColor(request.toShift.type)}`}>
                                 {getShortShiftType(request.toShift.type)}
