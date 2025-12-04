@@ -43,151 +43,115 @@ export default function SwapRequestModal({
                     </div>
 
                     <div className="space-y-4">
-                        {/* Scenario 1: User's own shift - giving it away */}
-                        {swapFormData.myDate && !swapFormData.targetUserId && (
-                            <>
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <div className="text-sm font-medium text-blue-900 mb-2">Your Shift to Give</div>
-                                    <div className="text-lg font-semibold text-blue-700">
-                                        {new Date(swapFormData.myDate).toLocaleDateString('en-US', {
-                                            weekday: 'short',
-                                            month: 'short',
-                                            day: 'numeric'
-                                        })}
-                                    </div>
-                                    <div className="text-sm text-blue-600">
-                                        {SHIFT_LEGENDS[swapFormData.myShift].label} - {SHIFT_LEGENDS[swapFormData.myShift].time}
-                                    </div>
-                                </div>
+                        {/* Step 1: Select team member to swap with */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Select Team Member to Swap With
+                            </label>
+                            <select
+                                value={swapFormData.targetUserId || ''}
+                                onChange={(e) => onUpdateFormData({
+                                    ...swapFormData,
+                                    targetUserId: e.target.value,
+                                    targetDate: '',
+                                    targetShift: 'M',
+                                })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Choose a team member...</option>
+                                {teamMembers.filter(m => m.id !== loggedInUserId).map(member => (
+                                    <option key={member.id} value={member.id}>
+                                        {member.name} ({member.role})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Select Team Member
-                                    </label>
-                                    <select
-                                        value={swapFormData.targetUserId}
-                                        onChange={(e) => onUpdateFormData({
-                                            ...swapFormData,
-                                            targetUserId: e.target.value,
-                                            targetDate: '',
-                                        })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option value="">Choose a team member...</option>
-                                        {teamMembers.filter(m => m.id !== loggedInUserId).map(member => (
-                                            <option key={member.id} value={member.id}>
-                                                {member.name} ({member.role})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {swapFormData.targetUserId && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Select Their Shift to Take
-                                        </label>
-                                        <select
-                                            value={swapFormData.targetDate ? `${swapFormData.targetDate}-${swapFormData.targetShift}` : ''}
-                                            onChange={(e) => {
-                                                const [date, shift] = e.target.value.split('-');
-                                                onUpdateFormData({
-                                                    ...swapFormData,
-                                                    targetDate: date,
-                                                    targetShift: shift as 'M' | 'A' | 'N',
-                                                });
-                                            }}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        >
-                                            <option value="">Choose a shift...</option>
-                                            {getAvailableShifts(swapFormData.targetUserId).map((shift, idx) => (
-                                                <option key={idx} value={`${shift.date}-${shift.shiftType}`}>
-                                                    {new Date(shift.date).toLocaleDateString('en-US', {
-                                                        weekday: 'short',
-                                                        month: 'short',
-                                                        day: 'numeric'
-                                                    })} - {SHIFT_LEGENDS[shift.shiftType].label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        {/* Scenario 2: Someone else's shift - taking it */}
-                        {swapFormData.targetUserId && swapFormData.targetDate && !swapFormData.myDate && (
-                            <>
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                    <div className="text-sm font-medium text-green-900 mb-2">Shift to Take</div>
-                                    <div className="text-lg font-semibold text-green-700">
-                                        {new Date(swapFormData.targetDate).toLocaleDateString('en-US', {
-                                            weekday: 'short',
-                                            month: 'short',
-                                            day: 'numeric'
-                                        })}
-                                    </div>
-                                    <div className="text-sm text-green-600">
-                                        {SHIFT_LEGENDS[swapFormData.targetShift].label} - {SHIFT_LEGENDS[swapFormData.targetShift].time}
-                                    </div>
-                                    <div className="text-sm text-green-800 mt-2">
-                                        From: {teamMembers.find(m => m.id === swapFormData.targetUserId)?.name}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Select Your Shift to Give
-                                    </label>
-                                    <select
-                                        value={swapFormData.myDate ? `${swapFormData.myDate}-${swapFormData.myShift}` : ''}
-                                        onChange={(e) => {
-                                            const [date, shift] = e.target.value.split('-');
+                        {/* Step 2: Show available shifts for selected team member */}
+                        {swapFormData.targetUserId && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Their Shift to Take
+                                </label>
+                                <select
+                                    value={swapFormData.targetDate ? `${swapFormData.targetDate}-${swapFormData.targetShift}` : ''}
+                                    onChange={(e) => {
+                                        if (!e.target.value) {
                                             onUpdateFormData({
                                                 ...swapFormData,
-                                                myDate: date,
-                                                myShift: shift as 'M' | 'A' | 'N',
+                                                targetDate: '',
+                                                targetShift: 'M',
                                             });
-                                        }}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option value="">Choose a shift...</option>
-                                        {getAvailableShifts(loggedInUserId).map((shift, idx) => (
-                                            <option key={idx} value={`${shift.date}-${shift.shiftType}`}>
-                                                {new Date(shift.date).toLocaleDateString('en-US', {
+                                            return;
+                                        }
+                                        const [date, shift] = e.target.value.split('-');
+                                        onUpdateFormData({
+                                            ...swapFormData,
+                                            targetDate: date,
+                                            targetShift: shift as 'M' | 'A' | 'N',
+                                        });
+                                    }}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="">Choose a shift...</option>
+                                    {getAvailableShifts(swapFormData.targetUserId).map((shift, idx) => (
+                                        <option key={idx} value={`${shift.date}-${shift.shiftType}`}>
+                                            {new Date(shift.date).toLocaleDateString('en-US', {
+                                                weekday: 'short',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })} - {SHIFT_LEGENDS[shift.shiftType].label} ({SHIFT_LEGENDS[shift.shiftType].time})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Step 3: Show summary after shift selection */}
+                        {swapFormData.targetUserId && swapFormData.targetDate && (
+                            <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                                <div className="text-sm font-semibold text-blue-900 mb-3">Shift Summary</div>
+                                <div className="space-y-3">
+                                    {/* Your shift to give */}
+                                    {swapFormData.myDate && (
+                                        <div className="bg-white rounded-md p-3 border border-blue-200">
+                                            <div className="text-xs font-medium text-gray-600 mb-1">You Give</div>
+                                            <div className="text-sm font-semibold text-gray-900">
+                                                {new Date(swapFormData.myDate).toLocaleDateString('en-US', {
                                                     weekday: 'short',
                                                     month: 'short',
                                                     day: 'numeric'
-                                                })} - {SHIFT_LEGENDS[shift.shiftType].label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </>
-                        )}
+                                                })}
+                                            </div>
+                                            <div className="text-xs text-gray-700">
+                                                {SHIFT_LEGENDS[swapFormData.myShift].label} - {SHIFT_LEGENDS[swapFormData.myShift].time}
+                                            </div>
+                                        </div>
+                                    )}
 
-                        {/* Summary when both shifts are selected */}
-                        {swapFormData.targetUserId && swapFormData.targetDate && swapFormData.myDate && (
-                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <div className="text-sm font-medium text-gray-900 mb-3">Swap Summary</div>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">You give:</span>
-                                        <span className="font-medium text-gray-900">
-                                            {new Date(swapFormData.myDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} {swapFormData.myShift}
-                                        </span>
+                                    {/* Exchange arrow */}
+                                    <div className="flex justify-center">
+                                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                        </svg>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">You get:</span>
-                                        <span className="font-medium text-gray-900">
-                                            {new Date(swapFormData.targetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} {swapFormData.targetShift}
-                                        </span>
-                                    </div>
-                                    <div className="pt-2 border-t border-gray-300">
-                                        <span className="text-gray-600">With: </span>
-                                        <span className="font-medium text-gray-900">
-                                            {teamMembers.find(m => m.id === swapFormData.targetUserId)?.name}
-                                        </span>
+
+                                    {/* Their shift to take */}
+                                    <div className="bg-white rounded-md p-3 border border-blue-200">
+                                        <div className="text-xs font-medium text-gray-600 mb-1">You Receive</div>
+                                        <div className="text-sm font-semibold text-gray-900">
+                                            {new Date(swapFormData.targetDate).toLocaleDateString('en-US', {
+                                                weekday: 'short',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </div>
+                                        <div className="text-xs text-gray-700">
+                                            {SHIFT_LEGENDS[swapFormData.targetShift].label} - {SHIFT_LEGENDS[swapFormData.targetShift].time}
+                                        </div>
+                                        <div className="text-xs text-gray-600 mt-1">
+                                            From: {teamMembers.find(m => m.id === swapFormData.targetUserId)?.name}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
