@@ -20,9 +20,45 @@ const UserAvatar = ({ name }: { name: string }) => {
     );
 };
 
-// Swap arrows icon - curved cycling arrows
+// Swap arrows icon - curved cycling arrows (for horizontal layout)
 const SwapArrowsIcon = () => (
     <div className="flex items-center justify-center px-4 md:px-8 flex-shrink-0">
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+            {/* Top arrow - light blue */}
+            <path
+                d="M16 3L19 6L16 9"
+                stroke="#5CBFDE"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M19 6H10C6.68629 6 4 8.68629 4 12"
+                stroke="#5CBFDE"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+            />
+            {/* Bottom arrow - dark blue */}
+            <path
+                d="M8 21L5 18L8 15"
+                stroke="#1E5F8B"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M5 18H14C17.3137 18 20 15.3137 20 12"
+                stroke="#1E5F8B"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+            />
+        </svg>
+    </div>
+);
+
+// Swap arrows icon for vertical/portrait layout
+const SwapArrowsIconVertical = () => (
+    <div className="flex items-center justify-center py-2 flex-shrink-0">
         <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
             {/* Top arrow - light blue */}
             <path
@@ -105,9 +141,82 @@ export const renderRequestCard = ({
     // Extract short shift type (e.g., "Afternoon" from "Afternoon Shift")
     const getShortShiftType = (type: string) => type.split(' ')[0];
 
+    // Actions component - reused in both layouts
+    const ActionsSection = ({ className = "" }: { className?: string }) => (
+        <div className={`flex items-center gap-3 ${className}`}>
+            {/* Share button */}
+            {request.status === 'pending' && canShare && (
+                <button
+                    onClick={() => handleShare(request)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition"
+                    title="Share"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                </button>
+            )}
+
+            {/* Accept/Decline buttons for pending requests */}
+            {request.status === 'pending' && showActions && (
+                <>
+                    <button
+                        onClick={() => handleApprove(request.id)}
+                        className="p-2 text-green-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                        title="Accept"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </button>
+                    <button
+                        onClick={() => handleDecline(request.id)}
+                        className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                        title="Decline"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </>
+            )}
+
+            {/* Status badges for completed requests */}
+            {request.status === 'approved' && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-full">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span className="text-xs font-medium">Approved</span>
+                </div>
+            )}
+
+            {request.status === 'declined' && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-500 rounded-full">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <span className="text-xs font-medium">Declined</span>
+                </div>
+            )}
+
+            {/* Pending indicator when no actions available */}
+            {request.status === 'pending' && !showActions && !canShare && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded-full">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span className="text-xs font-medium">Pending</span>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div key={request.id} className="px-6 py-5 hover:bg-gray-50 transition">
-            <div className="flex items-center">
+            {/* Desktop/Landscape Layout - Hidden on small portrait screens */}
+            <div className="hidden landscape:flex md:flex items-center">
                 {/* Left Shift Section */}
                 <div className="flex items-center gap-4 flex-1">
                     <UserAvatar name={request.from} />
@@ -156,73 +265,61 @@ export const renderRequestCard = ({
                 </div>
 
                 {/* Actions Section */}
-                <div className="flex items-center gap-3 pl-6 ml-6 border-l border-gray-200 flex-shrink-0">
-                    {/* Share button */}
-                    {request.status === 'pending' && canShare && (
-                        <button
-                            onClick={() => handleShare(request)}
-                            className="p-2 text-gray-400 hover:text-gray-600 transition"
-                            title="Share"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                            </svg>
-                        </button>
-                    )}
+                <ActionsSection className="pl-6 ml-6 border-l border-gray-200 flex-shrink-0" />
+            </div>
 
-                    {/* Accept/Decline buttons for pending requests */}
-                    {request.status === 'pending' && showActions && (
-                        <>
-                            <button
-                                onClick={() => handleApprove(request.id)}
-                                className="p-2 text-green-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-                                title="Accept"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </button>
-                            <button
-                                onClick={() => handleDecline(request.id)}
-                                className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
-                                title="Decline"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </>
-                    )}
-
-                    {/* Status badges for completed requests */}
-                    {request.status === 'approved' && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-full">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span className="text-xs font-medium">Approved</span>
+            {/* Mobile Portrait Layout - Only shown on small portrait screens */}
+            <div className="flex flex-col items-center portrait:flex md:hidden landscape:hidden">
+                {/* Top Shift Section (Your Shift) */}
+                <div className="flex items-center gap-4 w-full justify-center">
+                    <UserAvatar name={request.from} />
+                    <div className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{request.from}</span>
+                            <span className={`text-sm ${getShiftTypeColor(request.fromShift.type)}`}>
+                                {getShortShiftType(request.fromShift.type)}
+                            </span>
                         </div>
-                    )}
-
-                    {request.status === 'declined' && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-500 rounded-full">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            <span className="text-xs font-medium">Declined</span>
+                        <div className="text-base font-bold text-gray-900 mt-0.5">
+                            {request.fromShift.date}
                         </div>
-                    )}
-
-                    {/* Pending indicator when no actions available */}
-                    {request.status === 'pending' && !showActions && !canShare && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 text-yellow-600 rounded-full">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span className="text-xs font-medium">Pending</span>
+                        <div className="text-sm text-gray-500">
+                            {request.fromShift.time}
                         </div>
-                    )}
+                        <span className="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
+                            Your Shift
+                        </span>
+                    </div>
+                </div>
+
+                {/* Swap Arrows */}
+                <SwapArrowsIconVertical />
+
+                {/* Bottom Shift Section (Proposed Swap) */}
+                <div className="flex items-center gap-4 w-full justify-center">
+                    <UserAvatar name={request.to} />
+                    <div className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{request.to}</span>
+                            <span className={`text-sm ${getShiftTypeColor(request.toShift.type)}`}>
+                                {getShortShiftType(request.toShift.type)}
+                            </span>
+                        </div>
+                        <div className="text-base font-bold text-gray-900 mt-0.5">
+                            {request.toShift.date}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            {request.toShift.time}
+                        </div>
+                        <span className="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
+                            Proposed Swap
+                        </span>
+                    </div>
+                </div>
+
+                {/* Actions Section - Bottom row */}
+                <div className="mt-4 pt-4 border-t border-gray-200 w-full">
+                    <ActionsSection className="justify-center" />
                 </div>
             </div>
         </div>
