@@ -228,6 +228,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isTableExpanded, setIsTableExpanded] = useState(false);
 
     const LOGGED_IN_USER_ID = '1';
     const canGenerateSchedule = userRole === 'admin' || userRole === 'teamleader';
@@ -478,7 +479,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     };
 
     return (
-        <div className="space-y-4">
+        <div className={`space-y-4 ${isTableExpanded && scheduleView === 'team' ? 'fixed inset-0 z-40 bg-gray-100 p-4 overflow-auto' : ''}`}>
             {/* Header with View Toggle */}
             <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -589,6 +590,25 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 </svg>
                             </button>
                         </div>
+
+                        {/* Expand/Collapse Button - Only on desktop for team view */}
+                        {scheduleView === 'team' && isDesktop && (
+                            <button
+                                onClick={() => setIsTableExpanded(!isTableExpanded)}
+                                className="hidden md:flex items-center justify-center p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                                title={isTableExpanded ? 'Collapse table' : 'Expand table'}
+                            >
+                                {isTableExpanded ? (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                                    </svg>
+                                )}
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -614,6 +634,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     nameFilter={nameFilter}
                     userRole={userRole}
                     currentMonth={teamMonth}
+                    isExpanded={isTableExpanded}
                 />
             )}
 

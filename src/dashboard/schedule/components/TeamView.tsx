@@ -16,6 +16,7 @@ interface WeekViewProps {
     nameFilter: string;
     userRole?: string;
     currentMonth: Date;
+    isExpanded?: boolean;
 }
 
 export default function TeamView(props: WeekViewProps) {
@@ -31,7 +32,8 @@ export default function TeamView(props: WeekViewProps) {
         formatDate,
         nameFilter,
         userRole = 'user',
-        currentMonth
+        currentMonth,
+        isExpanded = false
     } = props;
 
     // Function to get all days in the current month
@@ -57,9 +59,9 @@ export default function TeamView(props: WeekViewProps) {
 
 
     return (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className={`bg-white rounded-lg border border-gray-200 overflow-hidden ${isExpanded ? 'flex-1' : ''}`}>
             <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className={`${isExpanded ? 'w-full table-fixed' : 'w-full'}`}>
                     <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-900 sticky left-0 bg-gray-50 z-10 w-32">
@@ -79,7 +81,7 @@ export default function TeamView(props: WeekViewProps) {
                         </th>
                         {/* Desktop: show appropriate view based on role */}
                         {daysToShow.map((day, index) => (
-                            <th key={index} className={`hidden md:table-cell px-1.5 py-1.5 text-center ${isMonthView ? 'min-w-[50px] w-16' : 'min-w-[70px] w-20'}`}>
+                            <th key={index} className={`hidden md:table-cell px-1.5 py-1.5 text-center ${isExpanded ? '' : (isMonthView ? 'min-w-[50px] w-16' : 'min-w-[70px] w-20')}`}>
                                 <div className="text-xs font-semibold text-gray-900">{getDayName(day)}</div>
                                 <div className="text-[10px] text-gray-500 mt-0.5">{formatDate(day)}</div>
                             </th>
@@ -185,7 +187,7 @@ export default function TeamView(props: WeekViewProps) {
                                                         return (
                                                             <div key={shiftIndex} className="relative inline-block">
                                                                 <div
-                                                                    className={`${shiftInfo.color} ${isMonthView ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-xs'} rounded font-semibold transition-transform ${
+                                                                    className={`${shiftInfo.color} ${isExpanded ? 'px-2 py-1 text-xs' : (isMonthView ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-xs')} rounded font-semibold transition-transform ${
                                                                         isClickable
                                                                             ? "cursor-pointer hover:scale-110"
                                                                             : "cursor-default"
