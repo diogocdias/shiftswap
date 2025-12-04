@@ -214,7 +214,7 @@ export const renderRequestCard = ({
     );
 
     return (
-        <div key={request.id} className="px-6 py-5 hover:bg-gray-50 transition">
+        <div key={request.id} className="mx-4 my-3 px-6 py-5 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition">
             {/* Desktop/Landscape Layout - Hidden on small portrait screens */}
             <div className="hidden landscape:flex md:flex items-center">
                 {/* Left Shift Section */}
