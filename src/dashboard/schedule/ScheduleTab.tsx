@@ -1,9 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CalendarView from "./components/CalendarView.tsx";
 import {ShiftData, SwapFormData, SwapRequest, TeamMember} from "./Types.ts";
 import TeamView from "./components/TeamView.tsx";
 import {SHIFT_LEGENDS} from "./ShiftConstants.ts";
 import SwapRequestModal from "./components/SwapRequestModal.tsx";
+import GenerateScheduleModal from "./components/GenerateScheduleModal.tsx";
+import {LoadingOverlay} from "../../components/LoadingOverlay.tsx";
+
+// Hook to detect desktop screen size
+function useIsDesktop() {
+    const getCurrentState = () =>
+        typeof window !== "undefined" ? window.innerWidth >= 1024 : false;
+
+    const [isDesktop, setIsDesktop] = useState(getCurrentState);
+
+    useEffect(() => {
+        const update = () => {
+            setIsDesktop(getCurrentState());
+        };
+
+        window.addEventListener("resize", update);
+        window.addEventListener("orientationchange", update);
+
+        return () => {
+            window.removeEventListener("resize", update);
+            window.removeEventListener("orientationchange", update);
+        };
+    }, []);
+
+    return isDesktop;
+}
 
 
 // Mock data
@@ -44,7 +70,7 @@ const generateMockShifts = (startDate: Date): ShiftData => {
     return shifts;
 };
 
-// Generate shifts for entire month
+// Generate shifts for entire month (for single user - calendar view)
 const generateMonthShifts = (year: number, month: number, userId: string): ShiftData => {
     const shifts: ShiftData = { [userId]: {} };
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -69,6 +95,108 @@ const generateMonthShifts = (year: number, month: number, userId: string): Shift
     return shifts;
 };
 
+// Generate shifts for entire month for all team members (for team view on desktop)
+const generateTeamMonthShifts = (year: number, month: number): ShiftData => {
+    const shifts: ShiftData = {};
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const shiftTypes: Array<'M' | 'A' | 'N' | 'R' | 'D'> = ['M', 'A', 'N', 'R', 'D'];
+
+    MOCK_TEAM_MEMBERS.forEach(member => {
+        shifts[member.id] = {};
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateKey = date.toISOString().split('T')[0];
+            const numShifts = Math.random() > 0.7 ? 2 : 1;
+            const dayShifts: Array<'M' | 'A' | 'N' | 'R' | 'D'> = [];
+
+            for (let j = 0; j < numShifts; j++) {
+                let shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
+                while (dayShifts.includes(shift)) {
+                    shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
+                }
+                dayShifts.push(shift);
+            }
+            shifts[member.id][dateKey] = dayShifts;
+        }
+    });
+
+    return shifts;
+};
+
+// Mock API function for generating team schedule
+// Generates realistic schedules: working shifts (M, A, N), rest days (R), or days off (D)
+// Rules:
+// - Working shifts can be single or double (consecutive like M+A or A+N)
+// - Rest and Day Off cannot be combined with working shifts
+// - Each person gets roughly 2 rest/off days per week
+const mockGenerateScheduleAPI = async (
+    startDate: string,
+    endDate: string,
+    teamMembers: TeamMember[]
+): Promise<ShiftData> => {
+    // Simulate API delay of 200ms
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const shifts: ShiftData = {};
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Working shift types only (for combining)
+    const workingShifts: Array<'M' | 'A' | 'N'> = ['M', 'A', 'N'];
+    // Valid double shift combinations (consecutive shifts that make sense)
+    const validDoubleShifts: Array<['M' | 'A' | 'N', 'M' | 'A' | 'N']> = [
+        ['M', 'A'], // Morning + Afternoon (12 hours)
+        ['A', 'N'], // Afternoon + Night (12 hours)
+    ];
+
+    teamMembers.forEach(member => {
+        shifts[member.id] = {};
+        let workingDaysInWeek = 0;
+        let currentWeekStart: Date | null = null;
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const currentDate = new Date(d);
+            const dateKey = currentDate.toISOString().split('T')[0];
+            const dayOfWeek = currentDate.getDay();
+
+            // Track weeks to ensure ~2 rest/off days per week
+            if (currentWeekStart === null || dayOfWeek === 1) {
+                currentWeekStart = new Date(currentDate);
+                workingDaysInWeek = 0;
+            }
+
+            // Determine if this should be a rest/off day
+            // Higher chance on weekends, and ensure roughly 2 per week
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const needsRestDay = workingDaysInWeek >= 5;
+            const restDayChance = isWeekend ? 0.6 : (needsRestDay ? 0.8 : 0.15);
+
+            if (Math.random() < restDayChance) {
+                // Assign rest day (R) or day off (D) - not combined with working shifts
+                const restType: 'R' | 'D' = Math.random() > 0.5 ? 'R' : 'D';
+                shifts[member.id][dateKey] = [restType];
+            } else {
+                workingDaysInWeek++;
+
+                // Determine if single or double shift (15% chance for double shift)
+                const isDoubleShift = Math.random() < 0.15;
+
+                if (isDoubleShift) {
+                    // Pick a valid double shift combination
+                    const combo = validDoubleShifts[Math.floor(Math.random() * validDoubleShifts.length)];
+                    shifts[member.id][dateKey] = [...combo];
+                } else {
+                    // Single working shift
+                    const shift = workingShifts[Math.floor(Math.random() * workingShifts.length)];
+                    shifts[member.id][dateKey] = [shift];
+                }
+            }
+        }
+    });
+
+    return shifts;
+};
+
 interface ScheduleTabProps {
     userRole: string;
 }
@@ -83,7 +211,11 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     });
 
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [teamMonth, setTeamMonth] = useState(new Date()); // Separate month state for team view
     const [shifts, setShifts] = useState<ShiftData>(() => generateMockShifts(currentWeekStart));
+    const [teamMonthShifts, setTeamMonthShifts] = useState<ShiftData>(() =>
+        generateTeamMonthShifts(new Date().getFullYear(), new Date().getMonth())
+    );
     const [monthShifts, setMonthShifts] = useState<ShiftData>(() =>
         generateMonthShifts(new Date().getFullYear(), new Date().getMonth(), '1')
     );
@@ -94,8 +226,17 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const [swapFormData, setSwapFormData] = useState<SwapFormData | null>(null);
     const [pendingSwaps, setPendingSwaps] = useState<SwapRequest[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [showGenerateModal, setShowGenerateModal] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [isTableExpanded, setIsTableExpanded] = useState(false);
 
     const LOGGED_IN_USER_ID = '1';
+    const canGenerateSchedule = userRole === 'admin' || userRole === 'teamleader';
+
+    // Detect desktop screen size
+    const isDesktop = useIsDesktop();
+    // Determine if team view should show month (desktop + admin/teamleader)
+    const isTeamMonthView = isDesktop && (userRole === 'admin' || userRole === 'teamleader');
 
     // Team view functions
     const weekDays = Array.from({ length: 7 }, (_, i) => {
@@ -111,6 +252,14 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         setShifts(generateMockShifts(newDate));
     };
 
+    // Navigate team month view (for desktop admin/teamleader)
+    const navigateTeamMonth = (direction: 'prev' | 'next') => {
+        const newDate = new Date(teamMonth);
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+        setTeamMonth(newDate);
+        setTeamMonthShifts(generateTeamMonthShifts(newDate.getFullYear(), newDate.getMonth()));
+    };
+
     // Calendar view functions
     const navigateMonth = (direction: 'prev' | 'next') => {
         const newDate = new Date(currentMonth);
@@ -119,14 +268,28 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         setMonthShifts(generateMonthShifts(newDate.getFullYear(), newDate.getMonth(), LOGGED_IN_USER_ID));
     };
 
+    // Combined navigation for team view (week or month based on view mode)
+    const navigateTeamView = (direction: 'prev' | 'next') => {
+        if (isTeamMonthView) {
+            navigateTeamMonth(direction);
+        } else {
+            navigateWeek(direction);
+        }
+    };
+
     const goToToday = () => {
         const today = new Date();
         if (scheduleView === 'team') {
-            const day = today.getDay();
-            const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-            const mondayDate = new Date(today.setDate(diff));
-            setCurrentWeekStart(mondayDate);
-            setShifts(generateMockShifts(mondayDate));
+            if (isTeamMonthView) {
+                setTeamMonth(new Date());
+                setTeamMonthShifts(generateTeamMonthShifts(today.getFullYear(), today.getMonth()));
+            } else {
+                const day = today.getDay();
+                const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+                const mondayDate = new Date(today.setDate(diff));
+                setCurrentWeekStart(mondayDate);
+                setShifts(generateMockShifts(mondayDate));
+            }
         } else {
             setCurrentMonth(new Date());
             setMonthShifts(generateMonthShifts(today.getFullYear(), today.getMonth(), LOGGED_IN_USER_ID));
@@ -181,6 +344,18 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     };
 
+    const getTeamMonthYear = () => {
+        return teamMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    };
+
+    // Get the subtitle for the team view header (week range or month/year)
+    const getTeamViewSubtitle = () => {
+        if (isTeamMonthView) {
+            return getTeamMonthYear();
+        }
+        return getWeekRange();
+    };
+
     const filteredTeamMembers = MOCK_TEAM_MEMBERS.filter(member =>
         member.name.toLowerCase().includes(nameFilter.toLowerCase())
     );
@@ -210,7 +385,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
 
     const getAvailableShifts = (userId: string) => {
         const userShifts: Array<{ date: string; shiftType: 'M' | 'A' | 'N' }> = [];
-        const userShiftData = shifts[userId];
+        const currentShifts = isTeamMonthView ? teamMonthShifts : shifts;
+        const userShiftData = currentShifts[userId];
 
         if (!userShiftData) return userShifts;
 
@@ -270,8 +446,40 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         setSwapFormData(null);
     };
 
+    const handleGenerateSchedule = async (startDate: string, endDate: string) => {
+        setIsGenerating(true);
+        try {
+            const generatedShifts = await mockGenerateScheduleAPI(startDate, endDate, MOCK_TEAM_MEMBERS);
+
+            // Merge the generated shifts with existing shifts
+            const updateShifts = (prevShifts: ShiftData) => {
+                const newShifts = { ...prevShifts };
+                Object.entries(generatedShifts).forEach(([memberId, memberShifts]) => {
+                    if (!newShifts[memberId]) {
+                        newShifts[memberId] = {};
+                    }
+                    Object.entries(memberShifts).forEach(([date, shiftsData]) => {
+                        newShifts[memberId][date] = shiftsData;
+                    });
+                });
+                return newShifts;
+            };
+
+            // Update both week and month shifts to keep them in sync
+            setShifts(updateShifts);
+            setTeamMonthShifts(updateShifts);
+
+            console.log('Schedule generated successfully:', { startDate, endDate, generatedShifts });
+        } catch (error) {
+            console.error('Failed to generate schedule:', error);
+            alert('Failed to generate schedule. Please try again.');
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     return (
-        <div className="space-y-4">
+        <div className={`space-y-4 ${isTableExpanded && scheduleView === 'team' ? 'fixed inset-0 z-40 bg-gray-100 p-4 overflow-auto' : ''}`}>
             {/* Header with View Toggle */}
             <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -281,7 +489,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 {scheduleView === 'team' ? 'Team Schedule' : 'My Calendar'}
                             </h2>
                             <p className="text-xs text-gray-600 mt-0.5">
-                                {scheduleView === 'team' ? getWeekRange() : getMonthYear()}
+                                {scheduleView === 'team' ? getTeamViewSubtitle() : getMonthYear()}
                             </p>
                         </div>
 
@@ -311,6 +519,19 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {/* Generate Schedule Button - Only for admin/teamleader in team view */}
+                        {scheduleView === 'team' && canGenerateSchedule && (
+                            <button
+                                onClick={() => setShowGenerateModal(true)}
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-xs"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Generate Schedule
+                            </button>
+                        )}
+
                         {/* Name Filter - Only show in team view */}
                         {scheduleView === 'team' && (
                             <div className="relative">
@@ -345,9 +566,9 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                         {/* Navigation */}
                         <div className="flex items-center gap-1.5">
                             <button
-                                onClick={() => scheduleView === 'team' ? navigateWeek('prev') : navigateMonth('prev')}
+                                onClick={() => scheduleView === 'team' ? navigateTeamView('prev') : navigateMonth('prev')}
                                 className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-                                title={`Previous ${scheduleView}`}
+                                title={`Previous ${isTeamMonthView ? 'month' : 'week'}`}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -360,15 +581,34 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 Today
                             </button>
                             <button
-                                onClick={() => scheduleView === 'team' ? navigateWeek('next') : navigateMonth('next')}
+                                onClick={() => scheduleView === 'team' ? navigateTeamView('next') : navigateMonth('next')}
                                 className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-                                title={`Next ${scheduleView}`}
+                                title={`Next ${isTeamMonthView ? 'month' : 'week'}`}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </button>
                         </div>
+
+                        {/* Expand/Collapse Button - Only on desktop for team view */}
+                        {scheduleView === 'team' && isDesktop && (
+                            <button
+                                onClick={() => setIsTableExpanded(!isTableExpanded)}
+                                className="hidden md:flex items-center justify-center p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                                title={isTableExpanded ? 'Collapse table' : 'Expand table'}
+                            >
+                                {isTableExpanded ? (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                                    </svg>
+                                )}
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -384,7 +624,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 <TeamView
                     weekDays={weekDays}
                     filteredTeamMembers={filteredTeamMembers}
-                    shifts={shifts}
+                    shifts={isTeamMonthView ? teamMonthShifts : shifts}
                     hoveredShift={hoveredShift}
                     setHoveredShift={setHoveredShift}
                     handleShiftClick={handleShiftClick}
@@ -393,7 +633,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     formatDate={formatDate}
                     nameFilter={nameFilter}
                     userRole={userRole}
-                    currentMonth={currentMonth}
+                    currentMonth={teamMonth}
+                    isExpanded={isTableExpanded}
                 />
             )}
 
@@ -531,6 +772,23 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 teamMembers={MOCK_TEAM_MEMBERS}
                 loggedInUserId={LOGGED_IN_USER_ID}
                 getAvailableShifts={getAvailableShifts}
+            />
+
+            {/* Generate Schedule Modal */}
+            <GenerateScheduleModal
+                isOpen={showGenerateModal}
+                onClose={() => setShowGenerateModal(false)}
+                onGenerate={handleGenerateSchedule}
+            />
+
+            {/* Loading Overlay - shown while generating schedule */}
+            <LoadingOverlay
+                isLoading={isGenerating}
+                timeout={10000}
+                onTimeout={() => {
+                    setIsGenerating(false);
+                    alert('Schedule generation timed out. Please try again.');
+                }}
             />
         </div>
     );
