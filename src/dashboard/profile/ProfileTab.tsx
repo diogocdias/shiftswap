@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { LoadingOverlay } from '../../components/LoadingOverlay';
 
 interface UserProfile {
     name: string;
@@ -36,6 +37,17 @@ const mockFetchUserProfile = async (userId: string): Promise<UserProfile> => {
         startDate: userData?.startDate || '2023-06-15',
         profilePicture: userData?.profilePicture || null,
     };
+};
+
+// Mock save API - simulates saving profile to backend
+const mockSaveUserProfile = async (profile: UserProfile): Promise<{ success: boolean }> => {
+    // Simulate API delay (200ms as requested)
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    console.log('Saving profile:', profile); // TODO: Remove this log
+
+    // Mock successful response
+    return { success: true };
 };
 // END TODO
 
@@ -108,41 +120,49 @@ function ProfileTab() {
         setIsSaving(true);
         setSaveSuccess(false);
 
-        // TODO: REPLACE WITH ACTUAL API CALL
-        // await fetch('/api/users/profile', {
-        //     method: 'PUT',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': `Bearer ${userData?.sessionId}`
-        //     },
-        //     body: JSON.stringify(editedProfile)
-        // });
+        try {
+            // TODO: REPLACE WITH ACTUAL API CALL
+            // const response = await fetch('/api/users/profile', {
+            //     method: 'PUT',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': `Bearer ${userData?.sessionId}`
+            //     },
+            //     body: JSON.stringify(editedProfile)
+            // });
+            // const result = await response.json();
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        // END TODO
+            const result = await mockSaveUserProfile(editedProfile);
+            // END TODO
 
-        // Update profile state
-        setProfile(editedProfile);
+            if (result.success) {
+                // Update profile state
+                setProfile(editedProfile);
 
-        // Update sessionStorage with new user data
-        const updatedUserData = {
-            ...userData,
-            name: editedProfile.name,
-            email: editedProfile.email,
-            phone: editedProfile.phone,
-            department: editedProfile.department,
-            facility: editedProfile.facility,
-            profilePicture: editedProfile.profilePicture,
-        };
-        sessionStorage.setItem('mockUser', JSON.stringify(updatedUserData));
+                // Update sessionStorage with new user data
+                const updatedUserData = {
+                    ...userData,
+                    name: editedProfile.name,
+                    email: editedProfile.email,
+                    phone: editedProfile.phone,
+                    department: editedProfile.department,
+                    facility: editedProfile.facility,
+                    profilePicture: editedProfile.profilePicture,
+                };
+                sessionStorage.setItem('mockUser', JSON.stringify(updatedUserData));
 
-        setIsSaving(false);
-        setIsEditing(false);
-        setSaveSuccess(true);
+                setIsEditing(false);
+                setSaveSuccess(true);
 
-        // Hide success message after 3 seconds
-        setTimeout(() => setSaveSuccess(false), 3000);
+                // Hide success message after 3 seconds
+                setTimeout(() => setSaveSuccess(false), 3000);
+            }
+        } catch (error) {
+            console.error('Failed to save profile:', error);
+            alert('Failed to save profile. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleProfilePictureClick = () => {
@@ -615,6 +635,9 @@ function ProfileTab() {
                     </div>
                 </div>
             </div>
+
+            {/* Loading Overlay - shown during load and save operations */}
+            <LoadingOverlay isLoading={isLoading || isSaving} />
         </div>
     );
 }
