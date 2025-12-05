@@ -1,35 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import CalendarView from "./components/CalendarView.tsx";
-import {ShiftData, SwapFormData, SwapRequest, TeamMember} from "./Types.ts";
+import { ShiftData, SwapFormData, SwapRequest, TeamMember } from "../../types/domain";
 import TeamView from "./components/TeamView.tsx";
-import {SHIFT_LEGENDS} from "./ShiftConstants.ts";
+import { SHIFT_LEGENDS } from "./ShiftConstants.ts";
 import SwapRequestModal from "./components/SwapRequestModal.tsx";
 import GenerateScheduleModal from "./components/GenerateScheduleModal.tsx";
-import {LoadingOverlay} from "../../components/LoadingOverlay.tsx";
-
-// Hook to detect desktop screen size
-function useIsDesktop() {
-    const getCurrentState = () =>
-        typeof window !== "undefined" ? window.innerWidth >= 1024 : false;
-
-    const [isDesktop, setIsDesktop] = useState(getCurrentState);
-
-    useEffect(() => {
-        const update = () => {
-            setIsDesktop(getCurrentState());
-        };
-
-        window.addEventListener("resize", update);
-        window.addEventListener("orientationchange", update);
-
-        return () => {
-            window.removeEventListener("resize", update);
-            window.removeEventListener("orientationchange", update);
-        };
-    }, []);
-
-    return isDesktop;
-}
+import { LoadingOverlay } from "../../components/LoadingOverlay.tsx";
+import { useIsDesktop } from "../../hooks/useIsDesktop";
+import { DEFAULTS } from "../../config/constants";
+import { formatShortDate, getDayName, getMonthYear, getWeekStart, getWeekRange, getWeekDays, getMonthDays as getMonthDaysUtil, isToday as isTodayUtil } from "../../utils/dateUtils";
+import { generateWeekShifts, generateMonthShiftsForUser, generateMonthShiftsForTeam, generateRealisticSchedule, mergeShifts } from "../../utils/shiftGenerator";
+import { submitSwapRequest } from "../../services/api/scheduleService";
 
 
 // Mock data
@@ -43,181 +24,22 @@ const MOCK_TEAM_MEMBERS: TeamMember[] = [
     { id: '7', name: 'Maria Garcia', role: 'user' },
 ];
 
-const generateMockShifts = (startDate: Date): ShiftData => {
-    const shifts: ShiftData = {};
-    const shiftTypes: Array<'M' | 'A' | 'N' | 'R' | 'D'> = ['M', 'A', 'N', 'R', 'D'];
-
-    MOCK_TEAM_MEMBERS.forEach(member => {
-        shifts[member.id] = {};
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(startDate);
-            date.setDate(date.getDate() + i);
-            const dateKey = date.toISOString().split('T')[0];
-            const numShifts = Math.random() > 0.7 ? 2 : 1;
-            const dayShifts: Array<'M' | 'A' | 'N' | 'R' | 'D'> = [];
-
-            for (let j = 0; j < numShifts; j++) {
-                let shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
-                while (dayShifts.includes(shift)) {
-                    shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
-                }
-                dayShifts.push(shift);
-            }
-            shifts[member.id][dateKey] = dayShifts;
-        }
-    });
-
-    return shifts;
-};
-
-// Generate shifts for entire month (for single user - calendar view)
-const generateMonthShifts = (year: number, month: number, userId: string): ShiftData => {
-    const shifts: ShiftData = { [userId]: {} };
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const shiftTypes: Array<'M' | 'A' | 'N' | 'R' | 'D'> = ['M', 'A', 'N', 'R', 'D'];
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        const dateKey = date.toISOString().split('T')[0];
-        const numShifts = Math.random() > 0.7 ? 2 : 1;
-        const dayShifts: Array<'M' | 'A' | 'N' | 'R' | 'D'> = [];
-
-        for (let j = 0; j < numShifts; j++) {
-            let shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
-            while (dayShifts.includes(shift)) {
-                shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
-            }
-            dayShifts.push(shift);
-        }
-        shifts[userId][dateKey] = dayShifts;
-    }
-
-    return shifts;
-};
-
-// Generate shifts for entire month for all team members (for team view on desktop)
-const generateTeamMonthShifts = (year: number, month: number): ShiftData => {
-    const shifts: ShiftData = {};
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const shiftTypes: Array<'M' | 'A' | 'N' | 'R' | 'D'> = ['M', 'A', 'N', 'R', 'D'];
-
-    MOCK_TEAM_MEMBERS.forEach(member => {
-        shifts[member.id] = {};
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const dateKey = date.toISOString().split('T')[0];
-            const numShifts = Math.random() > 0.7 ? 2 : 1;
-            const dayShifts: Array<'M' | 'A' | 'N' | 'R' | 'D'> = [];
-
-            for (let j = 0; j < numShifts; j++) {
-                let shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
-                while (dayShifts.includes(shift)) {
-                    shift = shiftTypes[Math.floor(Math.random() * shiftTypes.length)];
-                }
-                dayShifts.push(shift);
-            }
-            shifts[member.id][dateKey] = dayShifts;
-        }
-    });
-
-    return shifts;
-};
-
-// Mock API function for generating team schedule
-// Generates realistic schedules: working shifts (M, A, N), rest days (R), or days off (D)
-// Rules:
-// - Working shifts can be single or double (consecutive like M+A or A+N)
-// - Rest and Day Off cannot be combined with working shifts
-// - Each person gets roughly 2 rest/off days per week
-const mockGenerateScheduleAPI = async (
-    startDate: string,
-    endDate: string,
-    teamMembers: TeamMember[]
-): Promise<ShiftData> => {
-    // Simulate API delay of 200ms
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const shifts: ShiftData = {};
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    // Working shift types only (for combining)
-    const workingShifts: Array<'M' | 'A' | 'N'> = ['M', 'A', 'N'];
-    // Valid double shift combinations (consecutive shifts that make sense)
-    const validDoubleShifts: Array<['M' | 'A' | 'N', 'M' | 'A' | 'N']> = [
-        ['M', 'A'], // Morning + Afternoon (12 hours)
-        ['A', 'N'], // Afternoon + Night (12 hours)
-    ];
-
-    teamMembers.forEach(member => {
-        shifts[member.id] = {};
-        let workingDaysInWeek = 0;
-        let currentWeekStart: Date | null = null;
-
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            const currentDate = new Date(d);
-            const dateKey = currentDate.toISOString().split('T')[0];
-            const dayOfWeek = currentDate.getDay();
-
-            // Track weeks to ensure ~2 rest/off days per week
-            if (currentWeekStart === null || dayOfWeek === 1) {
-                currentWeekStart = new Date(currentDate);
-                workingDaysInWeek = 0;
-            }
-
-            // Determine if this should be a rest/off day
-            // Higher chance on weekends, and ensure roughly 2 per week
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-            const needsRestDay = workingDaysInWeek >= 5;
-            const restDayChance = isWeekend ? 0.6 : (needsRestDay ? 0.8 : 0.15);
-
-            if (Math.random() < restDayChance) {
-                // Assign rest day (R) or day off (D) - not combined with working shifts
-                const restType: 'R' | 'D' = Math.random() > 0.5 ? 'R' : 'D';
-                shifts[member.id][dateKey] = [restType];
-            } else {
-                workingDaysInWeek++;
-
-                // Determine if single or double shift (15% chance for double shift)
-                const isDoubleShift = Math.random() < 0.15;
-
-                if (isDoubleShift) {
-                    // Pick a valid double shift combination
-                    const combo = validDoubleShifts[Math.floor(Math.random() * validDoubleShifts.length)];
-                    shifts[member.id][dateKey] = [...combo];
-                } else {
-                    // Single working shift
-                    const shift = workingShifts[Math.floor(Math.random() * workingShifts.length)];
-                    shifts[member.id][dateKey] = [shift];
-                }
-            }
-        }
-    });
-
-    return shifts;
-};
-
 interface ScheduleTabProps {
     userRole: string;
 }
 
 function ScheduleTab({userRole}: ScheduleTabProps) {
     const [scheduleView, setScheduleView] = useState<'team' | 'calendar'>('team');
-    const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-        const today = new Date();
-        const day = today.getDay();
-        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(today.setDate(diff));
-    });
+    const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date()));
 
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [teamMonth, setTeamMonth] = useState(new Date()); // Separate month state for team view
-    const [shifts, setShifts] = useState<ShiftData>(() => generateMockShifts(currentWeekStart));
+    const [shifts, setShifts] = useState<ShiftData>(() => generateWeekShifts(getWeekStart(new Date()), MOCK_TEAM_MEMBERS));
     const [teamMonthShifts, setTeamMonthShifts] = useState<ShiftData>(() =>
-        generateTeamMonthShifts(new Date().getFullYear(), new Date().getMonth())
+        generateMonthShiftsForTeam(new Date().getFullYear(), new Date().getMonth(), MOCK_TEAM_MEMBERS)
     );
     const [monthShifts, setMonthShifts] = useState<ShiftData>(() =>
-        generateMonthShifts(new Date().getFullYear(), new Date().getMonth(), '1')
+        generateMonthShiftsForUser(new Date().getFullYear(), new Date().getMonth(), DEFAULTS.LOGGED_IN_USER_ID)
     );
 
     const [hoveredShift, setHoveredShift] = useState<string | null>(null);
@@ -230,7 +52,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isTableExpanded, setIsTableExpanded] = useState(false);
 
-    const LOGGED_IN_USER_ID = '1';
+    const LOGGED_IN_USER_ID = DEFAULTS.LOGGED_IN_USER_ID;
     const canGenerateSchedule = userRole === 'admin' || userRole === 'teamleader';
 
     // Detect desktop screen size
@@ -239,17 +61,13 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const isTeamMonthView = isDesktop && (userRole === 'admin' || userRole === 'teamleader');
 
     // Team view functions
-    const weekDays = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date(currentWeekStart);
-        date.setDate(date.getDate() + i);
-        return date;
-    });
+    const weekDays = getWeekDays(currentWeekStart);
 
     const navigateWeek = (direction: 'prev' | 'next') => {
         const newDate = new Date(currentWeekStart);
         newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
         setCurrentWeekStart(newDate);
-        setShifts(generateMockShifts(newDate));
+        setShifts(generateWeekShifts(newDate, MOCK_TEAM_MEMBERS));
     };
 
     // Navigate team month view (for desktop admin/teamleader)
@@ -257,7 +75,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         const newDate = new Date(teamMonth);
         newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
         setTeamMonth(newDate);
-        setTeamMonthShifts(generateTeamMonthShifts(newDate.getFullYear(), newDate.getMonth()));
+        setTeamMonthShifts(generateMonthShiftsForTeam(newDate.getFullYear(), newDate.getMonth(), MOCK_TEAM_MEMBERS));
     };
 
     // Calendar view functions
@@ -265,7 +83,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         const newDate = new Date(currentMonth);
         newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
         setCurrentMonth(newDate);
-        setMonthShifts(generateMonthShifts(newDate.getFullYear(), newDate.getMonth(), LOGGED_IN_USER_ID));
+        setMonthShifts(generateMonthShiftsForUser(newDate.getFullYear(), newDate.getMonth(), LOGGED_IN_USER_ID));
     };
 
     // Combined navigation for team view (week or month based on view mode)
@@ -282,78 +100,33 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         if (scheduleView === 'team') {
             if (isTeamMonthView) {
                 setTeamMonth(new Date());
-                setTeamMonthShifts(generateTeamMonthShifts(today.getFullYear(), today.getMonth()));
+                setTeamMonthShifts(generateMonthShiftsForTeam(today.getFullYear(), today.getMonth(), MOCK_TEAM_MEMBERS));
             } else {
-                const day = today.getDay();
-                const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-                const mondayDate = new Date(today.setDate(diff));
+                const mondayDate = getWeekStart(today);
                 setCurrentWeekStart(mondayDate);
-                setShifts(generateMockShifts(mondayDate));
+                setShifts(generateWeekShifts(mondayDate, MOCK_TEAM_MEMBERS));
             }
         } else {
             setCurrentMonth(new Date());
-            setMonthShifts(generateMonthShifts(today.getFullYear(), today.getMonth(), LOGGED_IN_USER_ID));
+            setMonthShifts(generateMonthShiftsForUser(today.getFullYear(), today.getMonth(), LOGGED_IN_USER_ID));
         }
     };
 
-    const getDaysInMonth = () => {
-        const year = currentMonth.getFullYear();
-        const month = currentMonth.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const startingDayOfWeek = firstDay.getDay();
-        const adjustedStart = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
-
-        const days: (Date | null)[] = [];
-
-        // Add empty cells for days before month starts
-        for (let i = 0; i < adjustedStart; i++) {
-            days.push(null);
-        }
-
-        // Add all days in month
-        for (let i = 1; i <= daysInMonth; i++) {
-            days.push(new Date(year, month, i));
-        }
-
-        return days;
-    };
-
-    const isToday = (date: Date | null) => {
-        if (!date) return false;
-        const today = new Date();
-        return date.toDateString() === today.toDateString();
-    };
-
-    const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    };
-
-    const getDayName = (date: Date) => {
-        return date.toLocaleDateString('en-US', { weekday: 'short' });
-    };
-
-    const getWeekRange = () => {
-        const endDate = new Date(currentWeekStart);
-        endDate.setDate(endDate.getDate() + 6);
-        return `${formatDate(currentWeekStart)} - ${formatDate(endDate)}`;
-    };
-
-    const getMonthYear = () => {
-        return currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    };
-
-    const getTeamMonthYear = () => {
-        return teamMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    };
+    // Use imported date utilities but wrap for local usage
+    const getDaysInMonth = () => getMonthDaysUtil(currentMonth.getFullYear(), currentMonth.getMonth());
+    const isToday = (date: Date | null) => isTodayUtil(date);
+    const formatDate = (date: Date) => formatShortDate(date);
+    const getLocalDayName = (date: Date) => getDayName(date);
+    const getLocalWeekRange = () => getWeekRange(currentWeekStart);
+    const getLocalMonthYear = () => getMonthYear(currentMonth);
+    const getTeamMonthYear = () => getMonthYear(teamMonth);
 
     // Get the subtitle for the team view header (week range or month/year)
     const getTeamViewSubtitle = () => {
         if (isTeamMonthView) {
             return getTeamMonthYear();
         }
-        return getWeekRange();
+        return getLocalWeekRange();
     };
 
     const filteredTeamMembers = MOCK_TEAM_MEMBERS.filter(member =>
@@ -413,34 +186,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
             return;
         }
 
-        // Mock API call with 200ms delay
-        await new Promise(resolve => setTimeout(resolve, 200));
-
-        // Create swap requests for all combinations of my shifts and target shifts
-        const newRequests: SwapRequest[] = [];
-        let requestIndex = 0;
-
-        for (const myShift of swapFormData.myShifts) {
-            for (const targetShift of swapFormData.targetShifts) {
-                newRequests.push({
-                    id: `swap_${Date.now()}_${requestIndex++}`,
-                    fromUserId: LOGGED_IN_USER_ID,
-                    toUserId: swapFormData.targetUserId,
-                    fromShift: {
-                        date: myShift.date,
-                        shiftType: myShift.shiftType,
-                    },
-                    toShift: {
-                        date: targetShift.date,
-                        shiftType: targetShift.shiftType,
-                    },
-                    status: 'pending',
-                    createdAt: new Date().toISOString(),
-                });
-            }
-        }
-
-        console.log('Swap requests created:', newRequests);
+        // Use the centralized schedule service to submit the request
+        const newRequests = await submitSwapRequest(swapFormData, LOGGED_IN_USER_ID);
 
         setPendingSwaps(prev => [...prev, ...newRequests]);
         setShowSwapModal(false);
@@ -469,21 +216,10 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const handleGenerateSchedule = async (startDate: string, endDate: string) => {
         setIsGenerating(true);
         try {
-            const generatedShifts = await mockGenerateScheduleAPI(startDate, endDate, MOCK_TEAM_MEMBERS);
+            const generatedShifts = generateRealisticSchedule(startDate, endDate, MOCK_TEAM_MEMBERS);
 
-            // Merge the generated shifts with existing shifts
-            const updateShifts = (prevShifts: ShiftData) => {
-                const newShifts = { ...prevShifts };
-                Object.entries(generatedShifts).forEach(([memberId, memberShifts]) => {
-                    if (!newShifts[memberId]) {
-                        newShifts[memberId] = {};
-                    }
-                    Object.entries(memberShifts).forEach(([date, shiftsData]) => {
-                        newShifts[memberId][date] = shiftsData;
-                    });
-                });
-                return newShifts;
-            };
+            // Merge the generated shifts with existing shifts using the utility function
+            const updateShifts = (prevShifts: ShiftData) => mergeShifts(prevShifts, generatedShifts);
 
             // Update both week and month shifts to keep them in sync
             setShifts(updateShifts);
@@ -509,7 +245,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 {scheduleView === 'team' ? 'Team Schedule' : 'My Calendar'}
                             </h2>
                             <p className="text-xs text-gray-600 mt-0.5">
-                                {scheduleView === 'team' ? getTeamViewSubtitle() : getMonthYear()}
+                                {scheduleView === 'team' ? getTeamViewSubtitle() : getLocalMonthYear()}
                             </p>
                         </div>
 
@@ -649,7 +385,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     setHoveredShift={setHoveredShift}
                     handleShiftClick={handleShiftClick}
                     hasPendingSwap={hasPendingSwap}
-                    getDayName={getDayName}
+                    getDayName={getLocalDayName}
                     formatDate={formatDate}
                     nameFilter={nameFilter}
                     userRole={userRole}

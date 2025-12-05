@@ -3,59 +3,13 @@ import ScheduleTab from './schedule/ScheduleTab.tsx';
 import RequestsTab from './requests/RequestsTab.tsx';
 import ProfileTab from './profile/ProfileTab.tsx';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import { MenuItem, UserRole } from '../types/domain';
+import { getUser, clearUser } from '../services/sessionService';
+import { fetchMenuItems } from '../services/api/menuService';
 
 interface DashboardProps {
     navigate: (page: string) => void;
 }
-
-interface MenuItem {
-    id: string;
-    label: string;
-    icon: string;
-    badge?: number;
-    order: number;
-}
-
-// TODO: REMOVE THIS MOCK API WHEN BACKEND CMS IS READY
-// This simulates the CMS API response for menu items based on user role
-const mockFetchMenuItems = async (sessionId: string): Promise<MenuItem[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Mock: Extract role from session (in real implementation, backend validates session)
-    const userDataString = sessionStorage.getItem('mockUser');
-    const userData = userDataString ? JSON.parse(userDataString) : null;
-    const userRole = userData?.role || 'user';
-
-    console.log(sessionId); //TODO remove this line
-
-    // Mock CMS responses for different roles
-    const menuItemsByRole: Record<string, MenuItem[]> = {
-        user: [
-            { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
-            { id: 'schedule', label: 'My Schedule', icon: '📅', order: 2 },
-            { id: 'requests', label: 'Requests', icon: '🔄', badge: 2, order: 3 },
-        ],
-        teamleader: [
-            { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
-            { id: 'schedule', label: 'Schedule', icon: '📅', order: 2 },
-            { id: 'team', label: 'Team', icon: '👥', order: 3 },
-            { id: 'requests', label: 'Requests', icon: '🔄', badge: 2, order: 4 },
-            { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
-        ],
-        admin: [
-            { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
-            { id: 'schedule', label: 'All Schedules', icon: '📅', order: 2 },
-            { id: 'team', label: 'All Staff', icon: '👥', order: 3 },
-            { id: 'requests', label: 'All Requests', icon: '🔄', badge: 2, order: 4 },
-            { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
-            { id: 'settings', label: 'Settings', icon: '⚙️', order: 6 },
-        ],
-    };
-
-    return menuItemsByRole[userRole] || menuItemsByRole.user;
-};
-// END TODO
 
 function Dashboard({ navigate }: DashboardProps) {
     const [activeTab, setActiveTab] = useState('overview');
@@ -63,11 +17,10 @@ function Dashboard({ navigate }: DashboardProps) {
     const [isLoadingMenu, setIsLoadingMenu] = useState(true);
     const [showProfileModal, setShowProfileModal] = useState(false);
 
-    // Get mock user data from sessionStorage
-    const userDataString = sessionStorage.getItem('mockUser');
-    const userData = userDataString ? JSON.parse(userDataString) : null;
+    // Get user data from session service
+    const userData = getUser();
     const userName: string = userData?.name || 'User';
-    const userRole: string = userData?.role || 'user';
+    const userRole: UserRole = userData?.role || 'user';
     const userProfilePicture: string | null = userData?.profilePicture || null;
 
     // Fetch menu items from CMS API on component mount
@@ -75,17 +28,7 @@ function Dashboard({ navigate }: DashboardProps) {
         const loadMenuItems = async () => {
             setIsLoadingMenu(true);
             try {
-                // TODO: REPLACE WITH ACTUAL CMS API CALL
-                // const response = await fetch('/api/cms/menu', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ sessionId: userData?.sessionId })
-                // });
-                // const items = await response.json();
-
-                const items = await mockFetchMenuItems(userData?.sessionId || '');
-                // END TODO
-
+                const items = await fetchMenuItems(userData?.sessionId || '', userRole);
                 setMenuItems(items.sort((a, b) => a.order - b.order));
             } catch (error) {
                 console.error('Failed to load menu items:', error);
@@ -99,10 +42,10 @@ function Dashboard({ navigate }: DashboardProps) {
         };
 
         loadMenuItems();
-    }, [userData?.sessionId]);
+    }, [userData?.sessionId, userRole]);
 
     const handleLogout = () => {
-        sessionStorage.removeItem('mockUser');
+        clearUser();
         navigate('home');
     };
 
