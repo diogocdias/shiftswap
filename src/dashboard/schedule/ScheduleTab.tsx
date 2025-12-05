@@ -195,7 +195,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 targetShift: 'M',
                 myDate: date,
                 myShift: shiftType,
-                myShifts: [],
+                myShifts: [{ date, shiftType }],
                 targetShifts: [],
             });
         } else {
