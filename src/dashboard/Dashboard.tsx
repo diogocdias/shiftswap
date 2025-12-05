@@ -61,6 +61,7 @@ function Dashboard({ navigate }: DashboardProps) {
     const [activeTab, setActiveTab] = useState('overview');
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [isLoadingMenu, setIsLoadingMenu] = useState(true);
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     // Get mock user data from sessionStorage
     const userDataString = sessionStorage.getItem('mockUser');
@@ -174,7 +175,14 @@ function Dashboard({ navigate }: DashboardProps) {
                 <div className="border-t border-gray-200 p-2 lg:p-4">
                     <div className="relative group">
                         <button
-                            onClick={() => setActiveTab('profile')}
+                            onClick={() => {
+                                // On mobile, show modal; on desktop, go to profile
+                                if (window.innerWidth < 1024) {
+                                    setShowProfileModal(true);
+                                } else {
+                                    setActiveTab('profile');
+                                }
+                            }}
                             className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center font-medium text-base lg:text-lg transition overflow-hidden ${
                                 activeTab === 'profile'
                                     ? 'ring-2 ring-blue-500 ring-offset-2'
@@ -192,8 +200,8 @@ function Dashboard({ navigate }: DashboardProps) {
                                 userName.charAt(0)
                             )}
                         </button>
-                        {/* Tooltip - positioned to prevent gap */}
-                        <div className="absolute left-full bottom-0 ml-1 hidden group-hover:block bg-gray-900 text-white text-sm py-3 px-4 rounded whitespace-nowrap before:content-[''] before:absolute before:right-full before:top-0 before:bottom-0 before:w-2 before:bg-transparent z-50">
+                        {/* Tooltip - positioned to prevent gap (desktop only) */}
+                        <div className="absolute left-full bottom-0 ml-1 hidden lg:group-hover:block bg-gray-900 text-white text-sm py-3 px-4 rounded whitespace-nowrap before:content-[''] before:absolute before:right-full before:top-0 before:bottom-0 before:w-2 before:bg-transparent z-50">
                             <div className="font-medium mb-1">{userName}</div>
                             <div className="text-xs text-gray-300 capitalize mb-2">{userRole}</div>
                             <div className="flex flex-col gap-2">
@@ -214,6 +222,80 @@ function Dashboard({ navigate }: DashboardProps) {
                     </div>
                 </div>
             </aside>
+
+            {/* Mobile Profile Modal */}
+            {showProfileModal && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+                    onClick={() => setShowProfileModal(false)}
+                >
+                    <div
+                        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Handle bar */}
+                        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6" />
+
+                        {/* User info */}
+                        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
+                            <div className={`w-14 h-14 rounded-full flex items-center justify-center font-medium text-xl overflow-hidden ${
+                                userProfilePicture ? '' : 'bg-blue-600 text-white'
+                            }`}>
+                                {userProfilePicture ? (
+                                    <img
+                                        src={userProfilePicture}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    userName.charAt(0)
+                                )}
+                            </div>
+                            <div>
+                                <div className="font-semibold text-gray-900 text-lg">{userName}</div>
+                                <div className="text-sm text-gray-500 capitalize">{userRole}</div>
+                            </div>
+                        </div>
+
+                        {/* Menu options */}
+                        <div className="space-y-2">
+                            <button
+                                onClick={() => {
+                                    setActiveTab('profile');
+                                    setShowProfileModal(false);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition"
+                            >
+                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span className="font-medium">View Profile</span>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setShowProfileModal(false);
+                                    handleLogout();
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span className="font-medium">Logout</span>
+                            </button>
+                        </div>
+
+                        {/* Cancel button */}
+                        <button
+                            onClick={() => setShowProfileModal(false)}
+                            className="w-full mt-6 py-3 text-gray-600 font-medium hover:bg-gray-50 rounded-lg transition"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto">
