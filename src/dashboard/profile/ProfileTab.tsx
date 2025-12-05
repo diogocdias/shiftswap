@@ -246,49 +246,52 @@ function ProfileTab() {
     // Loading State
     if (isLoading) {
         return (
-            <div className="max-w-4xl mx-auto">
-                {/* Loading Skeleton */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6 md:p-8 mb-6 animate-pulse">
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                        {/* Avatar Skeleton */}
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-200" />
-                        {/* Info Skeleton */}
-                        <div className="flex-1 text-center md:text-left space-y-3">
-                            <div className="h-8 bg-gray-200 rounded w-48 mx-auto md:mx-0" />
-                            <div className="h-4 bg-gray-200 rounded w-64 mx-auto md:mx-0" />
-                            <div className="flex gap-2 justify-center md:justify-start">
-                                <div className="h-6 bg-gray-200 rounded-full w-24" />
-                                <div className="h-6 bg-gray-200 rounded-full w-32" />
+            <>
+                <div className="max-w-4xl mx-auto">
+                    {/* Loading Skeleton */}
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 md:p-8 mb-6 animate-pulse">
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            {/* Avatar Skeleton */}
+                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-200" />
+                            {/* Info Skeleton */}
+                            <div className="flex-1 text-center md:text-left space-y-3">
+                                <div className="h-8 bg-gray-200 rounded w-48 mx-auto md:mx-0" />
+                                <div className="h-4 bg-gray-200 rounded w-64 mx-auto md:mx-0" />
+                                <div className="flex gap-2 justify-center md:justify-start">
+                                    <div className="h-6 bg-gray-200 rounded-full w-24" />
+                                    <div className="h-6 bg-gray-200 rounded-full w-32" />
+                                </div>
                             </div>
+                            {/* Button Skeleton */}
+                            <div className="h-10 bg-gray-200 rounded-lg w-28" />
                         </div>
-                        {/* Button Skeleton */}
-                        <div className="h-10 bg-gray-200 rounded-lg w-28" />
+                    </div>
+
+                    {/* Cards Skeleton */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+                                <div className="h-6 bg-gray-200 rounded w-40 mb-4" />
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                                        <div className="h-5 bg-gray-200 rounded w-full" />
+                                    </div>
+                                    <div>
+                                        <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                                        <div className="h-5 bg-gray-200 rounded w-3/4" />
+                                    </div>
+                                    <div>
+                                        <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                                        <div className="h-5 bg-gray-200 rounded w-1/2" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
-
-                {/* Cards Skeleton */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
-                            <div className="h-6 bg-gray-200 rounded w-40 mb-4" />
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
-                                    <div className="h-5 bg-gray-200 rounded w-full" />
-                                </div>
-                                <div>
-                                    <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
-                                    <div className="h-5 bg-gray-200 rounded w-3/4" />
-                                </div>
-                                <div>
-                                    <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
-                                    <div className="h-5 bg-gray-200 rounded w-1/2" />
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                <LoadingOverlay isLoading={isLoading} />
+            </>
         );
     }
 
