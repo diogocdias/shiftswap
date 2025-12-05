@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { LoadingOverlay } from '../../components/LoadingOverlay';
 
 interface UserProfile {
     name: string;
@@ -12,18 +13,20 @@ interface UserProfile {
     profilePicture: string | null;
 }
 
-function ProfileTab() {
-    // Get user data from sessionStorage
+// TODO: REMOVE THIS MOCK API WHEN BACKEND IS READY
+// This simulates the backend API response for user profile data
+const mockFetchUserProfile = async (userId: string): Promise<UserProfile> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Get user data from sessionStorage (simulating session-based user identification)
     const userDataString = sessionStorage.getItem('mockUser');
     const userData = userDataString ? JSON.parse(userDataString) : null;
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveSuccess, setSaveSuccess] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    console.log('Fetching profile for user:', userId); // TODO: Remove this log
 
-    // Initialize profile with user data and some mock defaults
-    const [profile, setProfile] = useState<UserProfile>({
+    // Mock API response - in real implementation, this would come from backend
+    return {
         name: userData?.name || 'User',
         email: userData?.email || '',
         phone: userData?.phone || '+1 (555) 123-4567',
@@ -33,9 +36,67 @@ function ProfileTab() {
         facility: userData?.facility || 'Memorial Hospital',
         startDate: userData?.startDate || '2023-06-15',
         profilePicture: userData?.profilePicture || null,
-    });
+    };
+};
 
-    const [editedProfile, setEditedProfile] = useState<UserProfile>(profile);
+// Mock save API - simulates saving profile to backend
+const mockSaveUserProfile = async (profile: UserProfile): Promise<{ success: boolean }> => {
+    // Simulate API delay (200ms as requested)
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    console.log('Saving profile:', profile); // TODO: Remove this log
+
+    // Mock successful response
+    return { success: true };
+};
+// END TODO
+
+function ProfileTab() {
+    // Get user data from sessionStorage for user identification
+    const userDataString = sessionStorage.getItem('mockUser');
+    const userData = userDataString ? JSON.parse(userDataString) : null;
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
+
+    // Fetch profile data on component mount
+    useEffect(() => {
+        const loadProfile = async () => {
+            setIsLoading(true);
+            setLoadError(null);
+            try {
+                // TODO: REPLACE WITH ACTUAL API CALL
+                // const response = await fetch('/api/users/profile', {
+                //     method: 'GET',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'Authorization': `Bearer ${userData?.sessionId}`
+                //     }
+                // });
+                // const profileData = await response.json();
+
+                const profileData = await mockFetchUserProfile(userData?.email || '');
+                // END TODO
+
+                setProfile(profileData);
+                setEditedProfile(profileData);
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+                setLoadError('Failed to load profile. Please try again.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadProfile();
+    }, [userData?.email]);
 
     const handleEditToggle = () => {
         if (isEditing) {
@@ -47,40 +108,61 @@ function ProfileTab() {
     };
 
     const handleInputChange = (field: keyof UserProfile, value: string) => {
-        setEditedProfile(prev => ({
+        setEditedProfile(prev => prev ? ({
             ...prev,
             [field]: value
-        }));
+        }) : null);
     };
 
     const handleSave = async () => {
+        if (!editedProfile) return;
+
         setIsSaving(true);
         setSaveSuccess(false);
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        try {
+            // TODO: REPLACE WITH ACTUAL API CALL
+            // const response = await fetch('/api/users/profile', {
+            //     method: 'PUT',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': `Bearer ${userData?.sessionId}`
+            //     },
+            //     body: JSON.stringify(editedProfile)
+            // });
+            // const result = await response.json();
 
-        // Update profile state
-        setProfile(editedProfile);
+            const result = await mockSaveUserProfile(editedProfile);
+            // END TODO
 
-        // Update sessionStorage with new user data
-        const updatedUserData = {
-            ...userData,
-            name: editedProfile.name,
-            email: editedProfile.email,
-            phone: editedProfile.phone,
-            department: editedProfile.department,
-            facility: editedProfile.facility,
-            profilePicture: editedProfile.profilePicture,
-        };
-        sessionStorage.setItem('mockUser', JSON.stringify(updatedUserData));
+            if (result.success) {
+                // Update profile state
+                setProfile(editedProfile);
 
-        setIsSaving(false);
-        setIsEditing(false);
-        setSaveSuccess(true);
+                // Update sessionStorage with new user data
+                const updatedUserData = {
+                    ...userData,
+                    name: editedProfile.name,
+                    email: editedProfile.email,
+                    phone: editedProfile.phone,
+                    department: editedProfile.department,
+                    facility: editedProfile.facility,
+                    profilePicture: editedProfile.profilePicture,
+                };
+                sessionStorage.setItem('mockUser', JSON.stringify(updatedUserData));
 
-        // Hide success message after 3 seconds
-        setTimeout(() => setSaveSuccess(false), 3000);
+                setIsEditing(false);
+                setSaveSuccess(true);
+
+                // Hide success message after 3 seconds
+                setTimeout(() => setSaveSuccess(false), 3000);
+            }
+        } catch (error) {
+            console.error('Failed to save profile:', error);
+            alert('Failed to save profile. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleProfilePictureClick = () => {
@@ -108,20 +190,37 @@ function ProfileTab() {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result as string;
-                setEditedProfile(prev => ({
+                setEditedProfile(prev => prev ? ({
                     ...prev,
                     profilePicture: base64String
-                }));
+                }) : null);
             };
             reader.readAsDataURL(file);
         }
     };
 
     const handleRemoveProfilePicture = () => {
-        setEditedProfile(prev => ({
+        setEditedProfile(prev => prev ? ({
             ...prev,
             profilePicture: null
-        }));
+        }) : null);
+    };
+
+    const handleRetry = () => {
+        setIsLoading(true);
+        setLoadError(null);
+        mockFetchUserProfile(userData?.email || '')
+            .then(profileData => {
+                setProfile(profileData);
+                setEditedProfile(profileData);
+            })
+            .catch(error => {
+                console.error('Failed to load profile:', error);
+                setLoadError('Failed to load profile. Please try again.');
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     };
 
     const getRoleDisplayName = (role: string) => {
@@ -142,7 +241,82 @@ function ProfileTab() {
             .slice(0, 2);
     };
 
-    const currentProfilePicture = isEditing ? editedProfile.profilePicture : profile.profilePicture;
+    const currentProfilePicture = isEditing ? editedProfile?.profilePicture : profile?.profilePicture;
+
+    // Loading State
+    if (isLoading) {
+        return (
+            <>
+                <div className="max-w-4xl mx-auto">
+                    {/* Loading Skeleton */}
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 md:p-8 mb-6 animate-pulse">
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            {/* Avatar Skeleton */}
+                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-200" />
+                            {/* Info Skeleton */}
+                            <div className="flex-1 text-center md:text-left space-y-3">
+                                <div className="h-8 bg-gray-200 rounded w-48 mx-auto md:mx-0" />
+                                <div className="h-4 bg-gray-200 rounded w-64 mx-auto md:mx-0" />
+                                <div className="flex gap-2 justify-center md:justify-start">
+                                    <div className="h-6 bg-gray-200 rounded-full w-24" />
+                                    <div className="h-6 bg-gray-200 rounded-full w-32" />
+                                </div>
+                            </div>
+                            {/* Button Skeleton */}
+                            <div className="h-10 bg-gray-200 rounded-lg w-28" />
+                        </div>
+                    </div>
+
+                    {/* Cards Skeleton */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+                                <div className="h-6 bg-gray-200 rounded w-40 mb-4" />
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                                        <div className="h-5 bg-gray-200 rounded w-full" />
+                                    </div>
+                                    <div>
+                                        <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                                        <div className="h-5 bg-gray-200 rounded w-3/4" />
+                                    </div>
+                                    <div>
+                                        <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                                        <div className="h-5 bg-gray-200 rounded w-1/2" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <LoadingOverlay isLoading={isLoading} />
+            </>
+        );
+    }
+
+    // Error State
+    if (loadError || !profile) {
+        return (
+            <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to Load Profile</h3>
+                    <p className="text-gray-600 mb-6">{loadError || 'Unable to load profile data. Please try again.'}</p>
+                    <button
+                        onClick={handleRetry}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -182,11 +356,11 @@ function ProfileTab() {
                                 />
                             ) : (
                                 <span className="text-white text-3xl md:text-4xl font-semibold">
-                                    {getInitials(isEditing ? editedProfile.name : profile.name)}
+                                    {getInitials(isEditing && editedProfile ? editedProfile.name : profile.name)}
                                 </span>
                             )}
                         </div>
-                        {isEditing && (
+                        {isEditing && editedProfile && (
                             <div className="absolute -bottom-1 -right-1 flex gap-1">
                                 <button
                                     onClick={handleProfilePictureClick}
@@ -288,7 +462,7 @@ function ProfileTab() {
                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                 Full Name
                             </label>
-                            {isEditing ? (
+                            {isEditing && editedProfile ? (
                                 <input
                                     type="text"
                                     value={editedProfile.name}
@@ -303,7 +477,7 @@ function ProfileTab() {
                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                 Email Address
                             </label>
-                            {isEditing ? (
+                            {isEditing && editedProfile ? (
                                 <input
                                     type="email"
                                     value={editedProfile.email}
@@ -318,7 +492,7 @@ function ProfileTab() {
                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                 Phone Number
                             </label>
-                            {isEditing ? (
+                            {isEditing && editedProfile ? (
                                 <input
                                     type="tel"
                                     value={editedProfile.phone}
@@ -357,7 +531,7 @@ function ProfileTab() {
                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                 Department
                             </label>
-                            {isEditing ? (
+                            {isEditing && editedProfile ? (
                                 <select
                                     value={editedProfile.department}
                                     onChange={(e) => handleInputChange('department', e.target.value)}
@@ -392,7 +566,7 @@ function ProfileTab() {
                             <label className="block text-sm font-medium text-gray-500 mb-1">
                                 Healthcare Facility
                             </label>
-                            {isEditing ? (
+                            {isEditing && editedProfile ? (
                                 <input
                                     type="text"
                                     value={editedProfile.facility}
@@ -464,6 +638,9 @@ function ProfileTab() {
                     </div>
                 </div>
             </div>
+
+            {/* Loading Overlay - shown during load and save operations */}
+            <LoadingOverlay isLoading={isLoading || isSaving} />
         </div>
     );
 }
