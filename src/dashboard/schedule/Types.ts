@@ -32,4 +32,6 @@ export interface SwapFormData {
     targetShift: 'M' | 'A' | 'N' | 'R' | 'D';
     myDate: string;
     myShift: 'M' | 'A' | 'N' | 'R' | 'D';
+    myShifts: Array<{ date: string; shiftType: 'M' | 'A' | 'N' | 'R' | 'D' }>;
+    targetShifts: Array<{ date: string; shiftType: 'M' | 'A' | 'N' | 'R' | 'D' }>;
 }

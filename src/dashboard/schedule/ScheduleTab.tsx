@@ -370,6 +370,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 targetShift: 'M',
                 myDate: date,
                 myShift: shiftType,
+                myShifts: [{ date, shiftType }],
+                targetShifts: [],
             });
         } else {
             setSwapFormData({
@@ -378,6 +380,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 targetShift: shiftType,
                 myDate: '',
                 myShift: 'M',
+                myShifts: [],
+                targetShifts: [{ date, shiftType }],
             });
         }
         setShowSwapModal(true);
@@ -404,34 +408,50 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const handleSwapRequest = async () => {
         if (!swapFormData) return;
 
-        if (!swapFormData.targetUserId || !swapFormData.targetDate || !swapFormData.myDate) {
+        if (!swapFormData.targetUserId || !swapFormData.targetShifts || swapFormData.targetShifts.length === 0 || !swapFormData.myShifts || swapFormData.myShifts.length === 0) {
             alert('Please fill in all required fields');
             return;
         }
 
-        const newRequest: SwapRequest = {
-            id: `swap_${Date.now()}`,
-            fromUserId: LOGGED_IN_USER_ID,
-            toUserId: swapFormData.targetUserId,
-            fromShift: {
-                date: swapFormData.myDate,
-                shiftType: swapFormData.myShift,
-            },
-            toShift: {
-                date: swapFormData.targetDate,
-                shiftType: swapFormData.targetShift,
-            },
-            status: 'pending',
-            createdAt: new Date().toISOString(),
-        };
+        // Mock API call with 200ms delay
+        await new Promise(resolve => setTimeout(resolve, 200));
 
-        await new Promise(resolve => setTimeout(resolve, 500));
-        console.log('Swap request created:', newRequest);
+        // Create swap requests for all combinations of my shifts and target shifts
+        const newRequests: SwapRequest[] = [];
+        let requestIndex = 0;
 
-        setPendingSwaps(prev => [...prev, newRequest]);
+        for (const myShift of swapFormData.myShifts) {
+            for (const targetShift of swapFormData.targetShifts) {
+                newRequests.push({
+                    id: `swap_${Date.now()}_${requestIndex++}`,
+                    fromUserId: LOGGED_IN_USER_ID,
+                    toUserId: swapFormData.targetUserId,
+                    fromShift: {
+                        date: myShift.date,
+                        shiftType: myShift.shiftType,
+                    },
+                    toShift: {
+                        date: targetShift.date,
+                        shiftType: targetShift.shiftType,
+                    },
+                    status: 'pending',
+                    createdAt: new Date().toISOString(),
+                });
+            }
+        }
+
+        console.log('Swap requests created:', newRequests);
+
+        setPendingSwaps(prev => [...prev, ...newRequests]);
         setShowSwapModal(false);
         setSwapFormData(null);
-        alert('Swap request submitted successfully! Waiting for approval.');
+
+        const myShiftsCount = swapFormData.myShifts.length;
+        const targetShiftsCount = swapFormData.targetShifts.length;
+        const shiftsText = myShiftsCount === 1 ? 'shift' : 'shifts';
+        const targetText = targetShiftsCount === 1 ? 'shift' : 'shifts';
+
+        alert(`Swap request submitted successfully! ${myShiftsCount} ${shiftsText} for ${targetShiftsCount} ${targetText}. Waiting for approval.`);
     };
 
     const hasPendingSwap = (userId: string, date: string, shiftType: 'M' | 'A' | 'N' | 'R' | 'D') => {

@@ -14,6 +14,16 @@ export interface SwapRequest {
         time: string;
         type: string;
     };
+    fromShifts?: Array<{
+        date: string;
+        time: string;
+        type: string;
+    }>;
+    toShifts?: Array<{
+        date: string;
+        time: string;
+        type: string;
+    }>;
     status: 'pending' | 'approved' | 'declined';
     createdAt: string;
 }

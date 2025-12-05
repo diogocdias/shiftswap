@@ -141,6 +141,44 @@ export const renderRequestCard = ({
     // Extract short shift type (e.g., "Afternoon" from "Afternoon Shift")
     const getShortShiftType = (type: string) => type.split(' ')[0];
 
+    // Get shifts array or fallback to single shift
+    const fromShifts = request.fromShifts || [request.fromShift];
+    const toShifts = request.toShifts || [request.toShift];
+
+    // Render shift list component
+    const ShiftList = ({ shifts }: { shifts: Array<{ date: string; time: string; type: string }> }) => {
+        if (shifts.length === 1) {
+            return (
+                <>
+                    <div className="text-base font-bold text-gray-900 mt-0.5">
+                        {shifts[0].date}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                        {shifts[0].time}
+                    </div>
+                </>
+            );
+        }
+
+        return (
+            <div className="mt-0.5">
+                {shifts.map((shift, index) => (
+                    <div key={index}>
+                        <div className="flex items-center justify-center gap-1.5">
+                            <span className="text-sm font-bold text-gray-900">{shift.date}</span>
+                            <span className={`text-xs ${getShiftTypeColor(shift.type)}`}>
+                                {getShortShiftType(shift.type)}
+                            </span>
+                        </div>
+                        {index < shifts.length - 1 && (
+                            <div className="text-blue-600 font-bold text-xs my-0.5">+</div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     // Actions component - reused in both layouts
     const ActionsSection = ({ className = "" }: { className?: string }) => (
         <div className={`flex items-center gap-3 ${className}`}>
@@ -223,18 +261,15 @@ export const renderRequestCard = ({
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2">
                             <span className="text-sm font-medium text-gray-900">{request.from}</span>
-                            <span className={`text-sm ${getShiftTypeColor(request.fromShift.type)}`}>
-                                {getShortShiftType(request.fromShift.type)}
-                            </span>
+                            {fromShifts.length === 1 && (
+                                <span className={`text-sm ${getShiftTypeColor(fromShifts[0].type)}`}>
+                                    {getShortShiftType(fromShifts[0].type)}
+                                </span>
+                            )}
                         </div>
-                        <div className="text-base font-bold text-gray-900 mt-0.5">
-                            {request.fromShift.date}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                            {request.fromShift.time}
-                        </div>
+                        <ShiftList shifts={fromShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Your Shift
+                            Your Shift{fromShifts.length > 1 ? 's' : ''}
                         </span>
                     </div>
                 </div>
@@ -248,18 +283,15 @@ export const renderRequestCard = ({
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2">
                             <span className="text-sm font-medium text-gray-900">{request.to}</span>
-                            <span className={`text-sm ${getShiftTypeColor(request.toShift.type)}`}>
-                                {getShortShiftType(request.toShift.type)}
-                            </span>
+                            {toShifts.length === 1 && (
+                                <span className={`text-sm ${getShiftTypeColor(toShifts[0].type)}`}>
+                                    {getShortShiftType(toShifts[0].type)}
+                                </span>
+                            )}
                         </div>
-                        <div className="text-base font-bold text-gray-900 mt-0.5">
-                            {request.toShift.date}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                            {request.toShift.time}
-                        </div>
+                        <ShiftList shifts={toShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Proposed Swap
+                            Proposed Swap{toShifts.length > 1 ? 's' : ''}
                         </span>
                     </div>
                 </div>
@@ -276,18 +308,15 @@ export const renderRequestCard = ({
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2">
                             <span className="text-sm font-medium text-gray-900">{request.from}</span>
-                            <span className={`text-sm ${getShiftTypeColor(request.fromShift.type)}`}>
-                                {getShortShiftType(request.fromShift.type)}
-                            </span>
+                            {fromShifts.length === 1 && (
+                                <span className={`text-sm ${getShiftTypeColor(fromShifts[0].type)}`}>
+                                    {getShortShiftType(fromShifts[0].type)}
+                                </span>
+                            )}
                         </div>
-                        <div className="text-base font-bold text-gray-900 mt-0.5">
-                            {request.fromShift.date}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                            {request.fromShift.time}
-                        </div>
+                        <ShiftList shifts={fromShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Your Shift
+                            Your Shift{fromShifts.length > 1 ? 's' : ''}
                         </span>
                     </div>
                 </div>
@@ -301,18 +330,15 @@ export const renderRequestCard = ({
                     <div className="text-center">
                         <div className="flex items-center justify-center gap-2">
                             <span className="text-sm font-medium text-gray-900">{request.to}</span>
-                            <span className={`text-sm ${getShiftTypeColor(request.toShift.type)}`}>
-                                {getShortShiftType(request.toShift.type)}
-                            </span>
+                            {toShifts.length === 1 && (
+                                <span className={`text-sm ${getShiftTypeColor(toShifts[0].type)}`}>
+                                    {getShortShiftType(toShifts[0].type)}
+                                </span>
+                            )}
                         </div>
-                        <div className="text-base font-bold text-gray-900 mt-0.5">
-                            {request.toShift.date}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                            {request.toShift.time}
-                        </div>
+                        <ShiftList shifts={toShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Proposed Swap
+                            Proposed Swap{toShifts.length > 1 ? 's' : ''}
                         </span>
                     </div>
                 </div>
