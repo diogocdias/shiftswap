@@ -1,5 +1,6 @@
 import { SwapFormData, TeamMember } from "../Types";
 import { SHIFT_LEGENDS } from "../ShiftConstants";
+import { useState } from "react";
 
 interface SwapRequestModalProps {
     isOpen: boolean;
@@ -22,10 +23,30 @@ export default function SwapRequestModal({
                                              loggedInUserId,
                                              getAvailableShifts,
                                          }: SwapRequestModalProps) {
+    const [isLoading, setIsLoading] = useState(false);
+
     if (!isOpen || !swapFormData) return null;
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        try {
+            await onSubmit();
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3">
+            {/* Loading Overlay */}
+            {isLoading && (
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-10">
+                    <div className="bg-white rounded-lg p-4 shadow-xl flex items-center gap-3">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <span className="text-sm font-medium text-gray-900">Submitting request...</span>
+                    </div>
+                </div>
+            )}
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[92vh] overflow-y-auto">
                 <div className="p-3">
                     <div className="flex items-center justify-between mb-3">
@@ -67,49 +88,106 @@ export default function SwapRequestModal({
                             </select>
                         </div>
 
-                        {/* Step 2: Show available shifts for selected team member */}
+                        {/* Step 2: Add their shifts to take */}
                         {swapFormData.targetUserId && (
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                                    Select Their Shift to Take
+                                    Their Shifts to Take
                                 </label>
-                                <select
-                                    value={swapFormData.targetDate ? `${swapFormData.targetDate}-${swapFormData.targetShift}` : ''}
-                                    onChange={(e) => {
-                                        if (!e.target.value) {
-                                            onUpdateFormData({
-                                                ...swapFormData,
-                                                targetDate: '',
-                                                targetShift: 'M',
-                                            });
-                                            return;
-                                        }
-                                        const lastDashIndex = e.target.value.lastIndexOf('-');
-                                        const date = e.target.value.substring(0, lastDashIndex);
-                                        const shift = e.target.value.substring(lastDashIndex + 1);
-                                        onUpdateFormData({
-                                            ...swapFormData,
-                                            targetDate: date,
-                                            targetShift: shift as 'M' | 'A' | 'N',
-                                        });
-                                    }}
-                                    className="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                >
-                                    <option value="">Choose shift...</option>
-                                    {getAvailableShifts(swapFormData.targetUserId).map((shift, idx) => (
-                                        <option key={idx} value={`${shift.date}-${shift.shiftType}`}>
-                                            {new Date(shift.date).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric'
-                                            })} - {SHIFT_LEGENDS[shift.shiftType].label}
-                                        </option>
-                                    ))}
-                                </select>
+
+                                {/* Display added target shifts */}
+                                {swapFormData.targetShifts && swapFormData.targetShifts.length > 0 && (
+                                    <div className="space-y-1.5 mb-2">
+                                        {swapFormData.targetShifts.map((shift, index) => (
+                                            <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-200">
+                                                <div className="flex-1">
+                                                    <span className="text-sm font-medium text-gray-900">
+                                                        {new Date(shift.date).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    <span className="text-xs text-gray-600 ml-2">
+                                                        {SHIFT_LEGENDS[shift.shiftType].label}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const newShifts = swapFormData.targetShifts.filter((_, i) => i !== index);
+                                                        onUpdateFormData({
+                                                            ...swapFormData,
+                                                            targetShifts: newShifts,
+                                                        });
+                                                    }}
+                                                    className="ml-2 text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded transition"
+                                                    title="Remove shift"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Add shift selector */}
+                                <div className="flex gap-1.5">
+                                    <select
+                                        id="target-shift-selector"
+                                        className="flex-1 px-2 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs"
+                                    >
+                                        <option value="">Select shift...</option>
+                                        {getAvailableShifts(swapFormData.targetUserId)
+                                            .filter(shift => !swapFormData.targetShifts?.some(
+                                                s => s.date === shift.date && s.shiftType === shift.shiftType
+                                            ))
+                                            .map((shift, idx) => (
+                                                <option key={idx} value={`${shift.date}-${shift.shiftType}`}>
+                                                    {new Date(shift.date).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })} - {SHIFT_LEGENDS[shift.shiftType].label}
+                                                </option>
+                                            ))}
+                                    </select>
+                                    <button
+                                        onClick={() => {
+                                            const selector = document.getElementById('target-shift-selector') as HTMLSelectElement;
+                                            if (selector.value) {
+                                                const lastDashIndex = selector.value.lastIndexOf('-');
+                                                const date = selector.value.substring(0, lastDashIndex);
+                                                const shiftType = selector.value.substring(lastDashIndex + 1);
+                                                const newShift = { date, shiftType: shiftType as 'M' | 'A' | 'N' };
+
+                                                const alreadyAdded = swapFormData.targetShifts?.some(
+                                                    s => s.date === date && s.shiftType === shiftType
+                                                );
+
+                                                if (!alreadyAdded) {
+                                                    onUpdateFormData({
+                                                        ...swapFormData,
+                                                        targetShifts: [...(swapFormData.targetShifts || []), newShift],
+                                                        targetDate: date,
+                                                        targetShift: shiftType as 'M' | 'A' | 'N',
+                                                    });
+                                                    selector.value = '';
+                                                }
+                                            }
+                                        }}
+                                        className="px-2.5 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition flex items-center"
+                                        title="Add shift"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         )}
 
                         {/* Step 3: Add your shifts to swap */}
-                        {swapFormData.targetUserId && swapFormData.targetDate && (
+                        {swapFormData.targetUserId && swapFormData.targetShifts && swapFormData.targetShifts.length > 0 && (
                             <div className="border-t pt-2.5">
                                 <div className="mb-2">
                                     <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -159,14 +237,18 @@ export default function SwapRequestModal({
                                             className="flex-1 px-2 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs"
                                         >
                                             <option value="">Select shift...</option>
-                                            {getAvailableShifts(loggedInUserId).map((shift, idx) => (
-                                                <option key={idx} value={`${shift.date}-${shift.shiftType}`}>
-                                                    {new Date(shift.date).toLocaleDateString('en-US', {
-                                                        month: 'short',
-                                                        day: 'numeric'
-                                                    })} - {SHIFT_LEGENDS[shift.shiftType].label}
-                                                </option>
-                                            ))}
+                                            {getAvailableShifts(loggedInUserId)
+                                                .filter(shift => !swapFormData.myShifts?.some(
+                                                    s => s.date === shift.date && s.shiftType === shift.shiftType
+                                                ))
+                                                .map((shift, idx) => (
+                                                    <option key={idx} value={`${shift.date}-${shift.shiftType}`}>
+                                                        {new Date(shift.date).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        })} - {SHIFT_LEGENDS[shift.shiftType].label}
+                                                    </option>
+                                                ))}
                                         </select>
                                         <button
                                             onClick={() => {
@@ -205,25 +287,28 @@ export default function SwapRequestModal({
                         )}
 
                         {/* Step 4: Show summary after shift selection */}
-                        {swapFormData.targetUserId && swapFormData.targetDate && swapFormData.myShifts && swapFormData.myShifts.length > 0 && (
+                        {swapFormData.targetUserId && swapFormData.targetShifts && swapFormData.targetShifts.length > 0 && swapFormData.myShifts && swapFormData.myShifts.length > 0 && (
                             <div className="bg-blue-50 border border-blue-300 rounded p-2">
                                 <div className="text-xs font-semibold text-blue-900 mb-1.5">Shift Summary</div>
                                 <div className="space-y-1.5">
                                     {/* Your shifts to give */}
                                     <div className="bg-white rounded p-1.5 border border-blue-200">
                                         <div className="text-xs font-medium text-gray-600 mb-1">You Give</div>
-                                        <div className="space-y-0.5">
+                                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                                             {swapFormData.myShifts.map((shift, index) => (
-                                                <div key={index} className="text-xs">
+                                                <div key={index} className="flex items-center text-xs">
                                                     <span className="font-semibold text-gray-900">
                                                         {new Date(shift.date).toLocaleDateString('en-US', {
                                                             month: 'short',
                                                             day: 'numeric'
                                                         })}
                                                     </span>
-                                                    <span className="text-gray-700 ml-1.5">
+                                                    <span className="text-gray-700 ml-1">
                                                         {SHIFT_LEGENDS[shift.shiftType].label}
                                                     </span>
+                                                    {index < swapFormData.myShifts.length - 1 && (
+                                                        <span className="text-blue-600 font-bold ml-1.5">+</span>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -236,19 +321,26 @@ export default function SwapRequestModal({
                                         </svg>
                                     </div>
 
-                                    {/* Their shift to take */}
+                                    {/* Their shifts to take */}
                                     <div className="bg-white rounded p-1.5 border border-blue-200">
-                                        <div className="text-xs font-medium text-gray-600 mb-0.5">You Receive</div>
-                                        <div className="text-xs">
-                                            <span className="font-semibold text-gray-900">
-                                                {new Date(swapFormData.targetDate).toLocaleDateString('en-US', {
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                })}
-                                            </span>
-                                            <span className="text-gray-700 ml-1.5">
-                                                {SHIFT_LEGENDS[swapFormData.targetShift].label}
-                                            </span>
+                                        <div className="text-xs font-medium text-gray-600 mb-1">You Receive</div>
+                                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                            {swapFormData.targetShifts.map((shift, index) => (
+                                                <div key={index} className="flex items-center text-xs">
+                                                    <span className="font-semibold text-gray-900">
+                                                        {new Date(shift.date).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    <span className="text-gray-700 ml-1">
+                                                        {SHIFT_LEGENDS[shift.shiftType].label}
+                                                    </span>
+                                                    {index < swapFormData.targetShifts.length - 1 && (
+                                                        <span className="text-blue-600 font-bold ml-1.5">+</span>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
                                         <div className="text-xs text-gray-600 mt-0.5">
                                             From: {teamMembers.find(m => m.id === swapFormData.targetUserId)?.name}
@@ -267,8 +359,8 @@ export default function SwapRequestModal({
                             Cancel
                         </button>
                         <button
-                            onClick={onSubmit}
-                            disabled={!swapFormData.targetUserId || !swapFormData.targetDate || !swapFormData.myShifts || swapFormData.myShifts.length === 0}
+                            onClick={handleSubmit}
+                            disabled={isLoading || !swapFormData.targetUserId || !swapFormData.targetShifts || swapFormData.targetShifts.length === 0 || !swapFormData.myShifts || swapFormData.myShifts.length === 0}
                             className="flex-1 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
                             Request Swap
