@@ -269,7 +269,13 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         setPendingSwaps(prev => [...prev, ...newRequests]);
         setShowSwapModal(false);
         setSwapFormData(null);
-        alert(`${newRequests.length} swap request${newRequests.length > 1 ? 's' : ''} submitted successfully! Waiting for approval.`);
+
+        const myShiftsCount = swapFormData.myShifts.length;
+        const targetShiftsCount = swapFormData.targetShifts.length;
+        const shiftsText = myShiftsCount === 1 ? 'shift' : 'shifts';
+        const targetText = targetShiftsCount === 1 ? 'shift' : 'shifts';
+
+        alert(`Swap request submitted successfully! ${myShiftsCount} ${shiftsText} for ${targetShiftsCount} ${targetText}. Waiting for approval.`);
     };
 
     const hasPendingSwap = (userId: string, date: string, shiftType: 'M' | 'A' | 'N' | 'R' | 'D') => {

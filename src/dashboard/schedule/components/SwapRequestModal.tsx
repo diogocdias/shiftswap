@@ -294,20 +294,22 @@ export default function SwapRequestModal({
                                     {/* Your shifts to give */}
                                     <div className="bg-white rounded p-1.5 border border-blue-200">
                                         <div className="text-xs font-medium text-gray-600 mb-1">You Give</div>
-                                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                        <div className="space-y-0.5">
                                             {swapFormData.myShifts.map((shift, index) => (
-                                                <div key={index} className="flex items-center text-xs">
-                                                    <span className="font-semibold text-gray-900">
-                                                        {new Date(shift.date).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric'
-                                                        })}
-                                                    </span>
-                                                    <span className="text-gray-700 ml-1">
-                                                        {SHIFT_LEGENDS[shift.shiftType].label}
-                                                    </span>
+                                                <div key={index}>
+                                                    <div className="text-xs">
+                                                        <span className="font-semibold text-gray-900">
+                                                            {new Date(shift.date).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </span>
+                                                        <span className="text-gray-700 ml-1">
+                                                            {SHIFT_LEGENDS[shift.shiftType].label}
+                                                        </span>
+                                                    </div>
                                                     {index < swapFormData.myShifts.length - 1 && (
-                                                        <span className="text-blue-600 font-bold ml-1.5">+</span>
+                                                        <div className="text-center text-blue-600 font-bold text-xs">+</div>
                                                     )}
                                                 </div>
                                             ))}
@@ -324,25 +326,27 @@ export default function SwapRequestModal({
                                     {/* Their shifts to take */}
                                     <div className="bg-white rounded p-1.5 border border-blue-200">
                                         <div className="text-xs font-medium text-gray-600 mb-1">You Receive</div>
-                                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                        <div className="space-y-0.5">
                                             {swapFormData.targetShifts.map((shift, index) => (
-                                                <div key={index} className="flex items-center text-xs">
-                                                    <span className="font-semibold text-gray-900">
-                                                        {new Date(shift.date).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric'
-                                                        })}
-                                                    </span>
-                                                    <span className="text-gray-700 ml-1">
-                                                        {SHIFT_LEGENDS[shift.shiftType].label}
-                                                    </span>
+                                                <div key={index}>
+                                                    <div className="text-xs">
+                                                        <span className="font-semibold text-gray-900">
+                                                            {new Date(shift.date).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </span>
+                                                        <span className="text-gray-700 ml-1">
+                                                            {SHIFT_LEGENDS[shift.shiftType].label}
+                                                        </span>
+                                                    </div>
                                                     {index < swapFormData.targetShifts.length - 1 && (
-                                                        <span className="text-blue-600 font-bold ml-1.5">+</span>
+                                                        <div className="text-center text-blue-600 font-bold text-xs">+</div>
                                                     )}
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="text-xs text-gray-600 mt-0.5">
+                                        <div className="text-xs text-gray-600 mt-1">
                                             From: {teamMembers.find(m => m.id === swapFormData.targetUserId)?.name}
                                         </div>
                                     </div>
