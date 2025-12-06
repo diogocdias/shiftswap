@@ -1,9 +1,11 @@
-import {useState} from 'react';
-import {MOCK_SWAP_REQUESTS} from "./data/mockSwapRequests.ts";
-import {SwapRequest} from './Types.ts';
-import {AdminView} from "./components/AdminView.tsx";
-import {ShareSwapModal} from "./components/ShareModal.tsx";
-import {UserView} from "./components/UserView.tsx";
+import { useState } from 'react';
+import { MOCK_SWAP_REQUESTS } from "./data/mockSwapRequests.ts";
+import { SwapRequest } from './Types.ts';
+import { AdminView } from "./components/AdminView.tsx";
+import { ShareSwapModal } from "./components/ShareModal.tsx";
+import { UserView } from "./components/UserView.tsx";
+import { getUserRole } from "../../services/sessionService";
+import { DEFAULTS } from "../../config/constants";
 
 function RequestsTab() {
     const [requests, setRequests] = useState<SwapRequest[]>(MOCK_SWAP_REQUESTS);
@@ -11,13 +13,11 @@ function RequestsTab() {
     const [showShareModal, setShowShareModal] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState<SwapRequest | null>(null);
 
-    // Mock logged-in user ID - in production, get from auth context
-    const LOGGED_IN_USER_ID = '1';
+    // Get logged-in user ID from constants (TODO: get from auth context in production)
+    const LOGGED_IN_USER_ID = DEFAULTS.LOGGED_IN_USER_ID;
 
-    // Get user role from session storage
-    const userDataString = sessionStorage.getItem('mockUser');
-    const userData = userDataString ? JSON.parse(userDataString) : null;
-    const userRole = userData?.role || 'user';
+    // Get user role from session service
+    const userRole = getUserRole();
 
 
     const shareToApp = (app: 'whatsapp' | 'telegram' | 'messenger' | 'sms' | 'copy') => {

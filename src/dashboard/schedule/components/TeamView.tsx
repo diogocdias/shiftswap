@@ -1,7 +1,8 @@
-// WeekView.tsx
+// TeamView.tsx
 import { SHIFT_LEGENDS } from "../ShiftConstants.ts";
-import {ShiftData, TeamMember} from "../Types.ts";
-import {useEffect, useState} from "react";
+import { ShiftData, TeamMember, ShiftType } from "../../../types/domain";
+import { useIsDesktop } from "../../../hooks/useIsDesktop";
+import { toISODateString } from "../../../utils/dateUtils";
 
 interface WeekViewProps {
     weekDays: Date[];
@@ -9,8 +10,8 @@ interface WeekViewProps {
     shifts: ShiftData;
     hoveredShift: string | null;
     setHoveredShift: (v: string | null) => void;
-    handleShiftClick: (userId: string, date: string, shift: 'M' | 'A' | 'N' | 'R' | 'D') => void;
-    hasPendingSwap: (userId: string, date: string, shift: 'M' | 'A' | 'N' | 'R' | 'D') => boolean;
+    handleShiftClick: (userId: string, date: string, shift: ShiftType) => void;
+    hasPendingSwap: (userId: string, date: string, shift: ShiftType) => boolean;
     getDayName: (date: Date) => string;
     formatDate: (date: Date) => string;
     nameFilter: string;
@@ -110,7 +111,7 @@ export default function TeamView(props: WeekViewProps) {
 
                                 {/* Mobile: render week days */}
                                 {weekDays.map((day, index) => {
-                                    const dateKey = day.toISOString().split("T")[0];
+                                    const dateKey = toISODateString(day);
                                     const dayShifts = shifts[member.id]?.[dateKey] || [];
 
                                     return (
@@ -171,7 +172,7 @@ export default function TeamView(props: WeekViewProps) {
 
                                 {/* Desktop: render appropriate days based on role */}
                                 {daysToShow.map((day, index) => {
-                                    const dateKey = day.toISOString().split("T")[0];
+                                    const dateKey = toISODateString(day);
                                     const dayShifts = shifts[member.id]?.[dateKey] || [];
 
                                     return (
@@ -237,29 +238,4 @@ export default function TeamView(props: WeekViewProps) {
             </div>
         </div>
     );
-}
-
-
-function useIsDesktop() {
-    const getCurrentState = () =>
-        typeof window !== "undefined" ? window.innerWidth >= 1024 : false;
-
-    const [isDesktop, setIsDesktop] = useState(getCurrentState);
-
-    useEffect(() => {
-        const update = () => {
-            setIsDesktop(getCurrentState());
-        };
-
-        // Handle resizing & rotation events
-        window.addEventListener("resize", update);
-        window.addEventListener("orientationchange", update);
-
-        return () => {
-            window.removeEventListener("resize", update);
-            window.removeEventListener("orientationchange", update);
-        };
-    }, []);
-
-    return isDesktop;
 }

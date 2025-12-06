@@ -1,60 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { LoadingOverlay } from '../../components/LoadingOverlay';
-
-interface UserProfile {
-    name: string;
-    email: string;
-    phone: string;
-    role: string;
-    department: string;
-    employeeId: string;
-    facility: string;
-    startDate: string;
-    profilePicture: string | null;
-}
-
-// TODO: REMOVE THIS MOCK API WHEN BACKEND IS READY
-// This simulates the backend API response for user profile data
-const mockFetchUserProfile = async (userId: string): Promise<UserProfile> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Get user data from sessionStorage (simulating session-based user identification)
-    const userDataString = sessionStorage.getItem('mockUser');
-    const userData = userDataString ? JSON.parse(userDataString) : null;
-
-    console.log('Fetching profile for user:', userId); // TODO: Remove this log
-
-    // Mock API response - in real implementation, this would come from backend
-    return {
-        name: userData?.name || 'User',
-        email: userData?.email || '',
-        phone: userData?.phone || '+1 (555) 123-4567',
-        role: userData?.role || 'user',
-        department: userData?.department || 'Emergency Department',
-        employeeId: userData?.employeeId || 'EMP-001234',
-        facility: userData?.facility || 'Memorial Hospital',
-        startDate: userData?.startDate || '2023-06-15',
-        profilePicture: userData?.profilePicture || null,
-    };
-};
-
-// Mock save API - simulates saving profile to backend
-const mockSaveUserProfile = async (profile: UserProfile): Promise<{ success: boolean }> => {
-    // Simulate API delay (200ms as requested)
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    console.log('Saving profile:', profile); // TODO: Remove this log
-
-    // Mock successful response
-    return { success: true };
-};
-// END TODO
+import { UserProfile } from '../../types/domain';
+import { getUser, updateUser } from '../../services/sessionService';
+import { fetchUserProfile, saveUserProfile } from '../../services/api/profileService';
+import { UI_TIMING } from '../../config/constants';
 
 function ProfileTab() {
-    // Get user data from sessionStorage for user identification
-    const userDataString = sessionStorage.getItem('mockUser');
-    const userData = userDataString ? JSON.parse(userDataString) : null;
+    // Get user data from session service for user identification
+    const userData = getUser();
 
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -72,19 +25,7 @@ function ProfileTab() {
             setIsLoading(true);
             setLoadError(null);
             try {
-                // TODO: REPLACE WITH ACTUAL API CALL
-                // const response = await fetch('/api/users/profile', {
-                //     method: 'GET',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //         'Authorization': `Bearer ${userData?.sessionId}`
-                //     }
-                // });
-                // const profileData = await response.json();
-
-                const profileData = await mockFetchUserProfile(userData?.email || '');
-                // END TODO
-
+                const profileData = await fetchUserProfile(userData?.email || '');
                 setProfile(profileData);
                 setEditedProfile(profileData);
             } catch (error) {
@@ -121,41 +62,27 @@ function ProfileTab() {
         setSaveSuccess(false);
 
         try {
-            // TODO: REPLACE WITH ACTUAL API CALL
-            // const response = await fetch('/api/users/profile', {
-            //     method: 'PUT',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'Authorization': `Bearer ${userData?.sessionId}`
-            //     },
-            //     body: JSON.stringify(editedProfile)
-            // });
-            // const result = await response.json();
-
-            const result = await mockSaveUserProfile(editedProfile);
-            // END TODO
+            const result = await saveUserProfile(editedProfile);
 
             if (result.success) {
                 // Update profile state
                 setProfile(editedProfile);
 
-                // Update sessionStorage with new user data
-                const updatedUserData = {
-                    ...userData,
+                // Update session with new user data using the session service
+                updateUser({
                     name: editedProfile.name,
                     email: editedProfile.email,
                     phone: editedProfile.phone,
                     department: editedProfile.department,
                     facility: editedProfile.facility,
                     profilePicture: editedProfile.profilePicture,
-                };
-                sessionStorage.setItem('mockUser', JSON.stringify(updatedUserData));
+                });
 
                 setIsEditing(false);
                 setSaveSuccess(true);
 
-                // Hide success message after 3 seconds
-                setTimeout(() => setSaveSuccess(false), 3000);
+                // Hide success message after configured time
+                setTimeout(() => setSaveSuccess(false), UI_TIMING.SUCCESS_MESSAGE_DISPLAY);
             }
         } catch (error) {
             console.error('Failed to save profile:', error);
@@ -209,7 +136,7 @@ function ProfileTab() {
     const handleRetry = () => {
         setIsLoading(true);
         setLoadError(null);
-        mockFetchUserProfile(userData?.email || '')
+        fetchUserProfile(userData?.email || '')
             .then(profileData => {
                 setProfile(profileData);
                 setEditedProfile(profileData);
