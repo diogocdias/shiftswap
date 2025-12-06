@@ -1,6 +1,7 @@
 import React from "react";
 import { SwapRequest } from "../Types.ts";
 import { renderRequestCard } from "./RenderRequestCard.tsx";
+import { useToast } from "../../../context/ToastContext";
 
 interface UserViewProps {
     incomingRequests: SwapRequest[];
@@ -19,6 +20,7 @@ export const UserView: React.FC<UserViewProps> = ({
                                                       setSelectedRequest,
                                                       setShowShareModal
                                                   }) => {
+    const { showSuccess, showInfo } = useToast();
     return (
         <>
             {/* Incoming Requests */}
@@ -55,7 +57,9 @@ export const UserView: React.FC<UserViewProps> = ({
                             canShare: false,
                             setRequests,
                             setSelectedRequest,
-                            setShowShareModal
+                            setShowShareModal,
+                            onApproveSuccess: showSuccess,
+                            onDeclineSuccess: showInfo
                         }))}
                     </div>
                 )}
@@ -95,7 +99,9 @@ export const UserView: React.FC<UserViewProps> = ({
                             canShare: true,
                             setRequests,
                             setSelectedRequest,
-                            setShowShareModal
+                            setShowShareModal,
+                            onApproveSuccess: showSuccess,
+                            onDeclineSuccess: showInfo
                         }))}
                     </div>
                 )}

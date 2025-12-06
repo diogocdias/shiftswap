@@ -7,6 +7,7 @@ import SwapRequestModal from "./components/SwapRequestModal.tsx";
 import GenerateScheduleModal from "./components/GenerateScheduleModal.tsx";
 import { LoadingOverlay } from "../../components/LoadingOverlay.tsx";
 import { useIsDesktop } from "../../hooks/useIsDesktop";
+import { useToast } from "../../context/ToastContext";
 import { DEFAULTS } from "../../config/constants";
 import { formatShortDate, getDayName, getMonthYear, getWeekStart, getWeekRange, getWeekDays, getMonthDays as getMonthDaysUtil, isToday as isTodayUtil } from "../../utils/dateUtils";
 import { generateWeekShifts, generateMonthShiftsForUser, generateMonthShiftsForTeam, generateRealisticSchedule, mergeShifts } from "../../utils/shiftGenerator";
@@ -30,6 +31,7 @@ interface ScheduleTabProps {
 }
 
 function ScheduleTab({userRole}: ScheduleTabProps) {
+    const { showSuccess, showWarning, showError } = useToast();
     const [scheduleView, setScheduleView] = useState<'team' | 'calendar'>('team');
     const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date()));
 
@@ -183,7 +185,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         if (!swapFormData) return;
 
         if (!swapFormData.targetUserId || !swapFormData.targetShifts || swapFormData.targetShifts.length === 0 || !swapFormData.myShifts || swapFormData.myShifts.length === 0) {
-            alert('Please fill in all required fields');
+            showWarning('Please fill in all required fields');
             return;
         }
 
@@ -199,7 +201,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         const shiftsText = myShiftsCount === 1 ? 'shift' : 'shifts';
         const targetText = targetShiftsCount === 1 ? 'shift' : 'shifts';
 
-        alert(`Swap request submitted successfully! ${myShiftsCount} ${shiftsText} for ${targetShiftsCount} ${targetText}. Waiting for approval.`);
+        showSuccess(`Swap request submitted! ${myShiftsCount} ${shiftsText} for ${targetShiftsCount} ${targetText}. Waiting for approval.`);
     };
 
     const hasPendingSwap = (userId: string, date: string, shiftType: 'M' | 'A' | 'N' | 'R' | 'D') => {
@@ -229,7 +231,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
             console.log('Schedule generated successfully:', { startDate, endDate, generatedShifts });
         } catch (error) {
             console.error('Failed to generate schedule:', error);
-            alert('Failed to generate schedule. Please try again.');
+            showError('Failed to generate schedule. Please try again.');
         } finally {
             setIsGenerating(false);
         }
@@ -578,7 +580,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 timeout={10000}
                 onTimeout={() => {
                     setIsGenerating(false);
-                    alert('Schedule generation timed out. Please try again.');
+                    showError('Schedule generation timed out. Please try again.');
                 }}
             />
         </div>

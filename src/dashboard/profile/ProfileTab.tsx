@@ -4,10 +4,12 @@ import { UserProfile } from '../../types/domain';
 import { getUser, updateUser } from '../../services/sessionService';
 import { fetchUserProfile, saveUserProfile } from '../../services/api/profileService';
 import { UI_TIMING } from '../../config/constants';
+import { useToast } from '../../context/ToastContext';
 
 function ProfileTab() {
     // Get user data from session service for user identification
     const userData = getUser();
+    const { showError, showWarning } = useToast();
 
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -86,7 +88,7 @@ function ProfileTab() {
             }
         } catch (error) {
             console.error('Failed to save profile:', error);
-            alert('Failed to save profile. Please try again.');
+            showError('Failed to save profile. Please try again.');
         } finally {
             setIsSaving(false);
         }
@@ -103,13 +105,13 @@ function ProfileTab() {
         if (file) {
             // Validate file type
             if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
+                showWarning('Please select an image file');
                 return;
             }
 
             // Validate file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
-                alert('Image size should be less than 5MB');
+                showWarning('Image size should be less than 5MB');
                 return;
             }
 
