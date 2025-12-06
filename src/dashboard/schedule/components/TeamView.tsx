@@ -12,6 +12,7 @@ interface WeekViewProps {
     setHoveredShift: (v: string | null) => void;
     handleShiftClick: (userId: string, date: string, shift: ShiftType) => void;
     hasPendingSwap: (userId: string, date: string, shift: ShiftType) => boolean;
+    isShiftSelected: (userId: string, date: string, shift: ShiftType) => boolean;
     getDayName: (date: Date) => string;
     formatDate: (date: Date) => string;
     nameFilter: string;
@@ -28,6 +29,7 @@ export default function TeamView(props: WeekViewProps) {
         setHoveredShift,
         handleShiftClick,
         hasPendingSwap,
+        isShiftSelected,
         getDayName,
         formatDate,
         nameFilter,
@@ -118,16 +120,19 @@ export default function TeamView(props: WeekViewProps) {
                                                         const shiftInfo = SHIFT_LEGENDS[shift];
                                                         const shiftKey = `${member.id}-${dateKey}-${shiftIndex}`;
                                                         const isPending = hasPendingSwap(member.id, dateKey, shift);
+                                                        const isSelected = isShiftSelected(member.id, dateKey, shift);
                                                         const isClickable = shift !== "R" && shift !== "D";
 
                                                         return (
                                                             <div key={shiftIndex} className="relative inline-block">
                                                                 <div
-                                                                    className={`${shiftInfo.color} px-2 py-1 rounded font-semibold text-xs transition-transform ${
+                                                                    className={`${shiftInfo.color} px-2 py-1 rounded font-semibold text-xs transition-all ${
                                                                         isClickable
                                                                             ? "cursor-pointer hover:scale-110"
                                                                             : "cursor-default"
-                                                                    } ${isPending ? "ring-2 ring-yellow-400 ring-offset-1" : ""}`}
+                                                                    } ${isPending ? "ring-2 ring-yellow-400 ring-offset-1" : ""} ${
+                                                                        isSelected ? "ring-2 ring-blue-600 ring-offset-1 scale-110" : ""
+                                                                    }`}
                                                                     onMouseEnter={() => setHoveredShift(shiftKey)}
                                                                     onMouseLeave={() => setHoveredShift(null)}
                                                                     onClick={() =>
@@ -136,7 +141,14 @@ export default function TeamView(props: WeekViewProps) {
                                                                     }
                                                                 >
                                                                     {shift}
-                                                                    {isPending && (
+                                                                    {isSelected && (
+                                                                        <span className="ml-0.5 text-blue-600">
+                                                                            <svg className="w-3 h-3 inline" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        </span>
+                                                                    )}
+                                                                    {isPending && !isSelected && (
                                                                         <span className="ml-1 text-yellow-600">
                                                                                 ⏳
                                                                             </span>
@@ -148,8 +160,11 @@ export default function TeamView(props: WeekViewProps) {
                                                                             {isPending && (
                                                                                 <div className="text-yellow-300 mt-1 font-semibold">Swap Pending</div>
                                                                             )}
-                                                                            {isClickable && !isPending && (
-                                                                                <div className="text-blue-300 mt-1">Click to request swap</div>
+                                                                            {isSelected && (
+                                                                                <div className="text-blue-300 mt-1 font-semibold">Selected - Click to deselect</div>
+                                                                            )}
+                                                                            {isClickable && !isPending && !isSelected && (
+                                                                                <div className="text-blue-300 mt-1">Click to select for swap</div>
                                                                             )}
                                                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                                                                                 <div className="border-4 border-transparent border-t-gray-900"></div>
@@ -179,16 +194,19 @@ export default function TeamView(props: WeekViewProps) {
                                                         const shiftInfo = SHIFT_LEGENDS[shift];
                                                         const shiftKey = `${member.id}-${dateKey}-${shiftIndex}`;
                                                         const isPending = hasPendingSwap(member.id, dateKey, shift);
+                                                        const isSelected = isShiftSelected(member.id, dateKey, shift);
                                                         const isClickable = shift !== "R" && shift !== "D";
 
                                                         return (
                                                             <div key={shiftIndex} className="relative inline-block">
                                                                 <div
-                                                                    className={`${shiftInfo.color} ${isExpanded ? 'px-2 py-1 text-xs' : (isMonthView ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-xs')} rounded font-semibold transition-transform ${
+                                                                    className={`${shiftInfo.color} ${isExpanded ? 'px-2 py-1 text-xs' : (isMonthView ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-xs')} rounded font-semibold transition-all ${
                                                                         isClickable
                                                                             ? "cursor-pointer hover:scale-110"
                                                                             : "cursor-default"
-                                                                    } ${isPending ? "ring-2 ring-yellow-400 ring-offset-1" : ""}`}
+                                                                    } ${isPending ? "ring-2 ring-yellow-400 ring-offset-1" : ""} ${
+                                                                        isSelected ? "ring-2 ring-blue-600 ring-offset-1 scale-110" : ""
+                                                                    }`}
                                                                     onMouseEnter={() => setHoveredShift(shiftKey)}
                                                                     onMouseLeave={() => setHoveredShift(null)}
                                                                     onClick={() =>
@@ -197,7 +215,14 @@ export default function TeamView(props: WeekViewProps) {
                                                                     }
                                                                 >
                                                                     {shift}
-                                                                    {isPending && (
+                                                                    {isSelected && (
+                                                                        <span className={`${isMonthView && !isExpanded ? 'ml-0' : 'ml-0.5'} text-blue-600`}>
+                                                                            <svg className={`${isMonthView && !isExpanded ? 'w-2 h-2' : 'w-3 h-3'} inline`} fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        </span>
+                                                                    )}
+                                                                    {isPending && !isSelected && (
                                                                         <span className="ml-1 text-yellow-600">
                                                                                 ⏳
                                                                             </span>
@@ -209,8 +234,11 @@ export default function TeamView(props: WeekViewProps) {
                                                                             {isPending && (
                                                                                 <div className="text-yellow-300 mt-1 font-semibold">Swap Pending</div>
                                                                             )}
-                                                                            {isClickable && !isPending && (
-                                                                                <div className="text-blue-300 mt-1">Click to request swap</div>
+                                                                            {isSelected && (
+                                                                                <div className="text-blue-300 mt-1 font-semibold">Selected - Click to deselect</div>
+                                                                            )}
+                                                                            {isClickable && !isPending && !isSelected && (
+                                                                                <div className="text-blue-300 mt-1">Click to select for swap</div>
                                                                             )}
                                                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                                                                                 <div className="border-4 border-transparent border-t-gray-900"></div>

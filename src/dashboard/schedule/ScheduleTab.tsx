@@ -55,6 +55,13 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isTableExpanded, setIsTableExpanded] = useState(false);
 
+    // Multi-shift selection state
+    const [selectedShifts, setSelectedShifts] = useState<Array<{
+        userId: string;
+        date: string;
+        shiftType: 'M' | 'A' | 'N';
+    }>>([]);
+
     const LOGGED_IN_USER_ID = DEFAULTS.LOGGED_IN_USER_ID;
     const canGenerateSchedule = userRole === 'admin' || userRole === 'teamleader';
 
@@ -136,31 +143,67 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         member.name.toLowerCase().includes(nameFilter.toLowerCase())
     );
 
+    // Toggle shift selection for multi-shift swap
     const handleShiftClick = (userId: string, date: string, shiftType: 'M' | 'A' | 'N' | 'R' | 'D') => {
         if (shiftType === 'R' || shiftType === 'D') return;
 
-        if (userId === LOGGED_IN_USER_ID) {
-            setSwapFormData({
-                targetUserId: '',
-                targetDate: '',
-                targetShift: 'M',
-                myDate: date,
-                myShift: shiftType,
-                myShifts: [{ date, shiftType }],
-                targetShifts: [],
-            });
-        } else {
-            setSwapFormData({
-                targetUserId: userId,
-                targetDate: date,
-                targetShift: shiftType,
-                myDate: '',
-                myShift: 'M',
-                myShifts: [],
-                targetShifts: [{ date, shiftType }],
-            });
-        }
+        const workingShiftType = shiftType as 'M' | 'A' | 'N';
+
+        setSelectedShifts(prev => {
+            const existingIndex = prev.findIndex(
+                s => s.userId === userId && s.date === date && s.shiftType === workingShiftType
+            );
+
+            if (existingIndex >= 0) {
+                // Deselect the shift
+                return prev.filter((_, i) => i !== existingIndex);
+            } else {
+                // Select the shift
+                return [...prev, { userId, date, shiftType: workingShiftType }];
+            }
+        });
+    };
+
+    // Check if a shift is currently selected
+    const isShiftSelected = (userId: string, date: string, shiftType: 'M' | 'A' | 'N' | 'R' | 'D') => {
+        if (shiftType === 'R' || shiftType === 'D') return false;
+        return selectedShifts.some(
+            s => s.userId === userId && s.date === date && s.shiftType === shiftType
+        );
+    };
+
+    // Open the swap request modal with all selected shifts
+    const handleOpenSwapModal = () => {
+        if (selectedShifts.length === 0) return;
+
+        // Separate shifts into my shifts and target shifts
+        const myShifts = selectedShifts
+            .filter(s => s.userId === LOGGED_IN_USER_ID)
+            .map(s => ({ date: s.date, shiftType: s.shiftType }));
+
+        const targetShifts = selectedShifts
+            .filter(s => s.userId !== LOGGED_IN_USER_ID)
+            .map(s => ({ date: s.date, shiftType: s.shiftType }));
+
+        // Determine target user (use the first non-logged-in user's shifts)
+        const targetUserShift = selectedShifts.find(s => s.userId !== LOGGED_IN_USER_ID);
+        const targetUserId = targetUserShift?.userId || '';
+
+        setSwapFormData({
+            targetUserId,
+            targetDate: targetShifts[0]?.date || '',
+            targetShift: targetShifts[0]?.shiftType || 'M',
+            myDate: myShifts[0]?.date || '',
+            myShift: myShifts[0]?.shiftType || 'M',
+            myShifts,
+            targetShifts,
+        });
         setShowSwapModal(true);
+    };
+
+    // Clear selected shifts
+    const clearSelectedShifts = () => {
+        setSelectedShifts([]);
     };
 
     const getAvailableShifts = (userId: string) => {
@@ -195,6 +238,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         setPendingSwaps(prev => [...prev, ...newRequests]);
         setShowSwapModal(false);
         setSwapFormData(null);
+        // Clear selected shifts on successful submission
+        clearSelectedShifts();
 
         const myShiftsCount = swapFormData.myShifts.length;
         const targetShiftsCount = swapFormData.targetShifts.length;
@@ -214,6 +259,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const handleCloseModal = () => {
         setShowSwapModal(false);
         setSwapFormData(null);
+        // Note: We intentionally do NOT clear selectedShifts here
+        // so the user can cancel and re-open without losing their selections
     };
 
     const handleGenerateSchedule = async (startDate: string, endDate: string) => {
@@ -422,12 +469,42 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     setHoveredShift={setHoveredShift}
                     handleShiftClick={handleShiftClick}
                     hasPendingSwap={hasPendingSwap}
+                    isShiftSelected={isShiftSelected}
                     getDayName={getLocalDayName}
                     formatDate={formatDate}
                     nameFilter={nameFilter}
                     currentMonth={teamMonth}
                     isExpanded={isTableExpanded}
                 />
+            )}
+
+            {/* Floating Request Swap Button - appears when shifts are selected */}
+            {selectedShifts.length > 0 && scheduleView === 'team' && (
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 flex items-center gap-2">
+                    <div className="bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-3 flex items-center gap-3">
+                        <div className="text-sm text-gray-600">
+                            <span className="font-semibold text-blue-600">{selectedShifts.length}</span>
+                            {' '}{selectedShifts.length === 1 ? 'shift' : 'shifts'} selected
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={clearSelectedShifts}
+                                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                            >
+                                Clear
+                            </button>
+                            <button
+                                onClick={handleOpenSwapModal}
+                                className="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                                Request Swap
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Calendar View - Calendar Grid */}
