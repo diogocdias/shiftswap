@@ -58,8 +58,8 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
 
     // Detect desktop screen size
     const isDesktop = useIsDesktop();
-    // Determine if team view should show month (desktop + admin/teamleader)
-    const isTeamMonthView = isDesktop && (userRole === 'admin' || userRole === 'teamleader');
+    // Determine if team view should show month (desktop) or week (mobile)
+    const isTeamMonthView = isDesktop;
 
     // Team view functions
     const weekDays = getWeekDays(currentWeekStart);
