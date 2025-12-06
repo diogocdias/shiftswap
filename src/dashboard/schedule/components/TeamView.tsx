@@ -15,7 +15,6 @@ interface WeekViewProps {
     getDayName: (date: Date) => string;
     formatDate: (date: Date) => string;
     nameFilter: string;
-    userRole?: string;
     currentMonth: Date;
     isExpanded?: boolean;
 }
@@ -32,7 +31,6 @@ export default function TeamView(props: WeekViewProps) {
         getDayName,
         formatDate,
         nameFilter,
-        userRole = 'user',
         currentMonth,
         isExpanded = false
     } = props;
@@ -51,11 +49,9 @@ export default function TeamView(props: WeekViewProps) {
         return days;
     };
 
-    // Only show month view if both conditions are met:
-    // 1. User is admin or teamleader
-    // 2. Screen is desktop
+    // Show month view on desktop for all users
     const isDesktop = useIsDesktop();
-    const isMonthView = isDesktop && (userRole === 'admin' || userRole === 'teamleader');
+    const isMonthView = isDesktop;
     const daysToShow = isMonthView ? getMonthDays() : weekDays;
 
 
