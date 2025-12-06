@@ -7,6 +7,8 @@ interface RenderRequestCardProps {
     setRequests: React.Dispatch<React.SetStateAction<SwapRequest[]>>;
     setSelectedRequest: React.Dispatch<React.SetStateAction<SwapRequest | null>>;
     setShowShareModal: React.Dispatch<React.SetStateAction<boolean>>;
+    onApproveSuccess?: (message: string) => void;
+    onDeclineSuccess?: (message: string) => void;
 }
 
 // Avatar component with initials
@@ -108,7 +110,9 @@ export const renderRequestCard = ({
                                       canShare,
                                       setRequests,
                                       setSelectedRequest,
-                                      setShowShareModal
+                                      setShowShareModal,
+                                      onApproveSuccess,
+                                      onDeclineSuccess
                                   }: RenderRequestCardProps) => {
 
     const handleApprove = async (requestId: number) => {
@@ -119,7 +123,7 @@ export const renderRequestCard = ({
             req.id === requestId ? {...req, status: 'approved' as const} : req
         ));
 
-        alert('Swap request approved successfully!');
+        onApproveSuccess?.('Swap request approved successfully!');
     };
 
     const handleDecline = async (requestId: number) => {
@@ -130,7 +134,7 @@ export const renderRequestCard = ({
             req.id === requestId ? {...req, status: 'declined' as const} : req
         ));
 
-        alert('Swap request declined.');
+        onDeclineSuccess?.('Swap request declined.');
     };
 
     const handleShare = (request: SwapRequest) => {

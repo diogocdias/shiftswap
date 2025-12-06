@@ -1,5 +1,6 @@
 import {SwapRequest} from "../Types.ts";
 import {renderRequestCard} from "./RenderRequestCard.tsx";
+import {useToast} from "../../../context/ToastContext";
 
 
 interface AdminViewProps {
@@ -11,6 +12,7 @@ interface AdminViewProps {
 }
 
 export function AdminView({displayRequests, filter, setRequests, setSelectedRequest, setShowShareModal}: AdminViewProps) {
+    const { showSuccess, showInfo } = useToast();
     return (
         <div className="bg-white rounded-lg border border-gray-200">
             {displayRequests && displayRequests.length === 0 ? (
@@ -32,7 +34,9 @@ export function AdminView({displayRequests, filter, setRequests, setSelectedRequ
                         canShare: true,
                         setRequests: setRequests,
                         setSelectedRequest: setSelectedRequest,
-                        setShowShareModal: setShowShareModal
+                        setShowShareModal: setShowShareModal,
+                        onApproveSuccess: showSuccess,
+                        onDeclineSuccess: showInfo
                     }))}
                 </div>
             )}

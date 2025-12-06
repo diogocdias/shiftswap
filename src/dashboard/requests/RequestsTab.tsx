@@ -6,8 +6,10 @@ import { ShareSwapModal } from "./components/ShareModal.tsx";
 import { UserView } from "./components/UserView.tsx";
 import { getUserRole } from "../../services/sessionService";
 import { DEFAULTS } from "../../config/constants";
+import { useToast } from "../../context/ToastContext";
 
 function RequestsTab() {
+    const { showSuccess, showError } = useToast();
     const [requests, setRequests] = useState<SwapRequest[]>(MOCK_SWAP_REQUESTS);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'declined'>('all');
     const [showShareModal, setShowShareModal] = useState(false);
@@ -48,9 +50,9 @@ function RequestsTab() {
                 break;
             case 'copy':
                 navigator.clipboard.writeText(shareText).then(() => {
-                    alert('Swap request details copied to clipboard!');
+                    showSuccess('Swap request details copied to clipboard!');
                 }).catch(() => {
-                    alert('Failed to copy to clipboard');
+                    showError('Failed to copy to clipboard');
                 });
                 break;
         }
