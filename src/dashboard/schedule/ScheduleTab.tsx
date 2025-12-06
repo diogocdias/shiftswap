@@ -425,7 +425,6 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     getDayName={getLocalDayName}
                     formatDate={formatDate}
                     nameFilter={nameFilter}
-                    userRole={userRole}
                     currentMonth={teamMonth}
                     isExpanded={isTableExpanded}
                 />

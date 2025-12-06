@@ -15,7 +15,6 @@ interface WeekViewProps {
     getDayName: (date: Date) => string;
     formatDate: (date: Date) => string;
     nameFilter: string;
-    userRole?: string;
     currentMonth: Date;
     isExpanded?: boolean;
 }
@@ -32,7 +31,6 @@ export default function TeamView(props: WeekViewProps) {
         getDayName,
         formatDate,
         nameFilter,
-        userRole = 'user',
         currentMonth,
         isExpanded = false
     } = props;
