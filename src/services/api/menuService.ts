@@ -10,24 +10,24 @@ import { mockDelay } from './mockDelay';
 // Menu items configuration by role
 const MENU_ITEMS_BY_ROLE: Record<UserRole, MenuItem[]> = {
     user: [
-        { id: 'overview', label: 'Overview', icon: 'home', order: 1 },
-        { id: 'schedule', label: 'Schedule', icon: 'calendar', order: 2 },
-        { id: 'requests', label: 'Requests', icon: 'swap', badge: 2, order: 3 },
+        { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
+        { id: 'schedule', label: 'My Schedule', icon: '📅', order: 2 },
+        { id: 'requests', label: 'Requests', icon: '🔄', badge: 2, order: 3 },
     ],
     teamleader: [
-        { id: 'overview', label: 'Overview', icon: 'home', order: 1 },
-        { id: 'schedule', label: 'Schedule', icon: 'calendar', order: 2 },
-        { id: 'team', label: 'Team', icon: 'users', order: 3 },
-        { id: 'requests', label: 'Requests', icon: 'swap', badge: 5, order: 4 },
-        { id: 'analytics', label: 'Analytics', icon: 'chart', order: 5 },
+        { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
+        { id: 'schedule', label: 'Schedule', icon: '📅', order: 2 },
+        { id: 'team', label: 'Team', icon: '👥', order: 3 },
+        { id: 'requests', label: 'Requests', icon: '🔄', badge: 2, order: 4 },
+        { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
     ],
     admin: [
-        { id: 'overview', label: 'Overview', icon: 'home', order: 1 },
-        { id: 'schedule', label: 'Schedule', icon: 'calendar', order: 2 },
-        { id: 'team', label: 'Team', icon: 'users', order: 3 },
-        { id: 'requests', label: 'Requests', icon: 'swap', badge: 8, order: 4 },
-        { id: 'analytics', label: 'Analytics', icon: 'chart', order: 5 },
-        { id: 'settings', label: 'Settings', icon: 'cog', order: 6 },
+        { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
+        { id: 'schedule', label: 'All Schedules', icon: '📅', order: 2 },
+        { id: 'team', label: 'All Staff', icon: '👥', order: 3 },
+        { id: 'requests', label: 'All Requests', icon: '🔄', badge: 2, order: 4 },
+        { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
+        { id: 'settings', label: 'Settings', icon: '⚙️', order: 6 },
     ],
 };
 
