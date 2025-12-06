@@ -11,6 +11,7 @@ import { DEFAULTS } from "../../config/constants";
 import { formatShortDate, getDayName, getMonthYear, getWeekStart, getWeekRange, getWeekDays, getMonthDays as getMonthDaysUtil, isToday as isTodayUtil } from "../../utils/dateUtils";
 import { generateWeekShifts, generateMonthShiftsForUser, generateMonthShiftsForTeam, generateRealisticSchedule, mergeShifts } from "../../utils/shiftGenerator";
 import { submitSwapRequest } from "../../services/api/scheduleService";
+import { exportScheduleToPDF } from "../../utils/pdfExport";
 
 
 // Mock data
@@ -234,6 +235,26 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         }
     };
 
+    const handleExportPDF = () => {
+        // Always export the full month, using teamMonth for the current month context
+        const exportMonth = scheduleView === 'team' ? teamMonth : currentMonth;
+        const year = exportMonth.getFullYear();
+        const month = exportMonth.getMonth();
+
+        // Generate fresh month shifts for all team members to ensure complete data
+        const fullMonthShifts = generateMonthShiftsForTeam(year, month, MOCK_TEAM_MEMBERS);
+
+        // Merge with existing shifts to preserve any generated/modified shifts
+        const exportShifts = mergeShifts(fullMonthShifts, teamMonthShifts);
+
+        exportScheduleToPDF({
+            year,
+            month,
+            shifts: exportShifts,
+            teamMembers: MOCK_TEAM_MEMBERS,
+        });
+    };
+
     return (
         <div className={`space-y-4 ${isTableExpanded && scheduleView === 'team' ? 'fixed inset-0 z-40 bg-gray-100 p-4 overflow-auto' : ''}`}>
             {/* Header with View Toggle */}
@@ -285,6 +306,20 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
                                 Generate Schedule
+                            </button>
+                        )}
+
+                        {/* Export PDF Button - Available in team view */}
+                        {scheduleView === 'team' && (
+                            <button
+                                onClick={handleExportPDF}
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-xs"
+                                title="Export full month schedule to PDF"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export PDF
                             </button>
                         )}
 
