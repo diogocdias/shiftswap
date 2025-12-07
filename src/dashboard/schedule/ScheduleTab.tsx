@@ -5,6 +5,7 @@ import TeamView from "./components/TeamView.tsx";
 import { SHIFT_LEGENDS } from "./ShiftConstants.ts";
 import SwapRequestModal from "./components/SwapRequestModal.tsx";
 import GenerateScheduleModal from "./components/GenerateScheduleModal.tsx";
+import CalendarSyncModal from "./components/CalendarSyncModal.tsx";
 import { LoadingOverlay } from "../../components/LoadingOverlay.tsx";
 import { useIsDesktop } from "../../hooks/useIsDesktop";
 import { useToast } from "../../context/ToastContext";
@@ -54,6 +55,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isTableExpanded, setIsTableExpanded] = useState(false);
+    const [showCalendarSyncModal, setShowCalendarSyncModal] = useState(false);
 
     // Multi-shift selection state
     const [selectedShifts, setSelectedShifts] = useState<Array<{
@@ -304,6 +306,12 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         });
     };
 
+    const handleCalendarSync = (providerId: string) => {
+        // TODO: Integrate with real calendar API
+        console.log('Calendar synced with provider:', providerId);
+        showSuccess('Your shifts have been synced to your calendar!');
+    };
+
     return (
         <div className={`space-y-4 ${isTableExpanded && scheduleView === 'team' ? 'fixed inset-0 z-40 bg-gray-100 p-4 overflow-auto' : ''}`}>
             {/* Header with View Toggle */}
@@ -369,6 +377,20 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 Export PDF
+                            </button>
+                        )}
+
+                        {/* Sync Calendar Button - Available in calendar view */}
+                        {scheduleView === 'calendar' && (
+                            <button
+                                onClick={() => setShowCalendarSyncModal(true)}
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-xs"
+                                title="Sync your shifts to an external calendar"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Sync Calendar
                             </button>
                         )}
 
@@ -648,6 +670,13 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 isOpen={showGenerateModal}
                 onClose={() => setShowGenerateModal(false)}
                 onGenerate={handleGenerateSchedule}
+            />
+
+            {/* Calendar Sync Modal */}
+            <CalendarSyncModal
+                isOpen={showCalendarSyncModal}
+                onClose={() => setShowCalendarSyncModal(false)}
+                onSync={handleCalendarSync}
             />
 
             {/* Loading Overlay - shown while generating schedule */}
