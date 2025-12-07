@@ -181,12 +181,6 @@ function VacationTab() {
         return `${formatShortDate(start)} - ${formatShortDate(end)}`;
     };
 
-    // Count records by type
-    const recordsByType = Object.keys(VACATION_TYPES).reduce((acc, type) => {
-        acc[type as VacationType] = vacationRecords.filter(r => r.type === type).length;
-        return acc;
-    }, {} as Record<VacationType, number>);
-
     return (
         <div className="space-y-4">
             {/* Header */}
@@ -234,32 +228,6 @@ function VacationTab() {
                             <option key={key} value={key}>{label}</option>
                         ))}
                     </select>
-                </div>
-            </div>
-
-            {/* Summary Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-2xl font-bold text-gray-900">{vacationRecords.length}</div>
-                    <div className="text-xs text-gray-600">Total Records</div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-2xl font-bold text-blue-600">
-                        {recordsByType.vacation || 0}
-                    </div>
-                    <div className="text-xs text-gray-600">Vacations</div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-2xl font-bold text-red-600">
-                        {recordsByType.sick || 0}
-                    </div>
-                    <div className="text-xs text-gray-600">Sick Leave</div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-2xl font-bold text-purple-600">
-                        {vacationRecords.reduce((acc, r) => acc + calculateDays(r.startDate, r.endDate), 0)}
-                    </div>
-                    <div className="text-xs text-gray-600">Total Days</div>
                 </div>
             </div>
 
