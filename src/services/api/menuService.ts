@@ -19,15 +19,17 @@ const MENU_ITEMS_BY_ROLE: Record<UserRole, MenuItem[]> = {
         { id: 'schedule', label: 'Schedule', icon: '📅', order: 2 },
         { id: 'team', label: 'Team', icon: '👥', order: 3 },
         { id: 'requests', label: 'Requests', icon: '🔄', badge: 2, order: 4 },
-        { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
+        { id: 'vacation', label: 'Vacation', icon: '🏖️', order: 5 },
+        { id: 'analytics', label: 'Analytics', icon: '📊', order: 6 },
     ],
     admin: [
         { id: 'overview', label: 'Overview', icon: '🏠', order: 1 },
         { id: 'schedule', label: 'All Schedules', icon: '📅', order: 2 },
         { id: 'team', label: 'All Staff', icon: '👥', order: 3 },
         { id: 'requests', label: 'All Requests', icon: '🔄', badge: 2, order: 4 },
-        { id: 'analytics', label: 'Analytics', icon: '📊', order: 5 },
-        { id: 'settings', label: 'Settings', icon: '⚙️', order: 6 },
+        { id: 'vacation', label: 'Vacation', icon: '🏖️', order: 5 },
+        { id: 'analytics', label: 'Analytics', icon: '📊', order: 6 },
+        { id: 'settings', label: 'Settings', icon: '⚙️', order: 7 },
     ],
 };
 
