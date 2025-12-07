@@ -4,8 +4,9 @@
  */
 
 import { jsPDF } from 'jspdf';
-import { ShiftData, TeamMember, ShiftType } from '../types/domain';
+import { ShiftData, TeamMember, ShiftType, VacationType } from '../types/domain';
 import { getDaysInMonth, getMonthYear } from './dateUtils';
+import { getTimeOffForDate } from '../services/timeOffService';
 
 // Shift labels for PDF display
 const SHIFT_LABELS: Record<ShiftType, string> = {
@@ -14,6 +15,15 @@ const SHIFT_LABELS: Record<ShiftType, string> = {
     N: 'N',
     R: 'R',
     D: 'D',
+};
+
+// Time-off labels for PDF display
+const TIME_OFF_LABELS: Record<VacationType, string> = {
+    vacation: 'VAC',
+    sick: 'SICK',
+    personal: 'PER',
+    special: 'SPE',
+    other: 'OFF',
 };
 
 interface ExportOptions {
@@ -133,12 +143,17 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
         for (let day = 1; day <= daysInMonth; day++) {
             const x = margin + nameColumnWidth + (day - 1) * dayColumnWidth;
             const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const timeOff = getTimeOffForDate(member.id, dateKey);
             const dayShifts = shifts[member.id]?.[dateKey] || [];
             const date = new Date(year, month, day);
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
-            // Weekend background
-            if (isWeekend) {
+            // Time-off background (grayed out)
+            if (timeOff) {
+                doc.setFillColor(200, 200, 200);
+                doc.rect(x, y, dayColumnWidth, rowHeight, 'F');
+            } else if (isWeekend) {
+                // Weekend background
                 doc.setFillColor(245, 245, 245);
                 doc.rect(x, y, dayColumnWidth, rowHeight, 'F');
             }
@@ -146,8 +161,16 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
             // Cell border
             doc.rect(x, y, dayColumnWidth, rowHeight);
 
-            // Shift codes
-            if (dayShifts.length > 0) {
+            // Time-off display (takes precedence over shifts)
+            if (timeOff) {
+                const timeOffLabel = TIME_OFF_LABELS[timeOff.type];
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(4);
+                doc.setTextColor(80, 80, 80);
+                doc.text(timeOffLabel, x + dayColumnWidth / 2, y + rowHeight / 2 + 1, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+            } else if (dayShifts.length > 0) {
+                // Shift codes
                 const shiftText = dayShifts.map(s => SHIFT_LABELS[s]).join('/');
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(5);
@@ -181,6 +204,18 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
 
     const legendText = legendItems.join('    ');
     doc.text(legendText, pageWidth / 2, legendY, { align: 'center' });
+
+    // Time-off legend (second line)
+    const timeOffLegendY = legendY + 4;
+    const timeOffLegendItems = [
+        'VAC = Vacation',
+        'SICK = Sick Leave',
+        'PER = Personal Day',
+        'SPE = Special Day Off',
+        'OFF = Other Time Off',
+    ];
+    const timeOffLegendText = timeOffLegendItems.join('    ');
+    doc.text(timeOffLegendText, pageWidth / 2, timeOffLegendY, { align: 'center' });
 
     // Generated date
     doc.setFontSize(5);

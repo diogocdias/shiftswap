@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VacationRecord, VacationType, TeamMember } from '../../types/domain';
 import { useToast } from '../../context/ToastContext';
 import { formatShortDate } from '../../utils/dateUtils';
+import {
+    getTimeOffRecords,
+    setTimeOffRecords,
+    subscribeToTimeOff,
+    TIME_OFF_TYPES,
+} from '../../services/timeOffService';
 
-// Vacation type configuration
-const VACATION_TYPES: Record<VacationType, { label: string; color: string; icon: string }> = {
-    vacation: { label: 'Vacation', color: 'bg-blue-100 text-blue-800', icon: '🏖️' },
-    sick: { label: 'Sick Leave', color: 'bg-red-100 text-red-800', icon: '🏥' },
-    personal: { label: 'Personal Day', color: 'bg-purple-100 text-purple-800', icon: '👤' },
-    special: { label: 'Special Day Off', color: 'bg-amber-100 text-amber-800', icon: '⭐' },
-    other: { label: 'Other', color: 'bg-gray-100 text-gray-800', icon: '📋' },
-};
+// Vacation type configuration (using shared config)
+const VACATION_TYPES = TIME_OFF_TYPES;
 
 // Mock team members (same as ScheduleTab)
 const MOCK_TEAM_MEMBERS: TeamMember[] = [
@@ -21,46 +21,6 @@ const MOCK_TEAM_MEMBERS: TeamMember[] = [
     { id: '5', name: 'Lisa Anderson', role: 'user' },
     { id: '6', name: 'Robert Taylor', role: 'user' },
     { id: '7', name: 'Maria Garcia', role: 'user' },
-];
-
-// Mock initial vacation records
-const INITIAL_VACATION_RECORDS: VacationRecord[] = [
-    {
-        id: '1',
-        userId: '1',
-        userName: 'Sarah Johnson',
-        type: 'vacation',
-        startDate: '2024-12-20',
-        endDate: '2024-12-27',
-        notes: 'Holiday vacation',
-        status: 'approved',
-        createdAt: '2024-12-01T10:00:00Z',
-        createdBy: 'Admin',
-    },
-    {
-        id: '2',
-        userId: '3',
-        userName: 'Emily Davis',
-        type: 'sick',
-        startDate: '2024-12-10',
-        endDate: '2024-12-11',
-        notes: 'Doctor appointment',
-        status: 'approved',
-        createdAt: '2024-12-08T14:30:00Z',
-        createdBy: 'Admin',
-    },
-    {
-        id: '3',
-        userId: '5',
-        userName: 'Lisa Anderson',
-        type: 'personal',
-        startDate: '2024-12-15',
-        endDate: '2024-12-15',
-        notes: 'Personal matters',
-        status: 'approved',
-        createdAt: '2024-12-05T09:15:00Z',
-        createdBy: 'Team Leader',
-    },
 ];
 
 interface VacationFormData {
@@ -81,12 +41,26 @@ const INITIAL_FORM_DATA: VacationFormData = {
 
 function VacationTab() {
     const { showSuccess, showError, showWarning } = useToast();
-    const [vacationRecords, setVacationRecords] = useState<VacationRecord[]>(INITIAL_VACATION_RECORDS);
+    const [vacationRecords, setVacationRecordsLocal] = useState<VacationRecord[]>(() => getTimeOffRecords());
     const [showAddModal, setShowAddModal] = useState(false);
     const [formData, setFormData] = useState<VacationFormData>(INITIAL_FORM_DATA);
     const [editingRecord, setEditingRecord] = useState<VacationRecord | null>(null);
     const [staffFilter, setStaffFilter] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<VacationType | 'all'>('all');
+
+    // Sync with shared time-off service
+    useEffect(() => {
+        const unsubscribe = subscribeToTimeOff(() => {
+            setVacationRecordsLocal(getTimeOffRecords());
+        });
+        return unsubscribe;
+    }, []);
+
+    // Wrapper to update both local state and shared service
+    const updateRecords = (newRecords: VacationRecord[]) => {
+        setVacationRecordsLocal(newRecords);
+        setTimeOffRecords(newRecords);
+    };
 
     // Filter records based on selected filters
     const filteredRecords = vacationRecords.filter(record => {
@@ -147,7 +121,7 @@ function VacationTab() {
 
         if (editingRecord) {
             // Update existing record
-            setVacationRecords(prev => prev.map(record =>
+            const updatedRecords = vacationRecords.map(record =>
                 record.id === editingRecord.id
                     ? {
                         ...record,
@@ -159,7 +133,8 @@ function VacationTab() {
                         notes: formData.notes || undefined,
                     }
                     : record
-            ));
+            );
+            updateRecords(updatedRecords);
             showSuccess('Time off record updated successfully');
         } else {
             // Create new record
@@ -175,7 +150,7 @@ function VacationTab() {
                 createdAt: new Date().toISOString(),
                 createdBy: 'Admin', // TODO: Get from session
             };
-            setVacationRecords(prev => [...prev, newRecord]);
+            updateRecords([...vacationRecords, newRecord]);
             showSuccess('Time off record added successfully');
         }
 
@@ -184,7 +159,7 @@ function VacationTab() {
 
     const handleDelete = (record: VacationRecord) => {
         if (window.confirm(`Are you sure you want to delete the ${VACATION_TYPES[record.type].label.toLowerCase()} for ${record.userName}?`)) {
-            setVacationRecords(prev => prev.filter(r => r.id !== record.id));
+            updateRecords(vacationRecords.filter(r => r.id !== record.id));
             showSuccess('Time off record deleted');
         }
     };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CalendarView from "./components/CalendarView.tsx";
 import { ShiftData, SwapFormData, SwapRequest, TeamMember } from "../../types/domain";
 import TeamView from "./components/TeamView.tsx";
@@ -13,6 +13,7 @@ import { formatShortDate, getDayName, getMonthYear, getWeekStart, getWeekRange, 
 import { generateWeekShifts, generateMonthShiftsForUser, generateMonthShiftsForTeam, generateRealisticSchedule, mergeShifts } from "../../utils/shiftGenerator";
 import { submitSwapRequest } from "../../services/api/scheduleService";
 import { exportScheduleToPDF } from "../../utils/pdfExport";
+import { getTimeOffForDate, subscribeToTimeOff } from "../../services/timeOffService";
 
 
 // Mock data
@@ -61,6 +62,17 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         date: string;
         shiftType: 'M' | 'A' | 'N';
     }>>([]);
+
+    // Time-off records state (subscribe to changes from VacationTab)
+    const [, setTimeOffVersion] = useState(0);
+
+    // Subscribe to time-off changes to trigger re-renders
+    useEffect(() => {
+        const unsubscribe = subscribeToTimeOff(() => {
+            setTimeOffVersion(v => v + 1);
+        });
+        return unsubscribe;
+    }, []);
 
     const LOGGED_IN_USER_ID = DEFAULTS.LOGGED_IN_USER_ID;
     const canGenerateSchedule = userRole === 'admin' || userRole === 'teamleader';
@@ -475,6 +487,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     nameFilter={nameFilter}
                     currentMonth={teamMonth}
                     isExpanded={isTableExpanded}
+                    getTimeOffForDate={getTimeOffForDate}
                 />
             )}
 
@@ -515,6 +528,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     LOGGED_IN_USER_ID={LOGGED_IN_USER_ID}
                     isToday={isToday}
                     setSelectedDate={setSelectedDate}
+                    getTimeOffForDate={getTimeOffForDate}
                 />
             )}
 
