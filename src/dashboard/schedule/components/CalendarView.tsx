@@ -41,14 +41,13 @@ export default function CalendarView(props: CalendarViewProps) {
                         : [];
                     const today = isToday(date);
 
-                    // If on time off, show grayed out cell
+                    // If on time off, show grayed out cell (not clickable)
                     if (date && timeOff) {
                         const typeInfo = TIME_OFF_TYPES[timeOff.type];
                         return (
                             <div
                                 key={index}
-                                className={`min-h-[100px] border-b border-r p-2 bg-gray-100 ${today ? "ring-2 ring-inset ring-blue-400" : ""} transition cursor-pointer`}
-                                onClick={() => setSelectedDate(date)}
+                                className={`min-h-[100px] border-b border-r p-2 bg-gray-100 ${today ? "ring-2 ring-inset ring-blue-400" : ""} transition`}
                             >
                                 <div
                                     className={`text-xs font-medium mb-1 ${
@@ -81,13 +80,17 @@ export default function CalendarView(props: CalendarViewProps) {
                         );
                     }
 
+                    // Check if day has any working shifts (M, A, N)
+                    const hasWorkingShift = dayShifts.some(shift => ['M', 'A', 'N'].includes(shift));
+                    const isClickable = date && hasWorkingShift;
+
                     return (
                         <div
                             key={index}
                             className={`min-h-[100px] border-b border-r p-2 ${
-                                !date ? "bg-gray-50" : "bg-white hover:bg-gray-50"
-                            } ${today ? "bg-blue-50" : ""} transition cursor-pointer`}
-                            onClick={() => date && setSelectedDate(date)}
+                                !date ? "bg-gray-50" : isClickable ? "bg-white hover:bg-gray-50 cursor-pointer" : "bg-white"
+                            } ${today ? "bg-blue-50" : ""} transition`}
+                            onClick={() => isClickable && setSelectedDate(date)}
                         >
                             {date && (
                                 <>
