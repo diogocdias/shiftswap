@@ -102,3 +102,19 @@ export interface MenuItem {
     badge?: number;
     order: number;
 }
+
+// Vacation/Time-off types
+export type VacationType = 'vacation' | 'sick' | 'personal' | 'special' | 'other';
+
+export interface VacationRecord {
+    id: string;
+    userId: string;
+    userName: string;
+    type: VacationType;
+    startDate: string;
+    endDate: string;
+    notes?: string;
+    status: 'approved' | 'pending' | 'declined';
+    createdAt: string;
+    createdBy: string;
+}

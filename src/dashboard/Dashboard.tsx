@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ScheduleTab from './schedule/ScheduleTab.tsx';
 import RequestsTab from './requests/RequestsTab.tsx';
 import ProfileTab from './profile/ProfileTab.tsx';
+import VacationTab from './vacation/VacationTab.tsx';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { MenuItem, UserRole } from '../types/domain';
 import { getUser, clearUser } from '../services/sessionService';
@@ -420,6 +421,9 @@ function Dashboard({ navigate }: DashboardProps) {
                             </div>
                         </div>
                     )}
+
+                    {/* Vacation Tab - Admin and Team Leader only */}
+                    {activeTab === 'vacation' && <VacationTab />}
 
                     {/* Settings Tab */}
                     {activeTab === 'settings' && (

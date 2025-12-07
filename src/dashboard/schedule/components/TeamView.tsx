@@ -1,8 +1,9 @@
 // TeamView.tsx
 import { SHIFT_LEGENDS } from "../ShiftConstants.ts";
-import { ShiftData, TeamMember, ShiftType } from "../../../types/domain";
+import { ShiftData, TeamMember, ShiftType, VacationRecord } from "../../../types/domain";
 import { useIsDesktop } from "../../../hooks/useIsDesktop";
 import { toISODateString } from "../../../utils/dateUtils";
+import { TIME_OFF_TYPES } from "../../../services/timeOffService";
 
 interface WeekViewProps {
     weekDays: Date[];
@@ -18,6 +19,7 @@ interface WeekViewProps {
     nameFilter: string;
     currentMonth: Date;
     isExpanded?: boolean;
+    getTimeOffForDate?: (userId: string, dateString: string) => VacationRecord | undefined;
 }
 
 export default function TeamView(props: WeekViewProps) {
@@ -34,7 +36,8 @@ export default function TeamView(props: WeekViewProps) {
         formatDate,
         nameFilter,
         currentMonth,
-        isExpanded = false
+        isExpanded = false,
+        getTimeOffForDate
     } = props;
 
     // Function to get all days in the current month
@@ -110,7 +113,40 @@ export default function TeamView(props: WeekViewProps) {
                                 {/* Mobile: render week days */}
                                 {weekDays.map((day, index) => {
                                     const dateKey = toISODateString(day);
+                                    const timeOff = getTimeOffForDate?.(member.id, dateKey);
                                     const dayShifts = shifts[member.id]?.[dateKey] || [];
+
+                                    // If on time off, show grayed out cell
+                                    if (timeOff) {
+                                        const typeInfo = TIME_OFF_TYPES[timeOff.type];
+                                        return (
+                                            <td key={`mobile-${index}`} className="md:hidden px-1 py-1.5 text-center relative bg-gray-100">
+                                                <div className="flex flex-wrap gap-0.5 justify-center">
+                                                    <div className="relative inline-block">
+                                                        <div
+                                                            className="bg-gray-300 text-gray-600 px-2 py-1 rounded font-semibold text-xs cursor-default opacity-75"
+                                                            onMouseEnter={() => setHoveredShift(`timeoff-${member.id}-${dateKey}`)}
+                                                            onMouseLeave={() => setHoveredShift(null)}
+                                                        >
+                                                            {typeInfo.shortLabel}
+                                                            {hoveredShift === `timeoff-${member.id}-${dateKey}` && (
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 text-white text-[10px] rounded whitespace-nowrap z-20 shadow-lg">
+                                                                    <div className="font-semibold">{typeInfo.icon} {typeInfo.label}</div>
+                                                                    <div className="text-gray-300 mt-0.5">Time Off</div>
+                                                                    {timeOff.notes && (
+                                                                        <div className="text-gray-400 mt-1">{timeOff.notes}</div>
+                                                                    )}
+                                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                                                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        );
+                                    }
 
                                     return (
                                         <td key={`mobile-${index}`} className="md:hidden px-1 py-1.5 text-center relative">
@@ -184,7 +220,40 @@ export default function TeamView(props: WeekViewProps) {
                                 {/* Desktop: render appropriate days based on role */}
                                 {daysToShow.map((day, index) => {
                                     const dateKey = toISODateString(day);
+                                    const timeOff = getTimeOffForDate?.(member.id, dateKey);
                                     const dayShifts = shifts[member.id]?.[dateKey] || [];
+
+                                    // If on time off, show grayed out cell
+                                    if (timeOff) {
+                                        const typeInfo = TIME_OFF_TYPES[timeOff.type];
+                                        return (
+                                            <td key={`desktop-${index}`} className="hidden md:table-cell px-1 py-1.5 text-center relative bg-gray-100">
+                                                <div className="flex flex-wrap gap-0.5 justify-center">
+                                                    <div className="relative inline-block">
+                                                        <div
+                                                            className={`bg-gray-300 text-gray-600 ${isExpanded ? 'px-2 py-1 text-xs' : (isMonthView ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-xs')} rounded font-semibold cursor-default opacity-75`}
+                                                            onMouseEnter={() => setHoveredShift(`timeoff-${member.id}-${dateKey}`)}
+                                                            onMouseLeave={() => setHoveredShift(null)}
+                                                        >
+                                                            {isMonthView && !isExpanded ? 'OFF' : typeInfo.shortLabel}
+                                                            {hoveredShift === `timeoff-${member.id}-${dateKey}` && (
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 text-white text-[10px] rounded whitespace-nowrap z-20 shadow-lg">
+                                                                    <div className="font-semibold">{typeInfo.icon} {typeInfo.label}</div>
+                                                                    <div className="text-gray-300 mt-0.5">Time Off</div>
+                                                                    {timeOff.notes && (
+                                                                        <div className="text-gray-400 mt-1">{timeOff.notes}</div>
+                                                                    )}
+                                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                                                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        );
+                                    }
 
                                     return (
                                         <td key={`desktop-${index}`} className="hidden md:table-cell px-1 py-1.5 text-center relative">
