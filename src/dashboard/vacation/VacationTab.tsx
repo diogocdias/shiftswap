@@ -57,7 +57,7 @@ const INITIAL_VACATION_RECORDS: VacationRecord[] = [
         startDate: '2024-12-15',
         endDate: '2024-12-15',
         notes: 'Personal matters',
-        status: 'pending',
+        status: 'approved',
         createdAt: '2024-12-05T09:15:00Z',
         createdBy: 'Team Leader',
     },
@@ -85,16 +85,14 @@ function VacationTab() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [formData, setFormData] = useState<VacationFormData>(INITIAL_FORM_DATA);
     const [editingRecord, setEditingRecord] = useState<VacationRecord | null>(null);
-    const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'declined'>('all');
     const [staffFilter, setStaffFilter] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<VacationType | 'all'>('all');
 
     // Filter records based on selected filters
     const filteredRecords = vacationRecords.filter(record => {
-        const statusMatch = filter === 'all' || record.status === filter;
         const staffMatch = !staffFilter || record.userId === staffFilter;
         const typeMatch = typeFilter === 'all' || record.type === typeFilter;
-        return statusMatch && staffMatch && typeMatch;
+        return staffMatch && typeMatch;
     });
 
     // Sort by start date (most recent first)
@@ -162,7 +160,7 @@ function VacationTab() {
                     }
                     : record
             ));
-            showSuccess('Vacation record updated successfully');
+            showSuccess('Time off record updated successfully');
         } else {
             // Create new record
             const newRecord: VacationRecord = {
@@ -173,12 +171,12 @@ function VacationTab() {
                 startDate: formData.startDate,
                 endDate: formData.endDate,
                 notes: formData.notes || undefined,
-                status: 'approved', // Auto-approve when admin/teamleader creates
+                status: 'approved',
                 createdAt: new Date().toISOString(),
                 createdBy: 'Admin', // TODO: Get from session
             };
             setVacationRecords(prev => [...prev, newRecord]);
-            showSuccess('Vacation record added successfully');
+            showSuccess('Time off record added successfully');
         }
 
         handleCloseModal();
@@ -187,15 +185,8 @@ function VacationTab() {
     const handleDelete = (record: VacationRecord) => {
         if (window.confirm(`Are you sure you want to delete the ${VACATION_TYPES[record.type].label.toLowerCase()} for ${record.userName}?`)) {
             setVacationRecords(prev => prev.filter(r => r.id !== record.id));
-            showSuccess('Vacation record deleted');
+            showSuccess('Time off record deleted');
         }
-    };
-
-    const handleStatusChange = (record: VacationRecord, newStatus: 'approved' | 'declined') => {
-        setVacationRecords(prev => prev.map(r =>
-            r.id === record.id ? { ...r, status: newStatus } : r
-        ));
-        showSuccess(`Vacation ${newStatus === 'approved' ? 'approved' : 'declined'}`);
     };
 
     const calculateDays = (startDate: string, endDate: string): number => {
@@ -215,13 +206,19 @@ function VacationTab() {
         return `${formatShortDate(start)} - ${formatShortDate(end)}`;
     };
 
+    // Count records by type
+    const recordsByType = Object.keys(VACATION_TYPES).reduce((acc, type) => {
+        acc[type as VacationType] = vacationRecords.filter(r => r.type === type).length;
+        return acc;
+    }, {} as Record<VacationType, number>);
+
     return (
         <div className="space-y-4">
             {/* Header */}
             <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Vacation & Time Off</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">Staff Time Off</h2>
                         <p className="text-xs text-gray-600 mt-0.5">
                             Manage staff vacations and special days off
                         </p>
@@ -239,23 +236,6 @@ function VacationTab() {
 
                 {/* Filters */}
                 <div className="mt-4 flex flex-wrap gap-3">
-                    {/* Status Filter */}
-                    <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                        {(['all', 'pending', 'approved', 'declined'] as const).map(status => (
-                            <button
-                                key={status}
-                                onClick={() => setFilter(status)}
-                                className={`px-3 py-1.5 text-xs font-medium rounded transition capitalize ${
-                                    filter === status
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                {status}
-                            </button>
-                        ))}
-                    </div>
-
                     {/* Staff Filter */}
                     <select
                         value={staffFilter}
@@ -289,19 +269,19 @@ function VacationTab() {
                     <div className="text-xs text-gray-600">Total Records</div>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-2xl font-bold text-yellow-600">
-                        {vacationRecords.filter(r => r.status === 'pending').length}
-                    </div>
-                    <div className="text-xs text-gray-600">Pending</div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-2xl font-bold text-green-600">
-                        {vacationRecords.filter(r => r.status === 'approved').length}
-                    </div>
-                    <div className="text-xs text-gray-600">Approved</div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
                     <div className="text-2xl font-bold text-blue-600">
+                        {recordsByType.vacation || 0}
+                    </div>
+                    <div className="text-xs text-gray-600">Vacations</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                    <div className="text-2xl font-bold text-red-600">
+                        {recordsByType.sick || 0}
+                    </div>
+                    <div className="text-xs text-gray-600">Sick Leave</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                    <div className="text-2xl font-bold text-purple-600">
                         {vacationRecords.reduce((acc, r) => acc + calculateDays(r.startDate, r.endDate), 0)}
                     </div>
                     <div className="text-xs text-gray-600">Total Days</div>
@@ -311,16 +291,13 @@ function VacationTab() {
             {/* Vacation Records List */}
             <div className="bg-white rounded-lg border border-gray-200">
                 <div className="p-4 border-b border-gray-200">
-                    <h3 className="font-semibold text-gray-900">
-                        Time Off Records
-                        {filter !== 'all' && <span className="text-gray-500 font-normal"> ({filter})</span>}
-                    </h3>
+                    <h3 className="font-semibold text-gray-900">Time Off Records</h3>
                 </div>
 
                 {sortedRecords.length === 0 ? (
                     <div className="p-8 text-center">
                         <div className="text-4xl mb-2">📅</div>
-                        <div className="text-gray-500">No vacation records found</div>
+                        <div className="text-gray-500">No time off records found</div>
                         <button
                             onClick={handleOpenAddModal}
                             className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm"
@@ -347,13 +324,6 @@ function VacationTab() {
                                                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeInfo.color}`}>
                                                         {typeInfo.label}
                                                     </span>
-                                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                                        record.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                        record.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-red-100 text-red-800'
-                                                    }`}>
-                                                        {record.status}
-                                                    </span>
                                                 </div>
                                                 <div className="text-sm text-gray-600 mt-1">
                                                     {formatDateRange(record.startDate, record.endDate)}
@@ -367,22 +337,6 @@ function VacationTab() {
                                         </div>
 
                                         <div className="flex items-center gap-2 ml-13 md:ml-0">
-                                            {record.status === 'pending' && (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleStatusChange(record, 'approved')}
-                                                        className="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition"
-                                                    >
-                                                        Approve
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleStatusChange(record, 'declined')}
-                                                        className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition"
-                                                    >
-                                                        Decline
-                                                    </button>
-                                                </>
-                                            )}
                                             <button
                                                 onClick={() => handleOpenEditModal(record)}
                                                 className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
