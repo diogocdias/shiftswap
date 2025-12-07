@@ -1,0 +1,405 @@
+{
+  "common": {
+    "loading": "A carregar...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "previous": "Anterior",
+    "today": "Hoje",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "all": "Todos",
+    "pending": "Pendente",
+    "approved": "Aprovado",
+    "declined": "Recusado",
+    "status": "Estado",
+    "actions": "Ações",
+    "yes": "Sim",
+    "no": "Não",
+    "close": "Fechar",
+    "submit": "Submeter",
+    "tryAgain": "Tentar Novamente",
+    "logout": "Terminar Sessão",
+    "viewProfile": "Ver Perfil",
+    "language": "Idioma",
+    "english": "Inglês",
+    "portuguese": "Português"
+  },
+  "nav": {
+    "product": "Produto",
+    "about": "Sobre",
+    "contact": "Contacto",
+    "login": "Entrar",
+    "getStarted": "Começar",
+    "home": "Início",
+    "backToHome": "Voltar ao Início"
+  },
+  "home": {
+    "hero": {
+      "title": "Gestão de Turnos,",
+      "titleBreak": "Simplificada",
+      "subtitle": "Para que se possa concentrar no que realmente importa – o cuidado ao paciente.",
+      "bookDemo": "Agendar Demo",
+      "learnMore": "Saber Mais"
+    },
+    "stats": {
+      "shiftsScheduled": "Turnos Agendados",
+      "healthcareFacilities": "Unidades de Saúde",
+      "platformAvailability": "Disponibilidade da Plataforma"
+    },
+    "product": {
+      "title": "O Nosso Produto",
+      "subtitle": "Tudo o que precisa para gerir turnos eficientemente numa única plataforma",
+      "creatingSchedules": {
+        "title": "Criação de Escalas",
+        "description": "O ShiftSwap cria escalas otimizadas com base em critérios predefinidos, garantindo uma distribuição justa dos turnos. Com a facilidade de um único clique, gere escalas que satisfazem as necessidades da sua equipa."
+      },
+      "swappingShifts": {
+        "title": "Troca de Turnos",
+        "description": "A nossa plataforma intuitiva permite que os funcionários troquem turnos facilmente, garantindo cobertura e flexibilidade. Os funcionários podem propor trocas e os gestores podem aprová-las sem complicações."
+      },
+      "onePlatform": {
+        "title": "Uma Plataforma. Sem papelada.",
+        "description": "O ShiftSwap consolida toda a gestão de escalas e turnos numa única plataforma, eliminando a necessidade de papelada e rastreamento manual."
+      }
+    },
+    "cta": {
+      "title": "Pronto para Simplificar as Suas Escalas?",
+      "subtitle": "Junte-se a centenas de unidades de saúde que já utilizam o ShiftSwap.",
+      "scheduleDemo": "Agendar uma Demo"
+    },
+    "footer": {
+      "tagline": "A simplificar escalas na saúde desde 2024.",
+      "productTitle": "Produto",
+      "features": "Funcionalidades",
+      "pricing": "Preços",
+      "companyTitle": "Empresa",
+      "aboutUs": "Sobre Nós",
+      "contactUs": "Contacto",
+      "connectTitle": "Contactos",
+      "copyright": "© 2024 ShiftSwap. Todos os direitos reservados."
+    }
+  },
+  "features": {
+    "hero": {
+      "title": "Como Funciona o ShiftSwap",
+      "subtitle": "Quatro passos simples para transformar as escalas da sua unidade de saúde"
+    },
+    "step": "Passo",
+    "steps": {
+      "createSchedule": {
+        "title": "Crie a Sua Escala",
+        "description": "Comece por configurar a escala básica da sua equipa. Defina tipos de turnos, horários de trabalho e atribua funcionários às suas funções preferidas. O nosso sistema inteligente ajuda a garantir uma distribuição justa e conformidade com as regulamentações laborais."
+      },
+      "automatedOptimization": {
+        "title": "Otimização Automática",
+        "description": "Deixe o algoritmo do ShiftSwap otimizar a sua escala com base nas preferências dos funcionários, requisitos de competências e necessidades de cobertura. O sistema deteta automaticamente conflitos e sugere os melhores arranjos para maximizar a eficiência."
+      },
+      "enableSwapping": {
+        "title": "Ative a Troca de Turnos",
+        "description": "Permita que os seus funcionários solicitem trocas de turnos diretamente através da plataforma. Os gestores recebem notificações instantâneas e podem aprovar ou recusar pedidos com um clique, mantendo controlo total enquanto dão flexibilidade aos funcionários."
+      },
+      "realTimeUpdates": {
+        "title": "Atualizações em Tempo Real",
+        "description": "Todos ficam informados com notificações instantâneas para alterações de escala, trocas aprovadas e turnos próximos. Aceda à escala a partir de qualquer dispositivo, em qualquer lugar, garantindo que a sua equipa está sempre atualizada."
+      }
+    },
+    "scheduleOverview": "Resumo da Escala",
+    "week": "Semana",
+    "dayShift": "Turno Diurno (8h-16h)",
+    "nightShift": "Turno Noturno (20h-6h)",
+    "cta": {
+      "title": "Pronto para Começar?",
+      "subtitle": "Veja o ShiftSwap em ação com uma demonstração personalizada",
+      "scheduleDemo": "Agendar uma Demo",
+      "backToHome": "Voltar ao Início"
+    },
+    "weekDays": {
+      "mon": "Seg",
+      "tue": "Ter",
+      "wed": "Qua",
+      "thu": "Qui",
+      "fri": "Sex",
+      "sat": "Sáb",
+      "sun": "Dom"
+    }
+  },
+  "login": {
+    "tabs": {
+      "login": "Entrar",
+      "signup": "Registar"
+    },
+    "welcomeBack": "Bem-vindo de Volta",
+    "signInSubtitle": "Inicie sessão na sua conta ShiftSwap",
+    "demoMode": "Modo Demo",
+    "demoModeHint": "Experimente estas contas (qualquer palavra-passe funciona):",
+    "demoAdmin": "(Administrador)",
+    "demoTeamLeader": "(Líder de Equipa)",
+    "demoUser": "(Utilizador)",
+    "emailLabel": "Endereço de Email",
+    "emailPlaceholder": "voce@exemplo.com",
+    "passwordLabel": "Palavra-passe",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Lembrar-me",
+    "forgotPassword": "Esqueceu a palavra-passe?",
+    "signIn": "Entrar",
+    "noAccount": "Não tem conta?",
+    "signUp": "Registar",
+    "createAccount": "Criar Conta",
+    "signUpSubtitle": "Junte-se ao ShiftSwap e simplifique as suas escalas",
+    "accountCreationSimulated": "A criação de conta é simulada",
+    "fullNameLabel": "Nome Completo",
+    "fullNamePlaceholder": "João Silva",
+    "facilityLabel": "Unidade de Saúde",
+    "facilityPlaceholder": "Hospital Memorial",
+    "confirmPasswordLabel": "Confirmar Palavra-passe",
+    "createAccountButton": "Criar Conta",
+    "hasAccount": "Já tem conta?",
+    "resetPassword": "Recuperar Palavra-passe",
+    "resetPasswordSubtitle": "Introduza o seu email e enviaremos um link de recuperação",
+    "passwordResetSimulated": "A recuperação de palavra-passe é simulada",
+    "sendResetLink": "Enviar Link de Recuperação",
+    "rememberPassword": "Lembra-se da palavra-passe?",
+    "termsAgreement": "Ao continuar, concorda com os",
+    "termsOfService": "Termos de Serviço",
+    "and": "e a",
+    "privacyPolicy": "Política de Privacidade",
+    "userNotFound": "Utilizador não encontrado. Experimente: admin@shiftswap.com, teamleader@shiftswap.com ou user@shiftswap.com",
+    "accountCreated": "Conta criada para {{email}}! Já pode iniciar sessão.",
+    "resetLinkSent": "Link de recuperação enviado para {{email}}!",
+    "welcomeUser": "Bem-vindo de volta, {{name}}!",
+    "requestTimeout": "O pedido expirou. Por favor, tente novamente."
+  },
+  "dashboard": {
+    "overview": "Resumo",
+    "schedule": "Escala",
+    "team": "Equipa",
+    "requests": "Pedidos",
+    "analytics": "Estatísticas",
+    "vacation": "Férias",
+    "settings": "Definições",
+    "profile": "Perfil",
+    "welcome": "Bem-vindo de volta, {{name}}!",
+    "todayOverview": "Eis o que está a acontecer hoje",
+    "stats": {
+      "upcomingShifts": "Turnos Próximos",
+      "thisWeek": "Esta semana",
+      "swapRequests": "Pedidos de Troca",
+      "pendingApproval": "Aguarda aprovação",
+      "hoursThisWeek": "Horas Esta Semana",
+      "hoursRemaining": "{{hours}} horas restantes",
+      "teamMembers": "Membros da Equipa",
+      "onShiftNow": "{{count}} em turno agora"
+    },
+    "quickActions": {
+      "title": "Ações Rápidas",
+      "requestSwap": "Pedir Troca",
+      "viewSchedule": "Ver Escala",
+      "timeOff": "Folga",
+      "teamChat": "Chat da Equipa"
+    },
+    "nextShift": {
+      "title": "Próximo Turno",
+      "location": "Local"
+    }
+  },
+  "schedule": {
+    "title": "Escala",
+    "teamScheduleWeek": "Escala da Equipa (Semana)",
+    "teamScheduleMonth": "Escala da Equipa (Mês)",
+    "myCalendar": "O Meu Calendário",
+    "filterByName": "Filtrar por nome...",
+    "generateSchedule": "Gerar Escala",
+    "syncCalendar": "Sincronizar Calendário",
+    "expandView": "Expandir Vista",
+    "collapseView": "Recolher Vista",
+    "noShiftsFound": "Não foram encontrados turnos para os critérios selecionados.",
+    "shiftTypes": {
+      "morning": "Manhã",
+      "afternoon": "Tarde",
+      "night": "Noite",
+      "rest": "Descanso",
+      "dayOff": "Folga"
+    },
+    "shiftTimes": {
+      "morning": "6:00 - 14:00",
+      "afternoon": "14:00 - 22:00",
+      "night": "22:00 - 6:00"
+    },
+    "generateModal": {
+      "title": "Gerar Escala",
+      "subtitle": "Criar uma nova escala para a sua equipa",
+      "startDate": "Data de Início",
+      "endDate": "Data de Fim",
+      "generate": "Gerar",
+      "generating": "A gerar..."
+    },
+    "calendarSync": {
+      "title": "Sincronizar com Calendário Externo",
+      "subtitle": "Exporte os seus turnos para a sua aplicação de calendário preferida",
+      "exportMonth": "Exportar Mês Atual",
+      "exportWeek": "Exportar Semana Atual",
+      "downloadIcs": "Transferir ficheiro .ics",
+      "copied": "Copiado para a área de transferência!",
+      "instructions": "Pode importar o ficheiro .ics transferido para o Google Calendar, Apple Calendar, Outlook ou qualquer outra aplicação de calendário."
+    },
+    "swapModal": {
+      "title": "Pedir Troca de Turno",
+      "yourShift": "O Seu Turno",
+      "selectShift": "Selecione o turno para trocar",
+      "requestedShift": "Turno Pretendido",
+      "selectTeamMember": "Selecione o membro da equipa",
+      "selectDate": "Selecione a data",
+      "selectShiftType": "Selecione o tipo de turno",
+      "additionalShifts": "Turnos Adicionais",
+      "addAnotherShift": "Adicionar outro turno",
+      "submitRequest": "Submeter Pedido",
+      "submitting": "A submeter..."
+    }
+  },
+  "team": {
+    "title": "Membros da Equipa",
+    "allStaff": "Todos os Funcionários",
+    "onShift": "Em Turno {{shift}}",
+    "offDuty": "Fora de Serviço"
+  },
+  "requests": {
+    "title": "Pedidos de Troca",
+    "incoming": "Recebidos",
+    "outgoing": "Enviados",
+    "filterAll": "Todos",
+    "filterPending": "Pendentes",
+    "filterApproved": "Aprovados",
+    "filterDeclined": "Recusados",
+    "noRequests": "Sem pedidos encontrados",
+    "noRequestsDescription": "Não há pedidos de troca que correspondam ao filtro selecionado.",
+    "card": {
+      "from": "De",
+      "to": "Para",
+      "requestedOn": "Pedido em",
+      "myShift": "O Meu Turno",
+      "theirShift": "Turno Dele/a",
+      "additionalShifts": "Turnos Adicionais",
+      "accept": "Aceitar",
+      "decline": "Recusar",
+      "approve": "Aprovar",
+      "cancel": "Cancelar",
+      "share": "Partilhar"
+    },
+    "shareModal": {
+      "title": "Partilhar Pedido de Troca",
+      "shareVia": "Partilhar via",
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram",
+      "messenger": "Messenger",
+      "sms": "SMS",
+      "copyLink": "Copiar para área de transferência",
+      "copied": "Copiado!"
+    }
+  },
+  "analytics": {
+    "title": "Estatísticas",
+    "totalHoursMonth": "Total de Horas Este Mês",
+    "fromLastMonth": "em relação ao mês passado",
+    "shiftSwaps": "Trocas de Turno",
+    "swapsDetail": "{{approved}} aprovadas, {{pending}} pendentes",
+    "coverageRate": "Taxa de Cobertura",
+    "excellentCoverage": "Cobertura excelente",
+    "shiftDistribution": "Distribuição de Turnos",
+    "chartsPlaceholder": "Os gráficos de estatísticas serão exibidos aqui"
+  },
+  "vacation": {
+    "title": "Férias e Folgas",
+    "addNew": "Adicionar Novo",
+    "filterByEmployee": "Filtrar por funcionário...",
+    "noRecords": "Sem registos de férias encontrados",
+    "noRecordsDescription": "Não há registos de férias ou folgas para os critérios selecionados.",
+    "types": {
+      "vacation": "Férias",
+      "sick": "Baixa Médica",
+      "personal": "Dia Pessoal",
+      "special": "Licença Especial",
+      "other": "Outro"
+    },
+    "addModal": {
+      "title": "Adicionar Ausência",
+      "employee": "Funcionário",
+      "selectEmployee": "Selecione o funcionário",
+      "type": "Tipo",
+      "selectType": "Selecione o tipo",
+      "startDate": "Data de Início",
+      "endDate": "Data de Fim",
+      "notes": "Notas (opcional)",
+      "notesPlaceholder": "Adicione notas adicionais...",
+      "add": "Adicionar",
+      "adding": "A adicionar..."
+    }
+  },
+  "settings": {
+    "title": "Definições do Sistema",
+    "facilityInfo": "Informação da Unidade",
+    "facilityName": "Nome da Unidade",
+    "facilityNamePlaceholder": "Hospital Memorial",
+    "timeZone": "Fuso Horário",
+    "easternTime": "Hora do Leste (ET)",
+    "pacificTime": "Hora do Pacífico (PT)",
+    "saveChanges": "Guardar Alterações"
+  },
+  "profile": {
+    "title": "Perfil",
+    "editProfile": "Editar Perfil",
+    "saveChanges": "Guardar Alterações",
+    "saving": "A guardar...",
+    "profileUpdated": "Perfil atualizado com sucesso!",
+    "failedToLoad": "Falha ao Carregar Perfil",
+    "failedToLoadDescription": "Não foi possível carregar os dados do perfil. Por favor, tente novamente.",
+    "failedToSave": "Falha ao guardar perfil. Por favor, tente novamente.",
+    "personalInfo": {
+      "title": "Informação Pessoal",
+      "fullName": "Nome Completo",
+      "email": "Endereço de Email",
+      "phone": "Número de Telefone"
+    },
+    "workInfo": {
+      "title": "Informação Profissional",
+      "employeeId": "Número de Funcionário",
+      "role": "Função",
+      "department": "Departamento"
+    },
+    "facilityInfo": {
+      "title": "Informação da Unidade",
+      "facility": "Unidade de Saúde",
+      "startDate": "Data de Início"
+    },
+    "accountSettings": {
+      "title": "Definições da Conta",
+      "changePassword": "Alterar Palavra-passe",
+      "notifications": "Preferências de Notificação",
+      "privacy": "Definições de Privacidade",
+      "language": "Preferência de Idioma"
+    },
+    "departments": {
+      "emergency": "Urgência",
+      "icu": "Unidade de Cuidados Intensivos",
+      "pediatrics": "Pediatria",
+      "surgery": "Cirurgia",
+      "oncology": "Oncologia",
+      "cardiology": "Cardiologia",
+      "neurology": "Neurologia",
+      "generalMedicine": "Medicina Geral"
+    },
+    "roles": {
+      "admin": "Administrador",
+      "teamleader": "Líder de Equipa",
+      "user": "Funcionário"
+    },
+    "imageValidation": {
+      "invalidType": "Por favor, selecione um ficheiro de imagem",
+      "tooLarge": "O tamanho da imagem deve ser inferior a 5MB"
+    }
+  }
+}

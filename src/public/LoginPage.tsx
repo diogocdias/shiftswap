@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LoadingOverlay } from '../components/LoadingOverlay';
+import LanguageSelector from '../components/LanguageSelector';
+import { getCurrentLanguage } from '../i18n';
 
 interface LoginPageProps {
     navigate: (page: string) => void;
@@ -14,6 +17,7 @@ const MOCK_USERS = {
 };
 
 function LoginPage({ navigate }: LoginPageProps) {
+    const { t } = useTranslation();
     const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
     const [formData, setFormData] = useState({
         email: '',
@@ -38,13 +42,14 @@ function LoginPage({ navigate }: LoginPageProps) {
             // Mock login - only check if email exists, accept any password
             if (MOCK_USERS[formData.email as keyof typeof MOCK_USERS]) {
                 const user = MOCK_USERS[formData.email as keyof typeof MOCK_USERS];
-                setSuccess(`Welcome back, ${user.name}!`);
+                setSuccess(t('login.welcomeUser', { name: user.name }));
 
-                // Store mock user data in sessionStorage
+                // Store mock user data in sessionStorage with current language preference
                 sessionStorage.setItem('mockUser', JSON.stringify({
                     email: formData.email,
                     name: user.name,
-                    role: user.role
+                    role: user.role,
+                    language: getCurrentLanguage()
                 }));
 
                 // Redirect to dashboard after successful login
@@ -52,18 +57,18 @@ function LoginPage({ navigate }: LoginPageProps) {
                     navigate('dashboard');
                 }, 1500);
             } else {
-                setError('User not found. Try: admin@shiftswap.com, teamleader@shiftswap.com, or user@shiftswap.com');
+                setError(t('login.userNotFound'));
             }
         } else if (mode === 'signup') {
             // Mock signup - just show success message
-            setSuccess(`Account created for ${formData.email}! You can now log in.`);
+            setSuccess(t('login.accountCreated', { email: formData.email }));
             setTimeout(() => {
                 setMode('login');
                 setSuccess('');
             }, 2000);
         } else if (mode === 'forgot') {
             // Mock forgot password - just show success message
-            setSuccess(`Password reset link sent to ${formData.email}!`);
+            setSuccess(t('login.resetLinkSent', { email: formData.email }));
         }
         // END TODO
 
@@ -91,12 +96,15 @@ function LoginPage({ navigate }: LoginPageProps) {
                                 onClick={() => navigate('home')}
                             />
                         </div>
-                        <button
-                            onClick={() => navigate('home')}
-                            className="text-gray-600 hover:text-gray-900 transition"
-                        >
-                            Back to Home
-                        </button>
+                        <div className="flex items-center gap-4">
+                            <LanguageSelector variant="compact" />
+                            <button
+                                onClick={() => navigate('home')}
+                                className="text-gray-600 hover:text-gray-900 transition"
+                            >
+                                {t('nav.backToHome')}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -115,7 +123,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         : 'text-gray-500 hover:text-gray-700'
                                 }`}
                             >
-                                Login
+                                {t('login.tabs.login')}
                             </button>
                             <button
                                 onClick={() => setMode('signup')}
@@ -125,7 +133,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         : 'text-gray-500 hover:text-gray-700'
                                 }`}
                             >
-                                Sign Up
+                                {t('login.tabs.signup')}
                             </button>
                         </div>
 
@@ -134,18 +142,18 @@ function LoginPage({ navigate }: LoginPageProps) {
                             <div className="space-y-6">
                                 <div>
                                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                        Welcome Back
+                                        {t('login.welcomeBack')}
                                     </h2>
                                     <p className="text-gray-600">
-                                        Sign in to your ShiftSwap account
+                                        {t('login.signInSubtitle')}
                                     </p>
                                     {/* TODO: REMOVE - Mock login hint */}
                                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                                        <strong>Demo Mode:</strong> Try these accounts (any password works):
+                                        <strong>{t('login.demoMode')}:</strong> {t('login.demoModeHint')}
                                         <ul className="mt-2 ml-4 list-disc">
-                                            <li>admin@shiftswap.com (Admin)</li>
-                                            <li>teamleader@shiftswap.com (Team Leader)</li>
-                                            <li>user@shiftswap.com (User)</li>
+                                            <li>admin@shiftswap.com {t('login.demoAdmin')}</li>
+                                            <li>teamleader@shiftswap.com {t('login.demoTeamLeader')}</li>
+                                            <li>user@shiftswap.com {t('login.demoUser')}</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -164,7 +172,7 @@ function LoginPage({ navigate }: LoginPageProps) {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Email Address
+                                        {t('login.emailLabel')}
                                     </label>
                                     <input
                                         type="email"
@@ -172,14 +180,14 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.email}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="you@example.com"
+                                        placeholder={t('login.emailPlaceholder')}
                                         required
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Password
+                                        {t('login.passwordLabel')}
                                     </label>
                                     <input
                                         type="password"
@@ -187,7 +195,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.password}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="••••••••"
+                                        placeholder={t('login.passwordPlaceholder')}
                                         required
                                     />
                                 </div>
@@ -199,7 +207,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                         />
                                         <span className="ml-2 text-sm text-gray-600">
-                                            Remember me
+                                            {t('login.rememberMe')}
                                         </span>
                                     </label>
                                     <button
@@ -207,7 +215,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         onClick={() => setMode('forgot')}
                                         className="text-sm text-blue-600 hover:text-blue-700"
                                     >
-                                        Forgot password?
+                                        {t('login.forgotPassword')}
                                     </button>
                                 </div>
 
@@ -215,16 +223,16 @@ function LoginPage({ navigate }: LoginPageProps) {
                                     onClick={handleSubmit}
                                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
                                 >
-                                    Sign In
+                                    {t('login.signIn')}
                                 </button>
 
                                 <div className="text-center text-sm text-gray-600">
-                                    Don't have an account?{' '}
+                                    {t('login.noAccount')}{' '}
                                     <button
                                         onClick={() => setMode('signup')}
                                         className="text-blue-600 hover:text-blue-700 font-medium"
                                     >
-                                        Sign up
+                                        {t('login.signUp')}
                                     </button>
                                 </div>
                             </div>
@@ -235,14 +243,14 @@ function LoginPage({ navigate }: LoginPageProps) {
                             <div className="space-y-6">
                                 <div>
                                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                        Create Account
+                                        {t('login.createAccount')}
                                     </h2>
                                     <p className="text-gray-600">
-                                        Join ShiftSwap and simplify your scheduling
+                                        {t('login.signUpSubtitle')}
                                     </p>
                                     {/* TODO: REMOVE - Mock signup hint */}
                                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                                        <strong>Demo Mode:</strong> Account creation is simulated
+                                        <strong>{t('login.demoMode')}:</strong> {t('login.accountCreationSimulated')}
                                     </div>
                                 </div>
 
@@ -260,7 +268,7 @@ function LoginPage({ navigate }: LoginPageProps) {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Full Name
+                                        {t('login.fullNameLabel')}
                                     </label>
                                     <input
                                         type="text"
@@ -268,14 +276,14 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.name}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="John Doe"
+                                        placeholder={t('login.fullNamePlaceholder')}
                                         required
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Email Address
+                                        {t('login.emailLabel')}
                                     </label>
                                     <input
                                         type="email"
@@ -283,14 +291,14 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.email}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="you@example.com"
+                                        placeholder={t('login.emailPlaceholder')}
                                         required
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Healthcare Facility
+                                        {t('login.facilityLabel')}
                                     </label>
                                     <input
                                         type="text"
@@ -298,14 +306,14 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.facility}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Memorial Hospital"
+                                        placeholder={t('login.facilityPlaceholder')}
                                         required
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Password
+                                        {t('login.passwordLabel')}
                                     </label>
                                     <input
                                         type="password"
@@ -313,14 +321,14 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.password}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="••••••••"
+                                        placeholder={t('login.passwordPlaceholder')}
                                         required
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Confirm Password
+                                        {t('login.confirmPasswordLabel')}
                                     </label>
                                     <input
                                         type="password"
@@ -328,7 +336,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="••••••••"
+                                        placeholder={t('login.passwordPlaceholder')}
                                         required
                                     />
                                 </div>
@@ -337,16 +345,16 @@ function LoginPage({ navigate }: LoginPageProps) {
                                     onClick={handleSubmit}
                                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
                                 >
-                                    Create Account
+                                    {t('login.createAccountButton')}
                                 </button>
 
                                 <div className="text-center text-sm text-gray-600">
-                                    Already have an account?{' '}
+                                    {t('login.hasAccount')}{' '}
                                     <button
                                         onClick={() => setMode('login')}
                                         className="text-blue-600 hover:text-blue-700 font-medium"
                                     >
-                                        Sign in
+                                        {t('login.signIn')}
                                     </button>
                                 </div>
                             </div>
@@ -357,14 +365,14 @@ function LoginPage({ navigate }: LoginPageProps) {
                             <div className="space-y-6">
                                 <div>
                                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                        Reset Password
+                                        {t('login.resetPassword')}
                                     </h2>
                                     <p className="text-gray-600">
-                                        Enter your email and we'll send you a reset link
+                                        {t('login.resetPasswordSubtitle')}
                                     </p>
                                     {/* TODO: REMOVE - Mock password reset hint */}
                                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                                        <strong>Demo Mode:</strong> Password reset is simulated
+                                        <strong>{t('login.demoMode')}:</strong> {t('login.passwordResetSimulated')}
                                     </div>
                                 </div>
 
@@ -382,7 +390,7 @@ function LoginPage({ navigate }: LoginPageProps) {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Email Address
+                                        {t('login.emailLabel')}
                                     </label>
                                     <input
                                         type="email"
@@ -390,7 +398,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                                         value={formData.email}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="you@example.com"
+                                        placeholder={t('login.emailPlaceholder')}
                                         required
                                     />
                                 </div>
@@ -399,16 +407,16 @@ function LoginPage({ navigate }: LoginPageProps) {
                                     onClick={handleSubmit}
                                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition"
                                 >
-                                    Send Reset Link
+                                    {t('login.sendResetLink')}
                                 </button>
 
                                 <div className="text-center text-sm text-gray-600">
-                                    Remember your password?{' '}
+                                    {t('login.rememberPassword')}{' '}
                                     <button
                                         onClick={() => setMode('login')}
                                         className="text-blue-600 hover:text-blue-700 font-medium"
                                     >
-                                        Sign in
+                                        {t('login.signIn')}
                                     </button>
                                 </div>
                             </div>
@@ -418,13 +426,13 @@ function LoginPage({ navigate }: LoginPageProps) {
                     {/* Additional Info */}
                     <div className="mt-8 text-center text-sm text-gray-600">
                         <p>
-                            By continuing, you agree to ShiftSwap's{' '}
+                            {t('login.termsAgreement')}{' '}
                             <a href="#" className="text-blue-600 hover:text-blue-700">
-                                Terms of Service
+                                {t('login.termsOfService')}
                             </a>{' '}
-                            and{' '}
+                            {t('login.and')}{' '}
                             <a href="#" className="text-blue-600 hover:text-blue-700">
-                                Privacy Policy
+                                {t('login.privacyPolicy')}
                             </a>
                         </p>
                     </div>
@@ -436,7 +444,7 @@ function LoginPage({ navigate }: LoginPageProps) {
                 isLoading={isSubmitting}
                 onTimeout={() => {
                     setIsSubmitting(false);
-                    setError('Request timed out. Please try again.');
+                    setError(t('login.requestTimeout'));
                 }}
             />
         </div>

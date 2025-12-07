@@ -3,7 +3,7 @@
  * Provides a centralized abstraction over sessionStorage.
  */
 
-import { UserSession, UserRole } from '../types/domain';
+import { UserSession, UserRole, LanguageCode } from '../types/domain';
 import { STORAGE_KEYS, DEFAULTS } from '../config/constants';
 
 /**
@@ -78,6 +78,23 @@ export function getUserId(): string {
     return user?.employeeId || DEFAULTS.LOGGED_IN_USER_ID;
 }
 
+/**
+ * Get the current user's language preference.
+ * @returns The language code or undefined if not set
+ */
+export function getUserLanguage(): LanguageCode | undefined {
+    const user = getUser();
+    return user?.language;
+}
+
+/**
+ * Set the current user's language preference.
+ * @param language - The language code to set
+ */
+export function setUserLanguage(language: LanguageCode): void {
+    updateUser({ language });
+}
+
 // Export as a service object for those who prefer that pattern
 export const sessionService = {
     getUser,
@@ -87,6 +104,8 @@ export const sessionService = {
     getUserRole,
     isLoggedIn,
     getUserId,
+    getUserLanguage,
+    setUserLanguage,
 };
 
 export default sessionService;

@@ -1,0 +1,405 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "today": "Today",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "pending": "Pending",
+    "approved": "Approved",
+    "declined": "Declined",
+    "status": "Status",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "submit": "Submit",
+    "tryAgain": "Try Again",
+    "logout": "Logout",
+    "viewProfile": "View Profile",
+    "language": "Language",
+    "english": "English",
+    "portuguese": "Portuguese"
+  },
+  "nav": {
+    "product": "Product",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "getStarted": "Get Started",
+    "home": "Home",
+    "backToHome": "Back to Home"
+  },
+  "home": {
+    "hero": {
+      "title": "Scheduling Shifts,",
+      "titleBreak": "Made Easy",
+      "subtitle": "So you can focus on what matters most – patient care.",
+      "bookDemo": "Book a Demo",
+      "learnMore": "Learn More"
+    },
+    "stats": {
+      "shiftsScheduled": "Shifts Scheduled",
+      "healthcareFacilities": "Healthcare Facilities",
+      "platformAvailability": "Platform Availability"
+    },
+    "product": {
+      "title": "Our Product",
+      "subtitle": "Everything you need to manage shifts efficiently in one simple platform",
+      "creatingSchedules": {
+        "title": "Creating Schedules",
+        "description": "ShiftSwap creates optimized schedules based on pre-defined criteria, ensuring fair distribution of shifts. With the ease of a single click, generate schedules that meet your team's needs."
+      },
+      "swappingShifts": {
+        "title": "Swapping Shifts",
+        "description": "Our intuitive platform allows staff to easily swap shifts, ensuring coverage and flexibility. Staff can propose swaps, and managers can approve them with minimal hassle."
+      },
+      "onePlatform": {
+        "title": "One Platform. No paperwork.",
+        "description": "ShiftSwap consolidates all scheduling and shift management into a single platform, eliminating the need for paperwork and manual tracking."
+      }
+    },
+    "cta": {
+      "title": "Ready to Simplify Your Scheduling?",
+      "subtitle": "Join hundreds of healthcare facilities already using ShiftSwap.",
+      "scheduleDemo": "Schedule a Demo"
+    },
+    "footer": {
+      "tagline": "Simplifying healthcare scheduling since 2024.",
+      "productTitle": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "companyTitle": "Company",
+      "aboutUs": "About",
+      "contactUs": "Contact",
+      "connectTitle": "Connect",
+      "copyright": "© 2024 ShiftSwap. All rights reserved."
+    }
+  },
+  "features": {
+    "hero": {
+      "title": "How ShiftSwap Works",
+      "subtitle": "Four simple steps to transform your healthcare scheduling"
+    },
+    "step": "Step",
+    "steps": {
+      "createSchedule": {
+        "title": "Create Your Schedule",
+        "description": "Start by setting up your team's basic schedule. Define shift types, set working hours, and assign staff members to their preferred roles. Our intelligent system helps ensure fair distribution and compliance with labor regulations."
+      },
+      "automatedOptimization": {
+        "title": "Automated Optimization",
+        "description": "Let ShiftSwap's algorithm optimize your schedule based on staff preferences, skill requirements, and coverage needs. The system automatically detects conflicts and suggests the best arrangements to maximize efficiency."
+      },
+      "enableSwapping": {
+        "title": "Enable Shift Swapping",
+        "description": "Empower your staff to request shift swaps directly through the platform. Managers receive instant notifications and can approve or deny requests with one click, maintaining full control while giving staff flexibility."
+      },
+      "realTimeUpdates": {
+        "title": "Real-Time Updates",
+        "description": "Everyone stays informed with instant notifications for schedule changes, approved swaps, and upcoming shifts. Access the schedule from any device, anywhere, ensuring your team is always up to date."
+      }
+    },
+    "scheduleOverview": "Schedule Overview",
+    "week": "Week",
+    "dayShift": "Day Shift (8am-4pm)",
+    "nightShift": "Night Shift (8pm-6am)",
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "See ShiftSwap in action with a personalized demo",
+      "scheduleDemo": "Schedule a Demo",
+      "backToHome": "Back to Home"
+    },
+    "weekDays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "login": {
+    "tabs": {
+      "login": "Login",
+      "signup": "Sign Up"
+    },
+    "welcomeBack": "Welcome Back",
+    "signInSubtitle": "Sign in to your ShiftSwap account",
+    "demoMode": "Demo Mode",
+    "demoModeHint": "Try these accounts (any password works):",
+    "demoAdmin": "(Admin)",
+    "demoTeamLeader": "(Team Leader)",
+    "demoUser": "(User)",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "createAccount": "Create Account",
+    "signUpSubtitle": "Join ShiftSwap and simplify your scheduling",
+    "accountCreationSimulated": "Account creation is simulated",
+    "fullNameLabel": "Full Name",
+    "fullNamePlaceholder": "John Doe",
+    "facilityLabel": "Healthcare Facility",
+    "facilityPlaceholder": "Memorial Hospital",
+    "confirmPasswordLabel": "Confirm Password",
+    "createAccountButton": "Create Account",
+    "hasAccount": "Already have an account?",
+    "resetPassword": "Reset Password",
+    "resetPasswordSubtitle": "Enter your email and we'll send you a reset link",
+    "passwordResetSimulated": "Password reset is simulated",
+    "sendResetLink": "Send Reset Link",
+    "rememberPassword": "Remember your password?",
+    "termsAgreement": "By continuing, you agree to ShiftSwap's",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "userNotFound": "User not found. Try: admin@shiftswap.com, teamleader@shiftswap.com, or user@shiftswap.com",
+    "accountCreated": "Account created for {{email}}! You can now log in.",
+    "resetLinkSent": "Password reset link sent to {{email}}!",
+    "welcomeUser": "Welcome back, {{name}}!",
+    "requestTimeout": "Request timed out. Please try again."
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "schedule": "Schedule",
+    "team": "Team",
+    "requests": "Requests",
+    "analytics": "Analytics",
+    "vacation": "Vacation",
+    "settings": "Settings",
+    "profile": "Profile",
+    "welcome": "Welcome back, {{name}}!",
+    "todayOverview": "Here's what's happening today",
+    "stats": {
+      "upcomingShifts": "Upcoming Shifts",
+      "thisWeek": "This week",
+      "swapRequests": "Swap Requests",
+      "pendingApproval": "Pending approval",
+      "hoursThisWeek": "Hours This Week",
+      "hoursRemaining": "{{hours}} hours remaining",
+      "teamMembers": "Team Members",
+      "onShiftNow": "{{count}} on shift now"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "requestSwap": "Request Swap",
+      "viewSchedule": "View Schedule",
+      "timeOff": "Time Off",
+      "teamChat": "Team Chat"
+    },
+    "nextShift": {
+      "title": "Next Shift",
+      "location": "Location"
+    }
+  },
+  "schedule": {
+    "title": "Schedule",
+    "teamScheduleWeek": "Team Schedule (Week)",
+    "teamScheduleMonth": "Team Schedule (Month)",
+    "myCalendar": "My Calendar",
+    "filterByName": "Filter by name...",
+    "generateSchedule": "Generate Schedule",
+    "syncCalendar": "Sync Calendar",
+    "expandView": "Expand View",
+    "collapseView": "Collapse View",
+    "noShiftsFound": "No shifts found for the selected criteria.",
+    "shiftTypes": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "night": "Night",
+      "rest": "Rest",
+      "dayOff": "Day Off"
+    },
+    "shiftTimes": {
+      "morning": "6:00 AM - 2:00 PM",
+      "afternoon": "2:00 PM - 10:00 PM",
+      "night": "10:00 PM - 6:00 AM"
+    },
+    "generateModal": {
+      "title": "Generate Schedule",
+      "subtitle": "Create a new schedule for your team",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "generate": "Generate",
+      "generating": "Generating..."
+    },
+    "calendarSync": {
+      "title": "Sync with External Calendar",
+      "subtitle": "Export your shifts to your preferred calendar app",
+      "exportMonth": "Export Current Month",
+      "exportWeek": "Export Current Week",
+      "downloadIcs": "Download .ics file",
+      "copied": "Copied to clipboard!",
+      "instructions": "You can import the downloaded .ics file into Google Calendar, Apple Calendar, Outlook, or any other calendar application."
+    },
+    "swapModal": {
+      "title": "Request Shift Swap",
+      "yourShift": "Your Shift",
+      "selectShift": "Select shift to swap",
+      "requestedShift": "Requested Shift",
+      "selectTeamMember": "Select team member",
+      "selectDate": "Select date",
+      "selectShiftType": "Select shift type",
+      "additionalShifts": "Additional Shifts",
+      "addAnotherShift": "Add another shift",
+      "submitRequest": "Submit Request",
+      "submitting": "Submitting..."
+    }
+  },
+  "team": {
+    "title": "Team Members",
+    "allStaff": "All Staff Members",
+    "onShift": "On {{shift}} Shift",
+    "offDuty": "Off Duty"
+  },
+  "requests": {
+    "title": "Swap Requests",
+    "incoming": "Incoming",
+    "outgoing": "Outgoing",
+    "filterAll": "All",
+    "filterPending": "Pending",
+    "filterApproved": "Approved",
+    "filterDeclined": "Declined",
+    "noRequests": "No requests found",
+    "noRequestsDescription": "There are no swap requests matching the selected filter.",
+    "card": {
+      "from": "From",
+      "to": "To",
+      "requestedOn": "Requested on",
+      "myShift": "My Shift",
+      "theirShift": "Their Shift",
+      "additionalShifts": "Additional Shifts",
+      "accept": "Accept",
+      "decline": "Decline",
+      "approve": "Approve",
+      "cancel": "Cancel",
+      "share": "Share"
+    },
+    "shareModal": {
+      "title": "Share Swap Request",
+      "shareVia": "Share via",
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram",
+      "messenger": "Messenger",
+      "sms": "SMS",
+      "copyLink": "Copy to clipboard",
+      "copied": "Copied!"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "totalHoursMonth": "Total Hours This Month",
+    "fromLastMonth": "from last month",
+    "shiftSwaps": "Shift Swaps",
+    "swapsDetail": "{{approved}} approved, {{pending}} pending",
+    "coverageRate": "Coverage Rate",
+    "excellentCoverage": "Excellent coverage",
+    "shiftDistribution": "Shift Distribution",
+    "chartsPlaceholder": "Analytics charts will be displayed here"
+  },
+  "vacation": {
+    "title": "Vacation & Days Off",
+    "addNew": "Add New",
+    "filterByEmployee": "Filter by employee...",
+    "noRecords": "No vacation records found",
+    "noRecordsDescription": "There are no vacation or days off records for the selected criteria.",
+    "types": {
+      "vacation": "Vacation",
+      "sick": "Sick Leave",
+      "personal": "Personal Day",
+      "special": "Special Leave",
+      "other": "Other"
+    },
+    "addModal": {
+      "title": "Add Time Off",
+      "employee": "Employee",
+      "selectEmployee": "Select employee",
+      "type": "Type",
+      "selectType": "Select type",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "notes": "Notes (optional)",
+      "notesPlaceholder": "Add any additional notes...",
+      "add": "Add",
+      "adding": "Adding..."
+    }
+  },
+  "settings": {
+    "title": "System Settings",
+    "facilityInfo": "Facility Information",
+    "facilityName": "Facility Name",
+    "facilityNamePlaceholder": "Memorial Hospital",
+    "timeZone": "Time Zone",
+    "easternTime": "Eastern Time (ET)",
+    "pacificTime": "Pacific Time (PT)",
+    "saveChanges": "Save Changes"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "profileUpdated": "Profile updated successfully!",
+    "failedToLoad": "Failed to Load Profile",
+    "failedToLoadDescription": "Unable to load profile data. Please try again.",
+    "failedToSave": "Failed to save profile. Please try again.",
+    "personalInfo": {
+      "title": "Personal Information",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number"
+    },
+    "workInfo": {
+      "title": "Work Information",
+      "employeeId": "Employee ID",
+      "role": "Role",
+      "department": "Department"
+    },
+    "facilityInfo": {
+      "title": "Facility Information",
+      "facility": "Healthcare Facility",
+      "startDate": "Start Date"
+    },
+    "accountSettings": {
+      "title": "Account Settings",
+      "changePassword": "Change Password",
+      "notifications": "Notification Preferences",
+      "privacy": "Privacy Settings",
+      "language": "Language Preference"
+    },
+    "departments": {
+      "emergency": "Emergency Department",
+      "icu": "Intensive Care Unit",
+      "pediatrics": "Pediatrics",
+      "surgery": "Surgery",
+      "oncology": "Oncology",
+      "cardiology": "Cardiology",
+      "neurology": "Neurology",
+      "generalMedicine": "General Medicine"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "teamleader": "Team Leader",
+      "user": "Staff Member"
+    },
+    "imageValidation": {
+      "invalidType": "Please select an image file",
+      "tooLarge": "Image size should be less than 5MB"
+    }
+  }
+}

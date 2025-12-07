@@ -67,6 +67,9 @@ export interface SwapFormData {
     targetShifts: ShiftDetail[];
 }
 
+// Supported language codes
+export type LanguageCode = 'en' | 'pt';
+
 // User profile
 export interface UserProfile {
     name: string;
@@ -78,6 +81,7 @@ export interface UserProfile {
     facility: string;
     startDate: string;
     profilePicture: string | null;
+    language?: LanguageCode;
 }
 
 // Session user data (stored in sessionStorage)
@@ -92,6 +96,7 @@ export interface UserSession {
     employeeId?: string;
     facility?: string;
     startDate?: string;
+    language?: LanguageCode;
 }
 
 // Menu item for navigation
