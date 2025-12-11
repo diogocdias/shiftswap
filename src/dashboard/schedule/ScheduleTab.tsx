@@ -456,7 +456,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 onClick={goToToday}
                                 className="px-3 py-1.5 text-xs font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
                             >
-                                Today
+                                {t('common.today')}
                             </button>
                             <button
                                 onClick={() => scheduleView === 'team' ? navigateTeamView('next') : navigateMonth('next')}
@@ -592,7 +592,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                         })}
                                     </h2>
                                     {isToday(selectedDate) && (
-                                        <span className="text-sm text-blue-600 font-medium">Today</span>
+                                        <span className="text-sm text-blue-600 font-medium">{t('common.today')}</span>
                                     )}
                                 </div>
                                 <button

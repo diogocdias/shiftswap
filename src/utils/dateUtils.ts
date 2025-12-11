@@ -2,6 +2,22 @@
  * Date utility functions for consistent date handling across the application.
  */
 
+import { getCurrentLanguage } from '../i18n';
+
+/**
+ * Get the locale code for date formatting based on current language
+ * @returns The locale code
+ */
+function getLocale(): string {
+    const lang = getCurrentLanguage();
+    // Map language codes to locales
+    const localeMap: Record<string, string> = {
+        'en': 'en-US',
+        'pt': 'pt-PT',
+    };
+    return localeMap[lang] || 'en-US';
+}
+
 /**
  * Convert a Date to ISO date string (YYYY-MM-DD).
  * @param date - The date to convert
@@ -17,7 +33,7 @@ export function toISODateString(date: Date): string {
  * @returns Formatted date string
  */
 export function formatShortDate(date: Date): string {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' });
 }
 
 /**
@@ -26,7 +42,7 @@ export function formatShortDate(date: Date): string {
  * @returns Day name abbreviation
  */
 export function getDayName(date: Date): string {
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return date.toLocaleDateString(getLocale(), { weekday: 'short' });
 }
 
 /**
@@ -35,7 +51,7 @@ export function getDayName(date: Date): string {
  * @returns Full formatted date string
  */
 export function formatFullDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(getLocale(), {
         weekday: 'long',
         month: 'long',
         day: 'numeric',
@@ -49,7 +65,7 @@ export function formatFullDate(date: Date): string {
  * @returns Month and year string
  */
 export function getMonthYear(date: Date): string {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' });
 }
 
 /**
