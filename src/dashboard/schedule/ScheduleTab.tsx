@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import CalendarView from "./components/CalendarView.tsx";
 import { ShiftData, SwapFormData, SwapRequest, TeamMember } from "../../types/domain";
 import TeamView from "./components/TeamView.tsx";
@@ -33,6 +34,7 @@ interface ScheduleTabProps {
 }
 
 function ScheduleTab({userRole}: ScheduleTabProps) {
+    const { t } = useTranslation();
     const { showSuccess, showWarning, showError } = useToast();
     const [scheduleView, setScheduleView] = useState<'team' | 'calendar'>('team');
     const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date()));
@@ -242,7 +244,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         if (!swapFormData) return;
 
         if (!swapFormData.targetUserId || !swapFormData.targetShifts || swapFormData.targetShifts.length === 0 || !swapFormData.myShifts || swapFormData.myShifts.length === 0) {
-            showWarning('Please fill in all required fields');
+            showWarning(t('schedule.toast.fillAllFields'));
             return;
         }
 
@@ -257,10 +259,12 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
 
         const myShiftsCount = swapFormData.myShifts.length;
         const targetShiftsCount = swapFormData.targetShifts.length;
-        const shiftsText = myShiftsCount === 1 ? 'shift' : 'shifts';
-        const targetText = targetShiftsCount === 1 ? 'shift' : 'shifts';
 
-        showSuccess(`Swap request submitted! ${myShiftsCount} ${shiftsText} for ${targetShiftsCount} ${targetText}. Waiting for approval.`);
+        showSuccess(
+            myShiftsCount === 1 && targetShiftsCount === 1
+                ? t('schedule.toast.swapSubmitted', { myShifts: myShiftsCount, targetShifts: targetShiftsCount })
+                : t('schedule.toast.swapSubmittedPlural', { myShifts: myShiftsCount, targetShifts: targetShiftsCount })
+        );
     };
 
     const hasPendingSwap = (userId: string, date: string, shiftType: 'M' | 'A' | 'N' | 'R' | 'D') => {
@@ -292,7 +296,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
             console.log('Schedule generated successfully:', { startDate, endDate, generatedShifts });
         } catch (error) {
             console.error('Failed to generate schedule:', error);
-            showError('Failed to generate schedule. Please try again.');
+            showError(t('schedule.toast.generateFailed'));
         } finally {
             setIsGenerating(false);
         }
@@ -321,7 +325,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const handleCalendarSync = (providerId: string) => {
         // TODO: Integrate with real calendar API
         console.log('Calendar synced with provider:', providerId);
-        showSuccess('Your shifts have been synced to your calendar!');
+        showSuccess(t('schedule.toast.calendarSynced'));
     };
 
     return (
@@ -332,7 +336,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     <div className="flex items-center gap-4">
                         <div>
                             <h2 className="text-lg font-semibold text-gray-900">
-                                {scheduleView === 'team' ? 'Team Schedule' : 'My Calendar'}
+                                {scheduleView === 'team' ? t('schedule.teamSchedule') : t('schedule.myCalendar')}
                             </h2>
                             <p className="text-xs text-gray-600 mt-0.5">
                                 {scheduleView === 'team' ? getTeamViewSubtitle() : getLocalMonthYear()}
@@ -349,7 +353,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                         : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             >
-                                Team Schedule
+                                {t('schedule.teamSchedule')}
                             </button>
                             <button
                                 onClick={() => setScheduleView('calendar')}
@@ -359,7 +363,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                         : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             >
-                                My Calendar
+                                {t('schedule.myCalendar')}
                             </button>
                         </div>
                     </div>
@@ -374,7 +378,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
-                                Generate Schedule
+                                {t('schedule.generateSchedule')}
                             </button>
                         )}
 
@@ -383,12 +387,12 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                             <button
                                 onClick={handleExportPDF}
                                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-xs"
-                                title="Export full month schedule to PDF"
+                                title={t('schedule.exportPDF')}
                             >
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Export PDF
+                                {t('schedule.exportPDF')}
                             </button>
                         )}
 
@@ -397,12 +401,12 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                             <button
                                 onClick={() => setShowCalendarSyncModal(true)}
                                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-xs"
-                                title="Sync your shifts to an external calendar"
+                                title={t('schedule.syncCalendar')}
                             >
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
-                                Sync Calendar
+                                {t('schedule.syncCalendar')}
                             </button>
                         )}
 
@@ -411,7 +415,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                             <div className="relative">
                                 <input
                                     type="text"
-                                    placeholder="Filter by name..."
+                                    placeholder={t('schedule.filterByName')}
                                     value={nameFilter}
                                     onChange={(e) => setNameFilter(e.target.value)}
                                     className="pl-8 pr-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs w-full sm:w-40"
@@ -442,7 +446,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                             <button
                                 onClick={() => scheduleView === 'team' ? navigateTeamView('prev') : navigateMonth('prev')}
                                 className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-                                title={`Previous ${isTeamMonthView ? 'month' : 'week'}`}
+                                title={isTeamMonthView ? t('schedule.previousMonth') : t('schedule.previousWeek')}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -457,7 +461,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                             <button
                                 onClick={() => scheduleView === 'team' ? navigateTeamView('next') : navigateMonth('next')}
                                 className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-                                title={`Next ${isTeamMonthView ? 'month' : 'week'}`}
+                                title={isTeamMonthView ? t('schedule.nextMonth') : t('schedule.nextWeek')}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -470,7 +474,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                             <button
                                 onClick={() => setIsTableExpanded(!isTableExpanded)}
                                 className="hidden md:flex items-center justify-center p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-                                title={isTableExpanded ? 'Collapse table' : 'Expand table'}
+                                title={isTableExpanded ? t('schedule.collapseTable') : t('schedule.expandTable')}
                             >
                                 {isTableExpanded ? (
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -488,7 +492,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
 
                 {scheduleView === 'team' && nameFilter && (
                     <div className="mt-2 text-xs text-gray-600">
-                        Showing {filteredTeamMembers.length} of {MOCK_TEAM_MEMBERS.length} team members
+                        {t('schedule.showingMembers', { shown: filteredTeamMembers.length, total: MOCK_TEAM_MEMBERS.length })}
                     </div>
                 )}
             </div>
@@ -519,14 +523,14 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                     <div className="bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-3 flex items-center gap-3">
                         <div className="text-sm text-gray-600">
                             <span className="font-semibold text-blue-600">{selectedShifts.length}</span>
-                            {' '}{selectedShifts.length === 1 ? 'shift' : 'shifts'} selected
+                            {' '}{selectedShifts.length === 1 ? t('schedule.shiftsSelected', { count: selectedShifts.length }) : t('schedule.shiftsSelectedPlural', { count: selectedShifts.length })}
                         </div>
                         <div className="flex gap-2">
                             <button
                                 onClick={clearSelectedShifts}
                                 className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
                             >
-                                Clear
+                                {t('schedule.clear')}
                             </button>
                             <button
                                 onClick={handleOpenSwapModal}
@@ -535,7 +539,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                 </svg>
-                                Request Swap
+                                {t('schedule.requestSwap')}
                             </button>
                         </div>
                     </div>
@@ -556,7 +560,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
 
             {/* Legend */}
             <div className="bg-white rounded-lg border border-gray-200 p-3">
-                <h3 className="text-xs font-semibold text-gray-900 mb-2">Shift Legend</h3>
+                <h3 className="text-xs font-semibold text-gray-900 mb-2">{t('schedule.shiftLegend')}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     {Object.entries(SHIFT_LEGENDS).map(([code, info]) => (
                         <div key={code} className="flex items-center gap-1.5">
@@ -610,7 +614,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                         return (
                                             <div className="text-center py-8">
                                                 <div className="text-4xl mb-2">📅</div>
-                                                <div className="text-gray-500">No shifts scheduled</div>
+                                                <div className="text-gray-500">{t('schedule.noShiftsScheduled')}</div>
                                             </div>
                                         );
                                     }
@@ -634,7 +638,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                                     </div>
                                                     {isPending && (
                                                         <span className="text-xs font-medium text-yellow-600 flex items-center gap-1">
-                                                            <span>⏳</span> Swap Pending
+                                                            <span>⏳</span> {t('schedule.dayDetail.swapPending')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -647,7 +651,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                                         }}
                                                         className="w-full bg-white bg-opacity-50 hover:bg-opacity-70 px-3 py-2 rounded text-sm font-medium transition"
                                                     >
-                                                        Request Swap
+                                                        {t('schedule.requestSwap')}
                                                     </button>
                                                 )}
                                             </div>
@@ -660,7 +664,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                                 onClick={() => setSelectedDate(null)}
                                 className="w-full mt-6 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
                             >
-                                Close
+                                {t('common.close')}
                             </button>
                         </div>
                     </div>
@@ -699,7 +703,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 timeout={10000}
                 onTimeout={() => {
                     setIsGenerating(false);
-                    showError('Schedule generation timed out. Please try again.');
+                    showError(t('schedule.toast.generateTimeout'));
                 }}
             />
         </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {SwapRequest} from "../Types.ts";
 import {renderRequestCard} from "./RenderRequestCard.tsx";
 import {useToast} from "../../../context/ToastContext";
@@ -12,17 +13,18 @@ interface AdminViewProps {
 }
 
 export function AdminView({displayRequests, filter, setRequests, setSelectedRequest, setShowShareModal}: AdminViewProps) {
+    const { t } = useTranslation();
     const { showSuccess, showInfo } = useToast();
     return (
         <div className="bg-white rounded-lg border border-gray-200">
             {displayRequests && displayRequests.length === 0 ? (
                 <div className="p-12 text-center">
                     <div className="text-4xl mb-3">📋</div>
-                    <div className="text-gray-900 font-medium mb-1">No requests found</div>
+                    <div className="text-gray-900 font-medium mb-1">{t('requests.noRequests')}</div>
                     <div className="text-sm text-gray-600">
                         {filter === 'all'
-                            ? 'There are no swap requests at the moment.'
-                            : `There are no ${filter} swap requests.`
+                            ? t('requests.noRequestsAtMoment')
+                            : t('requests.noFilteredRequests', { filter: t(`requests.filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`).toLowerCase() })
                         }
                     </div>
                 </div>
@@ -35,8 +37,8 @@ export function AdminView({displayRequests, filter, setRequests, setSelectedRequ
                         setRequests: setRequests,
                         setSelectedRequest: setSelectedRequest,
                         setShowShareModal: setShowShareModal,
-                        onApproveSuccess: showSuccess,
-                        onDeclineSuccess: showInfo
+                        onApproveSuccess: () => showSuccess(t('requests.toast.approved')),
+                        onDeclineSuccess: () => showInfo(t('requests.toast.declined'))
                     }))}
                 </div>
             )}

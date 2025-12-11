@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import { SwapRequest } from "../Types.ts";
 import { renderRequestCard } from "./RenderRequestCard.tsx";
 import { useToast } from "../../../context/ToastContext";
@@ -20,6 +21,7 @@ export const UserView: React.FC<UserViewProps> = ({
                                                       setSelectedRequest,
                                                       setShowShareModal
                                                   }) => {
+    const { t } = useTranslation();
     const { showSuccess, showInfo } = useToast();
     return (
         <>
@@ -31,9 +33,9 @@ export const UserView: React.FC<UserViewProps> = ({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
                         </svg>
                         <div>
-                            <h3 className="font-semibold text-gray-900">Requests for Your Approval</h3>
+                            <h3 className="font-semibold text-gray-900">{t('requests.requestsForApproval')}</h3>
                             <p className="text-xs text-gray-600">
-                                {incomingRequests.filter(r => r.status === 'pending').length} pending your response
+                                {t('requests.pendingYourResponse', { count: incomingRequests.filter(r => r.status === 'pending').length })}
                             </p>
                         </div>
                     </div>
@@ -41,11 +43,11 @@ export const UserView: React.FC<UserViewProps> = ({
                 {incomingRequests.length === 0 ? (
                     <div className="p-12 text-center">
                         <div className="text-4xl mb-3">✅</div>
-                        <div className="text-gray-900 font-medium mb-1">All caught up!</div>
+                        <div className="text-gray-900 font-medium mb-1">{t('requests.allCaughtUp')}</div>
                         <div className="text-sm text-gray-600">
                             {filter === 'all'
-                                ? 'No one has requested to swap shifts with you.'
-                                : `No ${filter} requests requiring your approval.`
+                                ? t('requests.noSwapRequestsFromOthers')
+                                : t('requests.noFilteredApprovalRequests', { filter: t(`requests.filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`).toLowerCase() })
                             }
                         </div>
                     </div>
@@ -58,8 +60,8 @@ export const UserView: React.FC<UserViewProps> = ({
                             setRequests,
                             setSelectedRequest,
                             setShowShareModal,
-                            onApproveSuccess: showSuccess,
-                            onDeclineSuccess: showInfo
+                            onApproveSuccess: () => showSuccess(t('requests.toast.approved')),
+                            onDeclineSuccess: () => showInfo(t('requests.toast.declined'))
                         }))}
                     </div>
                 )}
@@ -73,9 +75,9 @@ export const UserView: React.FC<UserViewProps> = ({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
                         <div>
-                            <h3 className="font-semibold text-gray-900">Your Swap Requests</h3>
+                            <h3 className="font-semibold text-gray-900">{t('requests.yourSwapRequests')}</h3>
                             <p className="text-xs text-gray-600">
-                                {outgoingRequests.filter(r => r.status === 'pending').length} awaiting approval from others
+                                {t('requests.awaitingApproval', { count: outgoingRequests.filter(r => r.status === 'pending').length })}
                             </p>
                         </div>
                     </div>
@@ -83,11 +85,11 @@ export const UserView: React.FC<UserViewProps> = ({
                 {outgoingRequests.length === 0 ? (
                     <div className="p-12 text-center">
                         <div className="text-4xl mb-3">📤</div>
-                        <div className="text-gray-900 font-medium mb-1">No outgoing requests</div>
+                        <div className="text-gray-900 font-medium mb-1">{t('requests.noOutgoingRequests')}</div>
                         <div className="text-sm text-gray-600">
                             {filter === 'all'
-                                ? 'You haven\'t requested any shift swaps yet.'
-                                : `No ${filter} requests sent by you.`
+                                ? t('requests.noSwapRequestsYet')
+                                : t('requests.noFilteredSentRequests', { filter: t(`requests.filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`).toLowerCase() })
                             }
                         </div>
                     </div>
@@ -100,8 +102,8 @@ export const UserView: React.FC<UserViewProps> = ({
                             setRequests,
                             setSelectedRequest,
                             setShowShareModal,
-                            onApproveSuccess: showSuccess,
-                            onDeclineSuccess: showInfo
+                            onApproveSuccess: () => showSuccess(t('requests.toast.approved')),
+                            onDeclineSuccess: () => showInfo(t('requests.toast.declined'))
                         }))}
                     </div>
                 )}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface GenerateScheduleModalProps {
     isOpen: boolean;
@@ -7,6 +8,7 @@ interface GenerateScheduleModalProps {
 }
 
 export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: GenerateScheduleModalProps) {
+    const { t } = useTranslation();
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [error, setError] = useState('');
@@ -17,7 +19,7 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
         setError('');
 
         if (!startDate || !endDate) {
-            setError('Please select both start and end dates');
+            setError(t('schedule.generateModal.errorSelectBothDates'));
             return;
         }
 
@@ -25,7 +27,7 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
         const end = new Date(endDate);
 
         if (start > end) {
-            setError('Start date must be before end date');
+            setError(t('schedule.generateModal.errorStartBeforeEnd'));
             return;
         }
 
@@ -34,7 +36,7 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays > 31) {
-            setError('Date range cannot exceed 31 days');
+            setError(t('schedule.generateModal.errorMaxDays'));
             return;
         }
 
@@ -59,9 +61,9 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900">Generate Schedule</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">{t('schedule.generateModal.title')}</h2>
                             <p className="text-sm text-gray-500 mt-1">
-                                Select the date range for schedule generation
+                                {t('schedule.generateModal.subtitle')}
                             </p>
                         </div>
                         <button
@@ -78,7 +80,7 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                Start Date
+                                {t('schedule.generateModal.startDate')}
                             </label>
                             <input
                                 type="date"
@@ -92,7 +94,7 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
 
                         <div>
                             <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                End Date
+                                {t('schedule.generateModal.endDate')}
                             </label>
                             <input
                                 type="date"
@@ -118,10 +120,9 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div className="text-sm text-blue-700">
-                                    <p className="font-medium">This will generate a new schedule</p>
+                                    <p className="font-medium">{t('schedule.generateModal.infoTitle')}</p>
                                     <p className="mt-1 text-blue-600">
-                                        Shifts will be automatically assigned to all team members for the selected period.
-                                        Existing schedules in this range will be replaced.
+                                        {t('schedule.generateModal.infoDescription')}
                                     </p>
                                 </div>
                             </div>
@@ -134,14 +135,14 @@ export default function GenerateScheduleModal({ isOpen, onClose, onGenerate }: G
                             onClick={handleClose}
                             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
                         >
-                            Cancel
+                            {t('common.cancel')}
                         </button>
                         <button
                             onClick={handleSubmit}
                             disabled={!startDate || !endDate}
                             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Generate Schedule
+                            {t('schedule.generateModal.generate')}
                         </button>
                     </div>
                 </div>

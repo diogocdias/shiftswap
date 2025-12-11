@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MOCK_SWAP_REQUESTS } from "./data/mockSwapRequests.ts";
 import { SwapRequest } from './Types.ts';
 import { AdminView } from "./components/AdminView.tsx";
@@ -9,6 +10,7 @@ import { DEFAULTS } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
 
 function RequestsTab() {
+    const { t } = useTranslation();
     const { showSuccess, showError } = useToast();
     const [requests, setRequests] = useState<SwapRequest[]>(MOCK_SWAP_REQUESTS);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'declined'>('all');
@@ -50,9 +52,9 @@ function RequestsTab() {
                 break;
             case 'copy':
                 navigator.clipboard.writeText(shareText).then(() => {
-                    showSuccess('Swap request details copied to clipboard!');
+                    showSuccess(t('requests.toast.copiedToClipboard'));
                 }).catch(() => {
-                    showError('Failed to copy to clipboard');
+                    showError(t('requests.toast.failedToCopy'));
                 });
                 break;
         }
@@ -84,12 +86,14 @@ function RequestsTab() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
                         <h2 className="text-lg font-semibold text-gray-900">
-                            {userRole === 'admin' || userRole === 'teamleader' ? 'All Swap Requests' : 'Swap Requests'}
+                            {userRole === 'admin' || userRole === 'teamleader' ? t('requests.allSwapRequests') : t('requests.title')}
                         </h2>
                         <p className="text-xs text-gray-600 mt-0.5">
                             {userRole === 'user'
-                                ? `${incomingRequests.length} incoming, ${outgoingRequests.length} outgoing`
-                                : `${displayRequests?.length || 0} ${displayRequests?.length === 1 ? 'request' : 'requests'}`
+                                ? `${incomingRequests.length} ${t('requests.incoming').toLowerCase()}, ${outgoingRequests.length} ${t('requests.outgoing').toLowerCase()}`
+                                : displayRequests?.length === 1
+                                    ? t('requests.requestCount', { count: displayRequests?.length || 0 })
+                                    : t('requests.requestsCount', { count: displayRequests?.length || 0 })
                             }
                         </p>
                     </div>
@@ -104,7 +108,7 @@ function RequestsTab() {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            All
+                            {t('requests.filterAll')}
                         </button>
                         <button
                             onClick={() => setFilter('pending')}
@@ -114,7 +118,7 @@ function RequestsTab() {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            Pending
+                            {t('requests.filterPending')}
                         </button>
                         <button
                             onClick={() => setFilter('approved')}
@@ -124,7 +128,7 @@ function RequestsTab() {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            Approved
+                            {t('requests.filterApproved')}
                         </button>
                         <button
                             onClick={() => setFilter('declined')}
@@ -134,7 +138,7 @@ function RequestsTab() {
                                     : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
-                            Declined
+                            {t('requests.filterDeclined')}
                         </button>
                     </div>
                 </div>
