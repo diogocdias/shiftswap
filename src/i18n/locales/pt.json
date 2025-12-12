@@ -318,6 +318,20 @@
       "youReceive": "Você Recebe",
       "from": "De"
     },
+    "multiPersonSwap": {
+      "title": "Troca de Turnos Multi-Pessoa",
+      "subtitle": "{{count}} pessoas envolvidas nesta troca",
+      "assignShifts": "Atribuir Turnos",
+      "assignShiftsDescription": "Selecione quem ficará com cada turno após a troca. Use o menu para reatribuir turnos entre os participantes.",
+      "you": "Você",
+      "unknownUser": "Utilizador Desconhecido",
+      "resultSummary": "Resumo da Troca",
+      "noChangesWarning": "Nenhum turno foi reatribuído. Selecione um proprietário diferente para pelo menos um turno para criar uma troca.",
+      "gives": "Dá",
+      "receives": "Recebe",
+      "from": "de",
+      "submitRequest": "Submeter Pedido de Troca"
+    },
     "dayDetail": {
       "swapPending": "Troca Pendente"
     },
@@ -339,6 +353,7 @@
     "toast": {
       "swapSubmitted": "Pedido de troca submetido! {{myShifts}} turno por {{targetShifts}} turno. À espera de aprovação.",
       "swapSubmittedPlural": "Pedido de troca submetido! {{myShifts}} turnos por {{targetShifts}} turnos. À espera de aprovação.",
+      "multiPersonSwapSubmitted": "Pedido de troca multi-pessoa submetido! {{count}} reatribuições de turno pendentes de aprovação.",
       "fillAllFields": "Por favor preencha todos os campos obrigatórios",
       "calendarSynced": "Os seus turnos foram sincronizados com o calendário!",
       "generateFailed": "Falha ao gerar escala. Por favor tente novamente.",
@@ -394,9 +409,23 @@
       "approve": "Aprovar",
       "cancel": "Cancelar",
       "share": "Partilhar",
+      "preview": "Pré-visualizar",
       "approved": "Aprovado",
       "declined": "Recusado",
       "pending": "Pendente"
+    },
+    "preview": {
+      "title": "Pré-visualização da Escala",
+      "subtitle": "Veja como ficará a escala após esta troca",
+      "removed": "Turno removido",
+      "added": "Turno adicionado",
+      "noChange": "Sem alteração",
+      "teamMember": "Membro da Equipa",
+      "summary": "Resumo",
+      "multiPersonSummary": "{{count}} transferências de turno entre {{participants}} participantes",
+      "twoPersonSummary": "{{from}} e {{to}} vão trocar turnos",
+      "willBeRemoved": "Será removido",
+      "willBeAdded": "Será adicionado"
     },
     "shareModal": {
       "title": "Partilhar Pedido de Troca",
@@ -413,6 +442,18 @@
       "declined": "Pedido de troca recusado.",
       "copiedToClipboard": "Detalhes do pedido de troca copiados para a área de transferência!",
       "failedToCopy": "Falha ao copiar para a área de transferência"
+    },
+    "multiPerson": {
+      "title": "Troca Multi-Pessoa",
+      "participantCount": "{{count}} pessoas",
+      "createdBy": "Criado por {{name}}",
+      "participants": "Participantes",
+      "you": "Você",
+      "shiftTransfers": "Transferências de Turno",
+      "yourSummary": "As Suas Alterações",
+      "youGive": "Você dá",
+      "youReceive": "Você recebe",
+      "none": "Nenhum"
     }
   },
   "analytics": {
