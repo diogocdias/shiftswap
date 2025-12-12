@@ -543,5 +543,22 @@
       "invalidType": "Please select an image file",
       "tooLarge": "Image size should be less than 5MB"
     }
+  },
+  "pdf": {
+    "teamSchedule": "Team Schedule",
+    "name": "Name",
+    "generated": "Generated",
+    "legend": {
+      "morning": "M = Morning (6:00-14:00)",
+      "afternoon": "A = Afternoon (14:00-22:00)",
+      "night": "N = Night (22:00-6:00)",
+      "restDay": "R = Rest Day",
+      "dayOff": "D = Day Off",
+      "vacation": "VAC = Vacation",
+      "sickLeave": "SICK = Sick Leave",
+      "personalDay": "PER = Personal Day",
+      "specialDayOff": "SPE = Special Day Off",
+      "otherTimeOff": "OFF = Other Time Off"
+    }
   }
 }

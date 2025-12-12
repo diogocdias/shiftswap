@@ -543,5 +543,22 @@
       "invalidType": "Por favor, selecione um ficheiro de imagem",
       "tooLarge": "O tamanho da imagem deve ser inferior a 5MB"
     }
+  },
+  "pdf": {
+    "teamSchedule": "Horário da Equipa",
+    "name": "Nome",
+    "generated": "Gerado",
+    "legend": {
+      "morning": "M = Manhã (6:00-14:00)",
+      "afternoon": "A = Tarde (14:00-22:00)",
+      "night": "N = Noite (22:00-6:00)",
+      "restDay": "R = Dia de Descanso",
+      "dayOff": "D = Folga",
+      "vacation": "VAC = Férias",
+      "sickLeave": "SICK = Baixa Médica",
+      "personalDay": "PER = Dia Pessoal",
+      "specialDayOff": "SPE = Folga Especial",
+      "otherTimeOff": "OFF = Outra Ausência"
+    }
   }
 }
