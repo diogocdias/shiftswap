@@ -8,15 +8,19 @@ ShiftSwap is a healthcare shift management application that enables healthcare s
 - React 18 + TypeScript
 - Vite (build tool)
 - Tailwind CSS (styling)
+- i18next (internationalization - English/Portuguese)
+- jsPDF (PDF export)
 - No external routing library (custom navigation)
-- No external state management (React hooks only)
+- React Context for toast notifications only
 
 **Key Characteristics:**
 - Mobile-first, responsive design
 - Role-based feature access
+- Multi-language support (English, Portuguese)
 - Mock data/API implementations (ready for backend integration)
 - Component-based architecture
 - Functional components with hooks
+- Centralized type definitions
 
 ---
 
@@ -32,12 +36,49 @@ shiftswap/
 │   ├── App.css                 # Legacy styles (minimal)
 │   ├── index.css              # Tailwind imports
 │   │
+│   ├── types/
+│   │   └── domain.ts          # Unified type definitions
+│   │
+│   ├── config/
+│   │   └── constants.ts       # Application constants & configuration
+│   │
+│   ├── context/
+│   │   └── ToastContext.tsx   # Toast notification context
+│   │
+│   ├── hooks/
+│   │   └── useIsDesktop.ts    # Responsive breakpoint hook
+│   │
+│   ├── i18n/
+│   │   ├── index.ts           # i18next configuration
+│   │   └── locales/
+│   │       ├── en.json        # English translations
+│   │       └── pt.json        # Portuguese translations
+│   │
+│   ├── services/
+│   │   ├── sessionService.ts  # Session management utilities
+│   │   ├── timeOffService.ts  # Time-off/vacation data service
+│   │   └── api/
+│   │       ├── index.ts           # Centralized API exports
+│   │       ├── mockDelay.ts       # Mock delay utility
+│   │       ├── authService.ts     # Authentication API
+│   │       ├── profileService.ts  # Profile API
+│   │       ├── scheduleService.ts # Schedule API
+│   │       ├── requestsService.ts # Swap requests API
+│   │       └── menuService.ts     # Menu configuration API
+│   │
+│   ├── utils/
+│   │   ├── dateUtils.ts       # Date formatting utilities
+│   │   ├── pdfExport.ts       # PDF schedule export
+│   │   └── shiftGenerator.ts  # Shift generation logic
+│   │
 │   ├── public/                 # Public-facing pages
 │   │   ├── ShiftSwapHome.tsx  # Landing/login page
 │   │   └── LoginPage.tsx      # Login component
 │   │
 │   ├── components/            # Shared components
-│   │   └── LoadingOverlay.tsx # Reusable loading component
+│   │   ├── LoadingOverlay.tsx # Reusable loading component
+│   │   ├── Toast.tsx          # Toast notification component
+│   │   └── LanguageSelector.tsx # Language picker dropdown
 │   │
 │   └── dashboard/             # Main authenticated app
 │       ├── Dashboard.tsx      # Main container (sidebar + content)
@@ -45,6 +86,9 @@ shiftswap/
 │       │
 │       ├── profile/
 │       │   └── ProfileTab.tsx # User profile page with edit
+│       │
+│       ├── vacation/
+│       │   └── VacationTab.tsx # Admin time-off management
 │       │
 │       ├── schedule/
 │       │   ├── ScheduleTab.tsx       # Main schedule container
@@ -54,7 +98,8 @@ shiftswap/
 │       │       ├── CalendarView.tsx         # Monthly calendar view
 │       │       ├── TeamView.tsx             # Team schedule table
 │       │       ├── SwapRequestModal.tsx     # Shift swap dialog
-│       │       └── GenerateScheduleModal.tsx # Schedule generation
+│       │       ├── GenerateScheduleModal.tsx # Schedule generation
+│       │       └── CalendarSyncModal.tsx    # External calendar sync
 │       │
 │       └── requests/
 │           ├── RequestsTab.tsx       # Main requests container
@@ -86,6 +131,7 @@ shiftswap/
 - Mock login system (no real auth)
 - Three user roles: `user`, `teamleader`, `admin`
 - Stores session in `sessionStorage` (key: `'mockUser'`)
+- Language selector available on login page
 
 **Mock Users:**
 ```typescript
@@ -96,7 +142,7 @@ admin@hospital.com / password     // Administrator
 
 **Session Data Structure:**
 ```typescript
-{
+interface UserSession {
   name: string;
   email: string;
   role: 'user' | 'teamleader' | 'admin';
@@ -107,6 +153,7 @@ admin@hospital.com / password     // Administrator
   employeeId?: string;
   facility?: string;
   startDate?: string;
+  language?: 'en' | 'pt';
 }
 ```
 
@@ -120,19 +167,20 @@ admin@hospital.com / password     // Administrator
 **Architecture:**
 - **Left Sidebar:** Collapsible navigation (56px mobile, 80px desktop)
 - **Main Content:** Tab-based content area
-- **Profile Section:** Sticky bottom profile with hover tooltip
+- **Profile Section:** Sticky bottom profile with mobile modal
+- **Language Selector:** Available in header
 
 **Dynamic Menu System:**
 ```typescript
 // CMS-driven menu items (mock implementation)
-const menuItems = await mockFetchMenuItems(sessionId);
-// Returns role-specific menu configuration
+import { menuService } from '../services/api';
+const menuItems = await menuService.fetchMenuItems(sessionId);
 ```
 
 **Available Tabs by Role:**
 - **User:** Overview, Schedule, Requests, Profile
 - **Team Leader:** Overview, Schedule, Team, Requests, Analytics, Profile
-- **Admin:** Overview, Schedule, Team, Requests, Analytics, Settings, Profile
+- **Admin:** Overview, Schedule, Team, Requests, Analytics, Vacation, Settings, Profile
 
 **State Management:**
 ```typescript
@@ -140,10 +188,6 @@ const [activeTab, setActiveTab] = useState('overview');
 const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 const [isLoadingMenu, setIsLoadingMenu] = useState(true);
 ```
-
-**TODO Items in Code:**
-- Line 19-58: Replace `mockFetchMenuItems` with real CMS API
-- Line 77-85: Replace mock session validation with real auth
 
 ---
 
@@ -156,6 +200,7 @@ const [isLoadingMenu, setIsLoadingMenu] = useState(true);
 - **Editable Fields:** Name, email, phone, department, facility
 - **Profile Picture:** Upload, preview, remove (base64 encoding)
 - **Read-only Fields:** Employee ID, role, start date
+- **Language Selection:** Change app language from profile
 - **Account Settings Stubs:** Change password, notifications, privacy
 
 **State Management:**
@@ -167,15 +212,10 @@ const [isSaving, setIsSaving] = useState(false);
 ```
 
 **Image Upload:**
-- Max file size: 5MB
+- Max file size: 5MB (configured in `config/constants.ts`)
 - Formats: Any image/* MIME type
 - Storage: Base64 in sessionStorage (not production-ready)
 - Validation: File type and size checked client-side
-
-**Profile Sync:**
-- Updates sessionStorage on save (line 66-76)
-- Auto-loads from sessionStorage on mount
-- Success message displays for 3 seconds after save
 
 ---
 
@@ -186,7 +226,7 @@ const [isSaving, setIsSaving] = useState(false);
 
 **View Modes:**
 1. **Team Schedule (Week):** 7-day team view (mobile + all roles)
-2. **Team Schedule (Month):** Full month team view (desktop + admin/teamleader only)
+2. **Team Schedule (Month):** Full month team view (all users)
 3. **My Calendar:** Monthly personal calendar (all users)
 
 **Shift Types:**
@@ -204,35 +244,22 @@ D - Day Off                         - Gray (dim)
 **Key Features:**
 - **Name Filter:** Search team members by name
 - **Week/Month Navigation:** Previous, next, today buttons
-- **Shift Click:** Opens swap request modal
+- **Shift Click:** Opens swap request modal (multi-shift selection)
 - **Pending Swaps:** Visual indicators (yellow ring)
 - **Expandable Table:** Desktop-only fullscreen mode
 - **Schedule Generation:** Admin/team leader can generate schedules
+- **PDF Export:** Export monthly schedule to PDF
+- **Calendar Sync:** Sync with Google, Apple, Outlook calendars
+
+**New: Multi-Shift Selection:**
+- Users can select multiple shifts to swap in a single request
+- Both "my shifts" and "target shifts" support multi-selection
 
 **Responsive Behavior:**
 ```typescript
-const useIsDesktop = () => window.innerWidth >= 1024;
-const isTeamMonthView = isDesktop && (userRole !== 'user');
+import { useIsDesktop } from '../hooks/useIsDesktop';
+const isDesktop = useIsDesktop();
 ```
-
-**Mock Data Generation:**
-```typescript
-// Week view: generateMockShifts(startDate)
-// Month view (personal): generateMonthShifts(year, month, userId)
-// Month view (team): generateTeamMonthShifts(year, month)
-```
-
-**Schedule Generation (Admin/Team Leader):**
-- Modal-based date range selection (src/dashboard/schedule/components/GenerateScheduleModal.tsx)
-- Realistic shift distribution algorithm
-- Loading overlay during generation
-- Automatic merge with existing schedules
-
-**Generation Rules:**
-- ~2 rest/off days per week per person
-- 15% chance of double shifts (M+A or A+N combinations)
-- Higher rest day chance on weekends
-- No combining rest/off days with working shifts
 
 ---
 
@@ -257,61 +284,339 @@ type Filter = 'all' | 'pending' | 'approved' | 'declined';
 **Share Functionality:**
 - WhatsApp, Telegram, Messenger, SMS, Copy to clipboard
 - Pre-formatted share text with shift details
-- Modal-based share interface (src/dashboard/requests/components/ShareModal.tsx)
+- Modal-based share interface
 
-**Request Card Features:**
-- Mobile-optimized portrait mode layout
-- Color-coded status badges
-- Shift detail pills
-- Hover effects and transitions
-
-**Data Structure:**
+**Data Structure (Unified):**
 ```typescript
 interface SwapRequest {
-  id: number | string;
-  from: string;         // Requester name
-  fromId: string;       // Requester user ID
-  to: string;           // Target person name
-  toId: string;         // Target person ID
+  id: string;
+  fromUserId: string;
+  fromUserName?: string;
+  toUserId: string;
+  toUserName?: string;
   fromShift: ShiftDetail;
   toShift: ShiftDetail;
+  fromShifts?: ShiftDetail[];  // Multi-shift support
+  toShifts?: ShiftDetail[];    // Multi-shift support
   status: 'pending' | 'approved' | 'declined';
-  createdAt: string;    // ISO date
+  createdAt: string;
 }
 ```
 
 ---
 
-### 6. LoadingOverlay (Shared Component)
-**Location:** `src/components/LoadingOverlay.tsx`
+### 6. VacationTab (Admin Time-Off Management)
+**Location:** `src/dashboard/vacation/VacationTab.tsx`
 
-**Purpose:** Reusable loading state with timeout handling
+**Purpose:** Admin/team leader tool to manage staff time-off records
 
-**Props:**
+**Features:**
+- Add/edit/delete time-off records for team members
+- Multiple time-off types: Vacation, Sick Leave, Personal Day, Special Day Off, Other
+- Filter by staff member or time-off type
+- Integrated with schedule view (shows time-off on calendar)
+
+**Time-Off Types:**
 ```typescript
-interface LoadingOverlayProps {
-  isLoading: boolean;
-  timeout?: number;      // Default: 5000ms
-  onTimeout?: () => void;
+type VacationType = 'vacation' | 'sick' | 'personal' | 'special' | 'other';
+```
+
+**Data Structure:**
+```typescript
+interface VacationRecord {
+  id: string;
+  userId: string;
+  userName: string;
+  type: VacationType;
+  startDate: string;
+  endDate: string;
+  notes?: string;
+  status: 'approved' | 'pending' | 'declined';
+  createdAt: string;
+  createdBy: string;
+}
+```
+
+---
+
+### 7. Toast Notification System
+**Location:** `src/context/ToastContext.tsx`, `src/components/Toast.tsx`
+
+**Purpose:** App-wide toast notifications (replaces browser alerts)
+
+**Toast Types:**
+```typescript
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+```
+
+**Usage:**
+```typescript
+import { useToast } from '../context/ToastContext';
+
+function MyComponent() {
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
+
+  const handleAction = () => {
+    showSuccess('Operation completed!');
+    showError('Something went wrong');
+    showWarning('Please review your changes');
+    showInfo('New update available');
+  };
 }
 ```
 
 **Features:**
-- Fullscreen overlay with backdrop
-- Spinning loader animation
-- Timeout detection and error display
-- Click-to-dismiss error state
+- Auto-dismiss after configurable duration
+- Multiple toasts can stack
+- Color-coded by type
+- Click to dismiss
 
-**Usage Pattern:**
+---
+
+### 8. LanguageSelector
+**Location:** `src/components/LanguageSelector.tsx`
+
+**Purpose:** Allow users to switch between supported languages
+
+**Supported Languages:**
+- English (en) - Default
+- Portuguese (pt)
+
+**Variants:**
+- `default`: Full dropdown with language names
+- `compact`: Flag-only button with dropdown
+
+**Usage:**
 ```typescript
-<LoadingOverlay
-  isLoading={isGenerating}
-  timeout={10000}
-  onTimeout={() => {
-    setIsGenerating(false);
-    alert('Operation timed out');
-  }}
-/>
+<LanguageSelector variant="compact" />
+```
+
+---
+
+### 9. Calendar Sync Modal
+**Location:** `src/dashboard/schedule/components/CalendarSyncModal.tsx`
+
+**Purpose:** Connect and sync schedules with external calendar providers
+
+**Supported Providers:**
+- Google Calendar
+- Apple Calendar
+- Microsoft Outlook
+- iCal Export
+
+**Features:**
+- Connect/disconnect providers (mock OAuth)
+- Sync button to push schedule updates
+- Last synced timestamp
+- Connection status persistence (localStorage)
+
+---
+
+### 10. PDF Export
+**Location:** `src/utils/pdfExport.ts`
+
+**Purpose:** Export team schedule as printer-friendly PDF
+
+**Features:**
+- Landscape A4 format
+- Monthly view with all team members
+- Shows time-off records
+- Shift legends
+- Black & white for printing
+- Localized dates based on language
+
+**Usage:**
+```typescript
+import { exportScheduleToPDF } from '../utils/pdfExport';
+
+exportScheduleToPDF({
+  year: 2024,
+  month: 11, // December (0-indexed)
+  shifts: shiftData,
+  teamMembers: MOCK_TEAM_MEMBERS,
+});
+```
+
+---
+
+## Internationalization (i18n)
+
+**Location:** `src/i18n/`
+
+**Configuration:** Uses i18next with react-i18next
+
+**Supported Languages:**
+- English (`en`) - Default
+- Portuguese (`pt`)
+
+**Usage in Components:**
+```typescript
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t } = useTranslation();
+  return <h1>{t('common.title')}</h1>;
+}
+```
+
+**Translation Files:**
+- `src/i18n/locales/en.json`
+- `src/i18n/locales/pt.json`
+
+**Key Namespaces:**
+- `common` - Shared strings (buttons, labels)
+- `schedule` - Schedule-related text
+- `requests` - Request management text
+- `vacation` - Time-off management text
+- `profile` - Profile page text
+- `pdf` - PDF export labels
+
+**Changing Language Programmatically:**
+```typescript
+import { changeLanguage } from '../i18n';
+changeLanguage('pt'); // Switch to Portuguese
+```
+
+---
+
+## Custom Hooks
+
+### useIsDesktop
+**Location:** `src/hooks/useIsDesktop.ts`
+
+**Purpose:** Responsive breakpoint detection
+
+**Usage:**
+```typescript
+import { useIsDesktop } from '../hooks/useIsDesktop';
+
+function MyComponent() {
+  const isDesktop = useIsDesktop(); // true if viewport >= 1024px
+  return isDesktop ? <DesktopView /> : <MobileView />;
+}
+```
+
+**Features:**
+- Updates on window resize
+- Updates on orientation change
+- Uses centralized breakpoint from config
+
+---
+
+## Centralized Services
+
+### API Services
+**Location:** `src/services/api/`
+
+All API functions are centralized and exported from `src/services/api/index.ts`:
+
+```typescript
+import {
+  authService,
+  profileService,
+  scheduleService,
+  requestsService,
+  menuService,
+} from '../services/api';
+
+// Example usage
+await authService.login(email, password);
+await profileService.fetchProfile(userId);
+await scheduleService.generateSchedule(startDate, endDate, members);
+await requestsService.createSwapRequest(request);
+await menuService.fetchMenuItems(sessionId);
+```
+
+### Time-Off Service
+**Location:** `src/services/timeOffService.ts`
+
+Manages vacation/time-off records with localStorage persistence:
+
+```typescript
+import {
+  getTimeOffRecords,
+  setTimeOffRecords,
+  getTimeOffForDate,
+  subscribeToTimeOff,
+} from '../services/timeOffService';
+```
+
+### Session Service
+**Location:** `src/services/sessionService.ts`
+
+Centralized session management utilities.
+
+---
+
+## Configuration Constants
+
+**Location:** `src/config/constants.ts`
+
+Centralized application constants:
+
+```typescript
+// Mock API delays (milliseconds)
+export const MOCK_API_DELAYS = {
+  CMS_MENU: 300,
+  PROFILE_FETCH: 800,
+  PROFILE_SAVE: 200,
+  SCHEDULE_GENERATE: 200,
+  // ...
+};
+
+// UI timing values
+export const UI_TIMING = {
+  SUCCESS_MESSAGE_DISPLAY: 3000,
+  PAGE_REDIRECT: 1500,
+  LOADING_TIMEOUT: 10000,
+};
+
+// Responsive breakpoints
+export const BREAKPOINTS = {
+  SM: 640,
+  MD: 768,
+  LG: 1024,
+  XL: 1280,
+  DESKTOP: 1024,
+};
+
+// File upload limits
+export const FILE_LIMITS = {
+  MAX_IMAGE_SIZE_MB: 5,
+  MAX_IMAGE_SIZE_BYTES: 5 * 1024 * 1024,
+};
+```
+
+---
+
+## Unified Type Definitions
+
+**Location:** `src/types/domain.ts`
+
+All shared types are centralized here:
+
+```typescript
+// Core types
+export type ShiftType = 'M' | 'A' | 'N' | 'R' | 'D';
+export type WorkingShiftType = 'M' | 'A' | 'N';
+export type RequestStatus = 'pending' | 'approved' | 'declined';
+export type UserRole = 'user' | 'teamleader' | 'admin';
+export type VacationType = 'vacation' | 'sick' | 'personal' | 'special' | 'other';
+export type LanguageCode = 'en' | 'pt';
+
+// Interfaces
+export interface ShiftData { ... }
+export interface TeamMember { ... }
+export interface SwapRequest { ... }
+export interface UserProfile { ... }
+export interface UserSession { ... }
+export interface VacationRecord { ... }
+export interface MenuItem { ... }
+```
+
+**Usage:**
+```typescript
+import { ShiftType, SwapRequest, UserRole } from '../types/domain';
 ```
 
 ---
@@ -323,81 +628,18 @@ interface LoadingOverlayProps {
 **Purpose:** User authentication and profile data
 **Scope:** Global (shared across all components)
 
-**Access Pattern:**
-```typescript
-const userDataString = sessionStorage.getItem('mockUser');
-const userData = userDataString ? JSON.parse(userDataString) : null;
-const userRole = userData?.role || 'user';
-```
+### Toast Context
+**Location:** `src/context/ToastContext.tsx`
+**Purpose:** App-wide toast notifications
+**Usage:** Wrap app with `ToastProvider`, use `useToast()` hook
 
-### Component State (Local)
-**Common Patterns:**
-```typescript
-// Tab navigation
-const [activeTab, setActiveTab] = useState('overview');
+### Local Storage
+**Calendar Sync:** `'calendarSyncConnections'`
+**Language:** `'shiftswap_language'`
+**Time-Off:** `'timeOffRecords'`
 
-// Data filtering
-const [filter, setFilter] = useState<'all' | 'pending'>('all');
-
-// Modal visibility
-const [showModal, setShowModal] = useState(false);
-
-// Loading states
-const [isLoading, setIsLoading] = useState(false);
-
-// Form data
-const [formData, setFormData] = useState<FormType | null>(null);
-```
-
-### Prop Drilling
-- Dashboard → Tab components (activeTab, role, handlers)
-- ScheduleTab → View components (data, handlers)
-- RequestsTab → View components (data, actions)
-
-**Note:** No context providers used (intentional simplicity)
-
----
-
-## Mock APIs & Data
-
-### 1. Menu Configuration API
-**Location:** `Dashboard.tsx:21-57`
-```typescript
-const mockFetchMenuItems = async (sessionId: string): Promise<MenuItem[]>
-```
-- 300ms simulated delay
-- Role-based menu items
-- CMS-style configuration
-- **TODO:** Replace with `/api/cms/menu`
-
-### 2. Schedule Generation API
-**Location:** `ScheduleTab.tsx:127-198`
-```typescript
-const mockGenerateScheduleAPI = async (
-  startDate: string,
-  endDate: string,
-  teamMembers: TeamMember[]
-): Promise<ShiftData>
-```
-- 200ms simulated delay
-- Realistic shift distribution
-- Follows business rules
-- **TODO:** Replace with `/api/schedule/generate`
-
-### 3. Mock Team Members
-**Location:** `ScheduleTab.tsx:36-44`
-```typescript
-const MOCK_TEAM_MEMBERS: TeamMember[] = [
-  { id: '1', name: 'Sarah Johnson', role: 'user' },
-  // ... 7 members total
-];
-```
-
-### 4. Mock Swap Requests
-**Location:** `src/dashboard/requests/data/mockSwapRequests.ts`
-- Pre-populated request examples
-- Various statuses and dates
-- Used for initial RequestsTab state
+### Component State
+Standard React useState/useEffect patterns for local state.
 
 ---
 
@@ -428,42 +670,21 @@ Rest (R):       bg-green-50 text-green-700
 Day Off (D):    bg-gray-100 text-gray-600
 ```
 
+### Time-Off Colors
+```css
+Vacation:     bg-purple-100 text-purple-800
+Sick Leave:   bg-red-100 text-red-800
+Personal:     bg-blue-100 text-blue-800
+Special:      bg-yellow-100 text-yellow-800
+Other:        bg-gray-100 text-gray-800
+```
+
 ### Responsive Breakpoints
 ```css
 sm:  640px   (small tablet)
 md:  768px   (tablet)
 lg:  1024px  (desktop)
 xl:  1280px  (large desktop)
-```
-
-### Component Patterns
-
-**Cards:**
-```tsx
-<div className="bg-white rounded-lg border border-gray-200 p-4">
-```
-
-**Buttons (Primary):**
-```tsx
-<button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-```
-
-**Buttons (Secondary):**
-```tsx
-<button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
-```
-
-**Status Badges:**
-```tsx
-<span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-```
-
-**Hover Tooltips:**
-```tsx
-<div className="group relative">
-  <button>Hover me</button>
-  <div className="hidden group-hover:block absolute ...">Tooltip</div>
-</div>
 ```
 
 ---
@@ -507,55 +728,20 @@ npm run lint
 - Named exports for interfaces/types if reused
 
 **Type Definitions:**
-- Separate `Types.ts` files per feature domain
-- Interface over type alias (preferred)
-- Export all interfaces
+- Centralized in `src/types/domain.ts`
+- Feature-specific types in `Types.ts` files
 
 **Constants:**
-- Uppercase with underscores: `SHIFT_LEGENDS`
-- Centralized in dedicated files (e.g., `ShiftConstants.ts`)
+- Centralized in `src/config/constants.ts`
+- Feature-specific constants in dedicated files
 
-**Mock Data:**
-- Prefix with `MOCK_`: `MOCK_TEAM_MEMBERS`
-- Separate folder: `data/mockSwapRequests.ts`
+**Services:**
+- Centralized in `src/services/api/`
+- Export all from `index.ts`
 
-### Code Style
-
-**TypeScript:**
-- Strict mode enabled
-- Explicit return types for complex functions
-- Interface for object shapes
-- Type for unions/primitives
-
-**React:**
-- Functional components only
-- Hooks for state/effects
-- Props interface above component
-- Destructure props in signature
-
-**Naming:**
-- camelCase: variables, functions
-- PascalCase: components, interfaces
-- UPPER_SNAKE_CASE: constants
-
-**Example:**
-```typescript
-interface ProfileTabProps {
-  userId: string;
-}
-
-function ProfileTab({ userId }: ProfileTabProps) {
-  const [isEditing, setIsEditing] = useState(false);
-
-  const handleSave = async () => {
-    // Implementation
-  };
-
-  return <div>...</div>;
-}
-
-export default ProfileTab;
-```
+**Translations:**
+- JSON files in `src/i18n/locales/`
+- Organized by feature namespace
 
 ---
 
@@ -569,9 +755,9 @@ export default ProfileTab;
 ### Commit Messages
 Follow existing patterns in commit history:
 ```
-Add user profile page with edit functionality (#2)
-Fix request card layout for mobile portrait mode (#1)
-Refactor code to componenterize schedule and request tabs
+Add language selection button for all users (#15)
+Add admin vacation and days off management tab (#13)
+Add calendar sync button for external calendar integration (#14)
 ```
 
 **Format:**
@@ -597,13 +783,6 @@ Refactor code to componenterize schedule and request tabs
 - `GET /api/auth/session` - Validate session
 - JWT tokens or secure session cookies
 
-### CMS API
-**Current:** `mockFetchMenuItems()` in Dashboard.tsx
-**Needed:**
-- `POST /api/cms/menu` - Fetch role-based menu
-- Request: `{ sessionId: string }`
-- Response: `MenuItem[]`
-
 ### Schedule API
 **Needed:**
 - `GET /api/schedule/week?start={date}` - Weekly schedule
@@ -625,72 +804,42 @@ Refactor code to componenterize schedule and request tabs
 - `POST /api/users/{id}/avatar` - Upload profile picture
 - `DELETE /api/users/{id}/avatar` - Remove profile picture
 
-### Team API
+### Time-Off API
 **Needed:**
-- `GET /api/teams/members` - List team members (role-filtered)
-- `GET /api/teams/{id}/schedule` - Team schedule data
+- `GET /api/timeoff` - List time-off records
+- `POST /api/timeoff` - Create time-off record
+- `PATCH /api/timeoff/{id}` - Update record
+- `DELETE /api/timeoff/{id}` - Delete record
+
+### Calendar Sync API
+**Needed:**
+- `POST /api/calendar/connect/{provider}` - OAuth connection
+- `POST /api/calendar/sync/{provider}` - Push schedule updates
+- `DELETE /api/calendar/disconnect/{provider}` - Remove connection
 
 ---
 
 ## Security Considerations
 
 ### Current Implementation (Mock/Dev)
-- ⚠️ No encryption
-- ⚠️ Client-side role validation
-- ⚠️ SessionStorage (not secure)
-- ⚠️ No CSRF protection
-- ⚠️ No rate limiting
-- ⚠️ Base64 images in storage (memory issues)
+- No encryption
+- Client-side role validation
+- SessionStorage (not secure)
+- No CSRF protection
+- No rate limiting
+- Base64 images in storage (memory issues)
 
 ### Production Requirements
-- ✅ Server-side session validation
-- ✅ JWT or secure session cookies
-- ✅ HTTPS only
-- ✅ CSRF tokens
-- ✅ Input sanitization
-- ✅ XSS prevention
-- ✅ Rate limiting on APIs
-- ✅ File upload validation (server-side)
-- ✅ SQL injection prevention
-- ✅ Role-based access control (backend)
-
----
-
-## Testing Strategy (Recommended)
-
-### Unit Tests
-**Tools:** Vitest, React Testing Library
-**Coverage:**
-- Component rendering
-- User interactions (clicks, inputs)
-- State management logic
-- Date/time calculations
-- Filter functions
-- Mock data generators
-
-### Integration Tests
-**Scenarios:**
-- Login flow → Dashboard navigation
-- Schedule view switching
-- Swap request creation → approval flow
-- Profile edit → save → verify
-- Role-based menu rendering
-
-### E2E Tests
-**Tools:** Playwright, Cypress
-**Scenarios:**
-- Complete user journey (login → swap → logout)
-- Role-based access control verification
-- Mobile responsive behavior
-- Cross-browser compatibility
-- Performance under load
-
-### Accessibility Tests
-- Keyboard navigation
-- Screen reader compatibility
-- ARIA labels
-- Color contrast (WCAG AA)
-- Focus management
+- Server-side session validation
+- JWT or secure session cookies
+- HTTPS only
+- CSRF tokens
+- Input sanitization
+- XSS prevention
+- Rate limiting on APIs
+- File upload validation (server-side)
+- SQL injection prevention
+- Role-based access control (backend)
 
 ---
 
@@ -699,27 +848,29 @@ Refactor code to componenterize schedule and request tabs
 ### When Working on This Codebase
 
 **DO:**
-- ✅ Read existing code before modifying
-- ✅ Follow established patterns (functional components, hooks)
-- ✅ Use Tailwind classes (avoid custom CSS)
-- ✅ Maintain TypeScript strict typing
-- ✅ Test on mobile breakpoints
-- ✅ Handle loading and error states
-- ✅ Update this documentation for major changes
-- ✅ Check role-based access when adding features
-- ✅ Use existing mock data patterns
-- ✅ Mark TODOs for backend integration points
+- Read existing code before modifying
+- Follow established patterns (functional components, hooks)
+- Use Tailwind classes (avoid custom CSS)
+- Maintain TypeScript strict typing
+- Test on mobile breakpoints
+- Handle loading and error states
+- Use toast notifications instead of alerts
+- Add translations for new text
+- Use centralized types from `src/types/domain.ts`
+- Use centralized constants from `src/config/constants.ts`
+- Import API services from `src/services/api`
+- Update this documentation for major changes
 
 **DON'T:**
-- ❌ Add new dependencies without discussion
-- ❌ Use class components
-- ❌ Write custom CSS (use Tailwind)
-- ❌ Ignore TypeScript errors
-- ❌ Skip mobile responsiveness
-- ❌ Hardcode user IDs (use sessionStorage or props)
-- ❌ Remove existing TODOs without replacing functionality
-- ❌ Break role-based access control
-- ❌ Introduce state management libraries (keep it simple)
+- Add new dependencies without discussion
+- Use class components
+- Write custom CSS (use Tailwind)
+- Ignore TypeScript errors
+- Skip mobile responsiveness
+- Hardcode user IDs (use sessionStorage or props)
+- Use browser alerts (use toast notifications)
+- Add hard-coded text (use i18n translations)
+- Break role-based access control
 
 ### Common Tasks
 
@@ -727,65 +878,25 @@ Refactor code to componenterize schedule and request tabs
 1. Create component in appropriate `dashboard/` subfolder
 2. Add tab to `menuItemsByRole` in `Dashboard.tsx`
 3. Add tab content section in `Dashboard.tsx` main content area
-4. Update this documentation
+4. Add translations for tab label
+5. Update this documentation
 
-**Adding a New Component:**
-1. Create `.tsx` file with PascalCase name
-2. Define props interface if needed
-3. Use functional component with hooks
-4. Export as default
-5. Import and use in parent component
+**Adding New Text:**
+1. Add keys to `src/i18n/locales/en.json`
+2. Add keys to `src/i18n/locales/pt.json`
+3. Use `t('namespace.key')` in component
 
-**Adding New Mock Data:**
-1. Create in `data/` subfolder or component file
-2. Prefix with `MOCK_`
-3. Export for potential reuse
+**Adding a New API:**
+1. Create/update service in `src/services/api/`
+2. Export from `src/services/api/index.ts`
+3. Use mock delay from `mockDelay.ts`
 4. Add TODO comment for backend replacement
 
-**Updating Styles:**
-1. Use existing Tailwind classes
-2. Check responsive breakpoints (sm, md, lg)
-3. Maintain design system colors
-4. Test on mobile view
-
-**Adding API Integration:**
-1. Find mock function with TODO comment
-2. Replace mock logic with real API call
-3. Keep loading states and error handling
-4. Update types if response differs
-5. Remove TODO comment
-6. Update this documentation
-
-### Debugging Tips
-
-**Check sessionStorage:**
-```javascript
-// Browser console
-JSON.parse(sessionStorage.getItem('mockUser'))
-```
-
-**Mock user switching:**
-```javascript
-// Login page or console
-sessionStorage.setItem('mockUser', JSON.stringify({
-  name: 'Test User',
-  email: 'test@hospital.com',
-  role: 'admin',
-  sessionId: 'test-123'
-}));
-// Then refresh page
-```
-
-**Component props inspection:**
+**Showing Notifications:**
 ```typescript
-// Add to component temporarily
-console.log('Props:', { userId, shifts, role });
-```
-
-**Date debugging:**
-```typescript
-// ScheduleTab uses ISO date strings
-const dateKey = date.toISOString().split('T')[0]; // "2024-12-04"
+const { showSuccess, showError } = useToast();
+showSuccess(t('message.success'));
+showError(t('message.error'));
 ```
 
 ---
@@ -825,35 +936,10 @@ const dateKey = date.toISOString().split('T')[0]; // "2024-12-04"
    - No WebSocket support
    - Stale data possible
 
-### Mobile-Specific Limitations
-
-1. **Table Scrolling**
-   - Horizontal scroll required for team schedule
-   - Can be confusing on small screens
-   - Expand button helps but not ideal
-
-2. **Portrait Mode**
-   - Request cards optimized but still cramped
-   - Some text truncation necessary
-
-3. **Touch Targets**
-   - Some buttons may be too small (< 44px)
-   - Hover states don't translate well
-
-### Performance Considerations
-
-1. **Large Team Sizes**
-   - Month view with many members is heavy
-   - No virtualization
-   - Re-renders can be slow
-
-2. **Date Calculations**
-   - Recalculated on every render in some places
-   - Could benefit from memoization
-
-3. **Filter Operations**
-   - Linear search on every keystroke
-   - No debouncing on name filter
+7. **Calendar Sync**
+   - Mock implementation only
+   - No actual OAuth flow
+   - No real sync functionality
 
 ---
 
@@ -870,42 +956,57 @@ const dateKey = date.toISOString().split('T')[0]; // "2024-12-04"
 - [ ] Mobile app (React Native)
 - [ ] Push notifications
 - [ ] Email notifications
-- [ ] Calendar export (iCal)
-- [ ] PDF schedule export
+- [x] ~~Calendar export (iCal)~~ (Implemented - mock)
+- [x] ~~PDF schedule export~~ (Implemented)
 - [ ] Analytics dashboard with charts
 - [ ] Advanced filtering (date ranges, departments)
 
 ### Low Priority
 - [ ] Team chat integration
 - [ ] Shift trading marketplace
-- [ ] Time-off request management
+- [x] ~~Time-off request management~~ (Implemented - admin only)
 - [ ] Overtime tracking
 - [ ] Payroll integration
 - [ ] Multi-facility support
 - [ ] Dark mode
-- [ ] Internationalization (i18n)
+- [x] ~~Internationalization (i18n)~~ (Implemented - EN/PT)
 
 ---
 
 ## Version History
 
 ### Recent Changes (from Git History)
+- **PR #15:** Add language selection button for all users
+- **PR #14:** Add calendar sync button for external calendar integration
+- **PR #13:** Add admin vacation and days off management tab
+- **PR #12:** Add multi-shift selection for swap requests
+- **PR #11:** Show full month view for user schedule
+- **PR #10:** Replace browser alerts with custom toast notifications
+- **PR #9:** Add export schedule to PDF button
+- **PR #8:** Review code for improvements and best practices
+- **PR #7:** Add mobile profile modal for logout and profile access
+- **PR #6:** Add mock API call for loading profile data
+- **PR #5:** Add comprehensive CLAUDE.md documentation
+- **PR #4:** Add shift selection to swap request modal
 - **PR #3:** Add schedule generation button and modal
 - **PR #2:** Add user profile page with edit functionality
 - **PR #1:** Fix request card layout for mobile portrait mode
-- **Recent:** Redesign Request Card
-- **Recent:** Refactor code to componentize schedule and request tabs
 
-### Version 1.0.0 (Current)
-- ✅ User authentication (mock)
-- ✅ Role-based dashboard
-- ✅ Team schedule view (week/month)
-- ✅ Personal calendar view
-- ✅ Shift swap requests
-- ✅ Profile management
-- ✅ Schedule generation (admin/team leader)
-- ✅ Mobile-responsive design
-- ✅ Share functionality
+### Version 2.0.0 (Current)
+- User authentication (mock)
+- Role-based dashboard
+- Team schedule view (week/month for all users)
+- Personal calendar view
+- Multi-shift swap requests
+- Profile management
+- Schedule generation (admin/team leader)
+- PDF schedule export
+- External calendar sync (mock)
+- Toast notification system
+- Admin time-off management
+- Multi-language support (EN/PT)
+- Mobile-responsive design
+- Share functionality
 
 ---
 
@@ -916,6 +1017,8 @@ const dateKey = date.toISOString().split('T')[0]; // "2024-12-04"
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Tailwind CSS Docs](https://tailwindcss.com/docs)
 - [Vite Guide](https://vitejs.dev/guide/)
+- [i18next Docs](https://www.i18next.com/)
+- [jsPDF Docs](https://artskydj.github.io/jsPDF/docs/jsPDF.html)
 
 ### Internal Files
 - `package.json` - Dependencies and scripts
@@ -924,119 +1027,10 @@ const dateKey = date.toISOString().split('T')[0]; // "2024-12-04"
 - `vite.config.ts` - Build configuration
 - `.gitignore` - Ignored files
 
-### Key Contacts
-- **Development Team:** dev@shiftswap.com
-- **Repository:** GitHub (check remote URL)
-
 ---
 
-## Appendix: Type Definitions Reference
-
-### Core Types
-
-```typescript
-// User & Session
-interface UserData {
-  name: string;
-  email: string;
-  role: 'user' | 'teamleader' | 'admin';
-  sessionId: string;
-  profilePicture?: string | null;
-  phone?: string;
-  department?: string;
-  employeeId?: string;
-  facility?: string;
-  startDate?: string;
-}
-
-// Menu
-interface MenuItem {
-  id: string;
-  label: string;
-  icon: string;
-  badge?: number;
-  order: number;
-}
-
-// Schedule
-interface ShiftData {
-  [personId: string]: {
-    [date: string]: Array<'M' | 'A' | 'N' | 'R' | 'D'>;
-  };
-}
-
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-}
-
-interface SwapFormData {
-  targetUserId: string;
-  targetDate: string;
-  targetShift: 'M' | 'A' | 'N' | 'R' | 'D';
-  myDate: string;
-  myShift: 'M' | 'A' | 'N' | 'R' | 'D';
-}
-
-// Requests (schedule/Types.ts)
-interface SwapRequest {
-  id: string;
-  fromUserId: string;
-  toUserId: string;
-  fromShift: {
-    date: string;
-    shiftType: 'M' | 'A' | 'N' | 'R' | 'D';
-  };
-  toShift: {
-    date: string;
-    shiftType: 'M' | 'A' | 'N' | 'R' | 'D';
-  };
-  status: 'pending' | 'approved' | 'declined';
-  createdAt: string;
-}
-
-// Requests (requests/Types.ts)
-interface SwapRequest {
-  id: number;
-  from: string;
-  fromId: string;
-  to: string;
-  toId: string;
-  fromShift: {
-    date: string;
-    time: string;
-    type: string;
-  };
-  toShift: {
-    date: string;
-    time: string;
-    type: string;
-  };
-  status: 'pending' | 'approved' | 'declined';
-  createdAt: string;
-}
-
-// Profile
-interface UserProfile {
-  name: string;
-  email: string;
-  phone: string;
-  role: string;
-  department: string;
-  employeeId: string;
-  facility: string;
-  startDate: string;
-  profilePicture: string | null;
-}
-```
-
-**Note:** There are two similar but slightly different `SwapRequest` interfaces in different domains (schedule vs requests). This is intentional for their specific use cases but could be unified in the future.
-
----
-
-**Last Updated:** December 4, 2024
-**Document Version:** 2.0
+**Last Updated:** December 12, 2024
+**Document Version:** 3.0
 **Maintained By:** Development Team & AI Assistants
 
 **For Questions or Updates:**
