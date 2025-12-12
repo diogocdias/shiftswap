@@ -5,6 +5,7 @@ import { ShiftData, SwapFormData, SwapRequest, TeamMember } from "../../types/do
 import TeamView from "./components/TeamView.tsx";
 import { SHIFT_LEGENDS } from "./ShiftConstants.ts";
 import SwapRequestModal from "./components/SwapRequestModal.tsx";
+import MultiPersonSwapModal from "./components/MultiPersonSwapModal.tsx";
 import GenerateScheduleModal from "./components/GenerateScheduleModal.tsx";
 import CalendarSyncModal from "./components/CalendarSyncModal.tsx";
 import { LoadingOverlay } from "../../components/LoadingOverlay.tsx";
@@ -52,6 +53,7 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const [hoveredShift, setHoveredShift] = useState<string | null>(null);
     const [nameFilter, setNameFilter] = useState('');
     const [showSwapModal, setShowSwapModal] = useState(false);
+    const [showMultiPersonSwapModal, setShowMultiPersonSwapModal] = useState(false);
     const [swapFormData, setSwapFormData] = useState<SwapFormData | null>(null);
     const [pendingSwaps, setPendingSwaps] = useState<SwapRequest[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -192,6 +194,16 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
     const handleOpenSwapModal = () => {
         if (selectedShifts.length === 0) return;
 
+        // Count unique users involved
+        const uniqueUserIds = [...new Set(selectedShifts.map(s => s.userId))];
+
+        // If 3+ people are involved, open the multi-person modal
+        if (uniqueUserIds.length >= 3) {
+            setShowMultiPersonSwapModal(true);
+            return;
+        }
+
+        // Otherwise, use the regular 2-person swap modal
         // Separate shifts into my shifts and target shifts
         const myShifts = selectedShifts
             .filter(s => s.userId === LOGGED_IN_USER_ID)
@@ -279,6 +291,46 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
         setSwapFormData(null);
         // Note: We intentionally do NOT clear selectedShifts here
         // so the user can cancel and re-open without losing their selections
+    };
+
+    const handleCloseMultiPersonModal = () => {
+        setShowMultiPersonSwapModal(false);
+        // Note: We intentionally do NOT clear selectedShifts here
+        // so the user can cancel and re-open without losing their selections
+    };
+
+    // Handler for multi-person swap submission
+    interface ShiftAssignment {
+        shiftId: string;
+        originalOwner: string;
+        newOwner: string;
+        date: string;
+        shiftType: 'M' | 'A' | 'N';
+    }
+
+    const handleMultiPersonSwapRequest = async (assignments: ShiftAssignment[]) => {
+        // Create swap requests for each reassignment
+        const newRequests: SwapRequest[] = assignments.map((assignment, index) => ({
+            id: `multi-swap-${Date.now()}-${index}`,
+            fromUserId: assignment.originalOwner,
+            toUserId: assignment.newOwner,
+            fromShift: {
+                date: assignment.date,
+                shiftType: assignment.shiftType,
+            },
+            toShift: {
+                date: assignment.date,
+                shiftType: assignment.shiftType,
+            },
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+        }));
+
+        setPendingSwaps(prev => [...prev, ...newRequests]);
+        setShowMultiPersonSwapModal(false);
+        clearSelectedShifts();
+
+        showSuccess(t('schedule.toast.multiPersonSwapSubmitted', { count: assignments.length }));
     };
 
     const handleGenerateSchedule = async (startDate: string, endDate: string) => {
@@ -681,6 +733,16 @@ function ScheduleTab({userRole}: ScheduleTabProps) {
                 teamMembers={MOCK_TEAM_MEMBERS}
                 loggedInUserId={LOGGED_IN_USER_ID}
                 getAvailableShifts={getAvailableShifts}
+            />
+
+            {/* Multi-Person Swap Modal */}
+            <MultiPersonSwapModal
+                isOpen={showMultiPersonSwapModal}
+                selectedShifts={selectedShifts}
+                onClose={handleCloseMultiPersonModal}
+                onSubmit={handleMultiPersonSwapRequest}
+                teamMembers={MOCK_TEAM_MEMBERS}
+                loggedInUserId={LOGGED_IN_USER_ID}
             />
 
             {/* Generate Schedule Modal */}

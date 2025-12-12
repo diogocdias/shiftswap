@@ -318,6 +318,20 @@
       "youReceive": "Você Recebe",
       "from": "De"
     },
+    "multiPersonSwap": {
+      "title": "Troca de Turnos Multi-Pessoa",
+      "subtitle": "{{count}} pessoas envolvidas nesta troca",
+      "assignShifts": "Atribuir Turnos",
+      "assignShiftsDescription": "Selecione quem ficará com cada turno após a troca. Use o menu para reatribuir turnos entre os participantes.",
+      "you": "Você",
+      "unknownUser": "Utilizador Desconhecido",
+      "resultSummary": "Resumo da Troca",
+      "noChangesWarning": "Nenhum turno foi reatribuído. Selecione um proprietário diferente para pelo menos um turno para criar uma troca.",
+      "gives": "Dá",
+      "receives": "Recebe",
+      "from": "de",
+      "submitRequest": "Submeter Pedido de Troca"
+    },
     "dayDetail": {
       "swapPending": "Troca Pendente"
     },
@@ -339,6 +353,7 @@
     "toast": {
       "swapSubmitted": "Pedido de troca submetido! {{myShifts}} turno por {{targetShifts}} turno. À espera de aprovação.",
       "swapSubmittedPlural": "Pedido de troca submetido! {{myShifts}} turnos por {{targetShifts}} turnos. À espera de aprovação.",
+      "multiPersonSwapSubmitted": "Pedido de troca multi-pessoa submetido! {{count}} reatribuições de turno pendentes de aprovação.",
       "fillAllFields": "Por favor preencha todos os campos obrigatórios",
       "calendarSynced": "Os seus turnos foram sincronizados com o calendário!",
       "generateFailed": "Falha ao gerar escala. Por favor tente novamente.",

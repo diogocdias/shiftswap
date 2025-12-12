@@ -318,6 +318,20 @@
       "youReceive": "You Receive",
       "from": "From"
     },
+    "multiPersonSwap": {
+      "title": "Multi-Person Shift Swap",
+      "subtitle": "{{count}} people involved in this swap",
+      "assignShifts": "Assign Shifts",
+      "assignShiftsDescription": "Select who will take each shift after the swap. Use the dropdown to reassign shifts between participants.",
+      "you": "You",
+      "unknownUser": "Unknown User",
+      "resultSummary": "Swap Summary",
+      "noChangesWarning": "No shifts have been reassigned. Select a different owner for at least one shift to create a swap.",
+      "gives": "Gives",
+      "receives": "Receives",
+      "from": "from",
+      "submitRequest": "Submit Swap Request"
+    },
     "dayDetail": {
       "swapPending": "Swap Pending"
     },
@@ -339,6 +353,7 @@
     "toast": {
       "swapSubmitted": "Swap request submitted! {{myShifts}} shift for {{targetShifts}} shift. Waiting for approval.",
       "swapSubmittedPlural": "Swap request submitted! {{myShifts}} shifts for {{targetShifts}} shifts. Waiting for approval.",
+      "multiPersonSwapSubmitted": "Multi-person swap request submitted! {{count}} shift reassignments pending approval.",
       "fillAllFields": "Please fill in all required fields",
       "calendarSynced": "Your shifts have been synced to your calendar!",
       "generateFailed": "Failed to generate schedule. Please try again.",
