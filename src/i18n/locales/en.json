@@ -428,6 +428,18 @@
       "declined": "Swap request declined.",
       "copiedToClipboard": "Swap request details copied to clipboard!",
       "failedToCopy": "Failed to copy to clipboard"
+    },
+    "multiPerson": {
+      "title": "Multi-Person Swap",
+      "participantCount": "{{count}} people",
+      "createdBy": "Created by {{name}}",
+      "participants": "Participants",
+      "you": "You",
+      "shiftTransfers": "Shift Transfers",
+      "yourSummary": "Your Changes",
+      "youGive": "You give",
+      "youReceive": "You receive",
+      "none": "None"
     }
   },
   "analytics": {

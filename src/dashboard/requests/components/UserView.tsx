@@ -1,16 +1,18 @@
 import React from "react";
 import { useTranslation } from 'react-i18next';
-import { SwapRequest } from "../Types.ts";
+import { SwapRequest, AnySwapRequest, isMultiPersonSwap } from "../Types.ts";
 import { renderRequestCard } from "./RenderRequestCard.tsx";
+import { MultiPersonRequestCard } from "./MultiPersonRequestCard.tsx";
 import { useToast } from "../../../context/ToastContext";
 
 interface UserViewProps {
-    incomingRequests: SwapRequest[];
-    outgoingRequests: SwapRequest[];
+    incomingRequests: AnySwapRequest[];
+    outgoingRequests: AnySwapRequest[];
     filter: string;
-    setRequests: React.Dispatch<React.SetStateAction<SwapRequest[]>>;
+    setRequests: React.Dispatch<React.SetStateAction<AnySwapRequest[]>>;
     setSelectedRequest: React.Dispatch<React.SetStateAction<SwapRequest | null>>;
     setShowShareModal: React.Dispatch<React.SetStateAction<boolean>>;
+    loggedInUserId: string;
 }
 
 export const UserView: React.FC<UserViewProps> = ({
@@ -19,10 +21,70 @@ export const UserView: React.FC<UserViewProps> = ({
                                                       filter,
                                                       setRequests,
                                                       setSelectedRequest,
-                                                      setShowShareModal
+                                                      setShowShareModal,
+                                                      loggedInUserId
                                                   }) => {
     const { t } = useTranslation();
     const { showSuccess, showInfo } = useToast();
+
+    const renderIncomingRequest = (request: AnySwapRequest) => {
+        if (isMultiPersonSwap(request)) {
+            return (
+                <MultiPersonRequestCard
+                    key={request.id}
+                    request={request}
+                    showActions={request.status === 'pending'}
+                    canShare={false}
+                    setRequests={setRequests}
+                    setShowShareModal={setShowShareModal}
+                    onApproveSuccess={() => showSuccess(t('requests.toast.approved'))}
+                    onDeclineSuccess={() => showInfo(t('requests.toast.declined'))}
+                    loggedInUserId={loggedInUserId}
+                />
+            );
+        }
+
+        return renderRequestCard({
+            request,
+            showActions: request.status === 'pending',
+            canShare: false,
+            setRequests: setRequests as React.Dispatch<React.SetStateAction<SwapRequest[]>>,
+            setSelectedRequest,
+            setShowShareModal,
+            onApproveSuccess: () => showSuccess(t('requests.toast.approved')),
+            onDeclineSuccess: () => showInfo(t('requests.toast.declined'))
+        });
+    };
+
+    const renderOutgoingRequest = (request: AnySwapRequest) => {
+        if (isMultiPersonSwap(request)) {
+            return (
+                <MultiPersonRequestCard
+                    key={request.id}
+                    request={request}
+                    showActions={false}
+                    canShare={true}
+                    setRequests={setRequests}
+                    setShowShareModal={setShowShareModal}
+                    onApproveSuccess={() => showSuccess(t('requests.toast.approved'))}
+                    onDeclineSuccess={() => showInfo(t('requests.toast.declined'))}
+                    loggedInUserId={loggedInUserId}
+                />
+            );
+        }
+
+        return renderRequestCard({
+            request,
+            showActions: false,
+            canShare: true,
+            setRequests: setRequests as React.Dispatch<React.SetStateAction<SwapRequest[]>>,
+            setSelectedRequest,
+            setShowShareModal,
+            onApproveSuccess: () => showSuccess(t('requests.toast.approved')),
+            onDeclineSuccess: () => showInfo(t('requests.toast.declined'))
+        });
+    };
+
     return (
         <>
             {/* Incoming Requests */}
@@ -53,16 +115,7 @@ export const UserView: React.FC<UserViewProps> = ({
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-200">
-                        {incomingRequests.map((request) => renderRequestCard({
-                            request,
-                            showActions: request.status === 'pending',
-                            canShare: false,
-                            setRequests,
-                            setSelectedRequest,
-                            setShowShareModal,
-                            onApproveSuccess: () => showSuccess(t('requests.toast.approved')),
-                            onDeclineSuccess: () => showInfo(t('requests.toast.declined'))
-                        }))}
+                        {incomingRequests.map(renderIncomingRequest)}
                     </div>
                 )}
             </div>
@@ -95,16 +148,7 @@ export const UserView: React.FC<UserViewProps> = ({
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-200">
-                        {outgoingRequests.map((request) => renderRequestCard({
-                            request,
-                            showActions: false,
-                            canShare: true,
-                            setRequests,
-                            setSelectedRequest,
-                            setShowShareModal,
-                            onApproveSuccess: () => showSuccess(t('requests.toast.approved')),
-                            onDeclineSuccess: () => showInfo(t('requests.toast.declined'))
-                        }))}
+                        {outgoingRequests.map(renderOutgoingRequest)}
                     </div>
                 )}
             </div>

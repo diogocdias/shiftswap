@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MOCK_SWAP_REQUESTS } from "./data/mockSwapRequests.ts";
-import { SwapRequest } from './Types.ts';
+import { ALL_MOCK_REQUESTS } from "./data/mockSwapRequests.ts";
+import { SwapRequest, AnySwapRequest, isMultiPersonSwap } from './Types.ts';
 import { AdminView } from "./components/AdminView.tsx";
 import { ShareSwapModal } from "./components/ShareModal.tsx";
 import { UserView } from "./components/UserView.tsx";
@@ -12,7 +12,7 @@ import { useToast } from "../../context/ToastContext";
 function RequestsTab() {
     const { t } = useTranslation();
     const { showSuccess, showError } = useToast();
-    const [requests, setRequests] = useState<SwapRequest[]>(MOCK_SWAP_REQUESTS);
+    const [requests, setRequests] = useState<AnySwapRequest[]>(ALL_MOCK_REQUESTS);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'declined'>('all');
     const [showShareModal, setShowShareModal] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState<SwapRequest | null>(null);
@@ -70,8 +70,23 @@ function RequestsTab() {
     });
 
     // For regular users, separate into two categories
-    const incomingRequests = filteredRequests.filter(req => req.toId === LOGGED_IN_USER_ID);
-    const outgoingRequests = filteredRequests.filter(req => req.fromId === LOGGED_IN_USER_ID);
+    // For regular (two-person) swaps, use the existing logic
+    // For multi-person swaps, show if user is a participant
+    const incomingRequests = filteredRequests.filter(req => {
+        if (isMultiPersonSwap(req)) {
+            // User is involved but didn't create the swap
+            return req.participants.some(p => p.id === LOGGED_IN_USER_ID) && req.createdById !== LOGGED_IN_USER_ID;
+        }
+        return req.toId === LOGGED_IN_USER_ID;
+    });
+
+    const outgoingRequests = filteredRequests.filter(req => {
+        if (isMultiPersonSwap(req)) {
+            // User created the swap
+            return req.createdById === LOGGED_IN_USER_ID;
+        }
+        return req.fromId === LOGGED_IN_USER_ID;
+    });
 
     // For admins/team leaders, show all requests
     const displayRequests = userRole === 'admin' || userRole === 'teamleader'
@@ -152,6 +167,7 @@ function RequestsTab() {
                     setRequests={setRequests}
                     setSelectedRequest={setSelectedRequest}
                     setShowShareModal={setShowShareModal}
+                    loggedInUserId={LOGGED_IN_USER_ID}
                 />
             )}
 
@@ -164,6 +180,7 @@ function RequestsTab() {
                     setRequests={setRequests}
                     setSelectedRequest={setSelectedRequest}
                     setShowShareModal={setShowShareModal}
+                    loggedInUserId={LOGGED_IN_USER_ID}
                 />
             )}
 

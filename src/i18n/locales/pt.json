@@ -428,6 +428,18 @@
       "declined": "Pedido de troca recusado.",
       "copiedToClipboard": "Detalhes do pedido de troca copiados para a área de transferência!",
       "failedToCopy": "Falha ao copiar para a área de transferência"
+    },
+    "multiPerson": {
+      "title": "Troca Multi-Pessoa",
+      "participantCount": "{{count}} pessoas",
+      "createdBy": "Criado por {{name}}",
+      "participants": "Participantes",
+      "you": "Você",
+      "shiftTransfers": "Transferências de Turno",
+      "yourSummary": "As Suas Alterações",
+      "youGive": "Você dá",
+      "youReceive": "Você recebe",
+      "none": "Nenhum"
     }
   },
   "analytics": {
