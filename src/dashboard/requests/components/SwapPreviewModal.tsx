@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SwapRequest, MultiPersonSwapRequest, isMultiPersonSwap, AnySwapRequest } from '../Types';
+import { SwapRequest, isMultiPersonSwap, AnySwapRequest } from '../Types';
 
 // Shift type colors matching ShiftConstants
 const SHIFT_COLORS: Record<string, string> = {
