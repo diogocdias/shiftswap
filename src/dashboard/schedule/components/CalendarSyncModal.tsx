@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CalendarProvider {
     id: string;
-    name: string;
+    nameKey: string;
     icon: JSX.Element;
     color: string;
     connected: boolean;
@@ -31,6 +32,7 @@ const saveConnections = (connections: Record<string, { connected: boolean; lastS
 };
 
 export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarSyncModalProps) {
+    const { t } = useTranslation();
     const [providers, setProviders] = useState<CalendarProvider[]>([]);
     const [connecting, setConnecting] = useState<string | null>(null);
     const [syncing, setSyncing] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
         setProviders([
             {
                 id: 'google',
-                name: 'Google Calendar',
+                nameKey: 'schedule.calendarSync.googleCalendar',
                 icon: (
                     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -56,7 +58,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
             },
             {
                 id: 'apple',
-                name: 'Apple Calendar',
+                nameKey: 'schedule.calendarSync.appleCalendar',
                 icon: (
                     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
@@ -68,7 +70,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
             },
             {
                 id: 'outlook',
-                name: 'Outlook Calendar',
+                nameKey: 'schedule.calendarSync.outlookCalendar',
                 icon: (
                     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
                         <path d="M24 7.387v10.478c0 .23-.08.424-.238.576-.159.152-.356.228-.593.228h-8.5V6.583h8.5c.237 0 .434.076.593.228.158.152.238.346.238.576z" fill="#0364B8"/>
@@ -84,7 +86,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
             },
             {
                 id: 'ical',
-                name: 'iCal Export',
+                nameKey: 'schedule.calendarSync.icalExport',
                 icon: (
                     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -112,6 +114,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
 
         const stored = getStoredConnections();
         const provider = providers.find(p => p.id === providerId);
+        const providerName = t(provider?.nameKey || '');
 
         if (provider?.connected) {
             // Disconnect
@@ -122,7 +125,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                     ? { ...p, connected: false, lastSynced: undefined }
                     : p
             ));
-            setMessage({ type: 'success', text: `Disconnected from ${provider.name}` });
+            setMessage({ type: 'success', text: t('schedule.calendarSync.disconnectedFrom', { provider: providerName }) });
         } else {
             // Connect
             stored[providerId] = { connected: true };
@@ -132,7 +135,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                     ? { ...p, connected: true }
                     : p
             ));
-            setMessage({ type: 'success', text: `Connected to ${providers.find(p => p.id === providerId)?.name}!` });
+            setMessage({ type: 'success', text: t('schedule.calendarSync.connectedTo', { provider: providerName }) });
         }
 
         setConnecting(null);
@@ -158,7 +161,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
 
         onSync(providerId);
         setSyncing(null);
-        setMessage({ type: 'success', text: 'Calendar synced successfully! Your shifts have been exported.' });
+        setMessage({ type: 'success', text: t('schedule.calendarSync.syncSuccess') });
     };
 
     const formatLastSynced = (dateString?: string) => {
@@ -170,10 +173,14 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
         const diffHours = Math.floor(diffMins / 60);
         const diffDays = Math.floor(diffHours / 24);
 
-        if (diffMins < 1) return 'Just now';
-        if (diffMins < 60) return `${diffMins} min ago`;
-        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        if (diffMins < 1) return t('schedule.calendarSync.justNow');
+        if (diffMins < 60) return t('schedule.calendarSync.minAgo', { count: diffMins });
+        if (diffHours < 24) return diffHours === 1
+            ? t('schedule.calendarSync.hourAgo', { count: diffHours })
+            : t('schedule.calendarSync.hoursAgo', { count: diffHours });
+        return diffDays === 1
+            ? t('schedule.calendarSync.dayAgo', { count: diffDays })
+            : t('schedule.calendarSync.daysAgo', { count: diffDays });
     };
 
     const handleClose = () => {
@@ -188,9 +195,9 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900">Sync Calendar</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">{t('schedule.calendarSync.title')}</h2>
                             <p className="text-sm text-gray-500 mt-1">
-                                Connect your calendar to sync your shifts
+                                {t('schedule.calendarSync.subtitle')}
                             </p>
                         </div>
                         <button
@@ -236,14 +243,14 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                                     <div className="flex items-center gap-3">
                                         {provider.icon}
                                         <div>
-                                            <div className="font-medium text-gray-900">{provider.name}</div>
+                                            <div className="font-medium text-gray-900">{t(provider.nameKey)}</div>
                                             {provider.connected && provider.lastSynced && (
                                                 <div className="text-xs text-gray-500">
-                                                    Last synced: {formatLastSynced(provider.lastSynced)}
+                                                    {t('schedule.calendarSync.lastSynced', { time: formatLastSynced(provider.lastSynced) })}
                                                 </div>
                                             )}
                                             {provider.connected && !provider.lastSynced && (
-                                                <div className="text-xs text-green-600">Connected</div>
+                                                <div className="text-xs text-green-600">{t('schedule.calendarSync.connected')}</div>
                                             )}
                                         </div>
                                     </div>
@@ -260,14 +267,14 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                                                         </svg>
-                                                        Syncing...
+                                                        {t('schedule.calendarSync.syncing')}
                                                     </>
                                                 ) : (
                                                     <>
                                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                         </svg>
-                                                        Sync
+                                                        {t('schedule.calendarSync.sync')}
                                                     </>
                                                 )}
                                             </button>
@@ -287,12 +294,12 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                                                     </svg>
-                                                    {provider.connected ? 'Disconnecting...' : 'Connecting...'}
+                                                    {provider.connected ? t('schedule.calendarSync.disconnecting') : t('schedule.calendarSync.connecting')}
                                                 </>
                                             ) : provider.connected ? (
-                                                'Disconnect'
+                                                t('schedule.calendarSync.disconnect')
                                             ) : (
-                                                'Connect'
+                                                t('schedule.calendarSync.connect')
                                             )}
                                         </button>
                                     </div>
@@ -308,10 +315,9 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <div className="text-sm text-blue-700">
-                                <p className="font-medium">How calendar sync works</p>
+                                <p className="font-medium">{t('schedule.calendarSync.howItWorks')}</p>
                                 <p className="mt-1 text-blue-600">
-                                    Connect your calendar to automatically add your shifts as events.
-                                    Sync anytime to update with your latest schedule.
+                                    {t('schedule.calendarSync.howItWorksDescription')}
                                 </p>
                             </div>
                         </div>
@@ -322,7 +328,7 @@ export default function CalendarSyncModal({ isOpen, onClose, onSync }: CalendarS
                         onClick={handleClose}
                         className="w-full mt-6 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
                     >
-                        Close
+                        {t('common.close')}
                     </button>
                 </div>
             </div>

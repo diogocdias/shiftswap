@@ -1,4 +1,5 @@
 // TeamView.tsx
+import { useTranslation } from 'react-i18next';
 import { SHIFT_LEGENDS } from "../ShiftConstants.ts";
 import { ShiftData, TeamMember, ShiftType, VacationRecord } from "../../../types/domain";
 import { useIsDesktop } from "../../../hooks/useIsDesktop";
@@ -23,6 +24,7 @@ interface WeekViewProps {
 }
 
 export default function TeamView(props: WeekViewProps) {
+    const { t } = useTranslation();
     const {
         weekDays,
         filteredTeamMembers,
@@ -67,7 +69,7 @@ export default function TeamView(props: WeekViewProps) {
                     <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-900 sticky left-0 bg-gray-50 z-10 w-32">
-                            Team Member
+                            {t('schedule.teamMember')}
                         </th>
                         {/* Show week view on mobile, month view on desktop for admin/teamleader */}
                         {/* Mobile: always show weekDays */}
@@ -95,7 +97,7 @@ export default function TeamView(props: WeekViewProps) {
                     {filteredTeamMembers.length === 0 ? (
                         <tr>
                             <td colSpan={isMonthView ? daysToShow.length + 1 : weekDays.length + 1} className="px-2 py-6 text-center text-gray-500 text-sm">
-                                No team members found matching "{nameFilter}"
+                                {t('schedule.noMembersFound', { filter: nameFilter })}
                             </td>
                         </tr>
                     ) : (
@@ -132,7 +134,7 @@ export default function TeamView(props: WeekViewProps) {
                                                             {hoveredShift === `timeoff-${member.id}-${dateKey}` && (
                                                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 text-white text-[10px] rounded whitespace-nowrap z-20 shadow-lg">
                                                                     <div className="font-semibold">{typeInfo.icon} {typeInfo.label}</div>
-                                                                    <div className="text-gray-300 mt-0.5">Time Off</div>
+                                                                    <div className="text-gray-300 mt-0.5">{t('schedule.tooltips.timeOff')}</div>
                                                                     {timeOff.notes && (
                                                                         <div className="text-gray-400 mt-1">{timeOff.notes}</div>
                                                                     )}
@@ -194,13 +196,13 @@ export default function TeamView(props: WeekViewProps) {
                                                                             <div className="font-semibold">{shiftInfo.label}</div>
                                                                             <div className="text-gray-300 mt-0.5">{shiftInfo.time}</div>
                                                                             {isPending && (
-                                                                                <div className="text-yellow-300 mt-1 font-semibold">Swap Pending</div>
+                                                                                <div className="text-yellow-300 mt-1 font-semibold">{t('schedule.tooltips.swapPending')}</div>
                                                                             )}
                                                                             {isSelected && (
-                                                                                <div className="text-blue-300 mt-1 font-semibold">Selected - Click to deselect</div>
+                                                                                <div className="text-blue-300 mt-1 font-semibold">{t('schedule.tooltips.selectedClickToDeselect')}</div>
                                                                             )}
                                                                             {isClickable && !isPending && !isSelected && (
-                                                                                <div className="text-blue-300 mt-1">Click to select for swap</div>
+                                                                                <div className="text-blue-300 mt-1">{t('schedule.tooltips.clickToSelectForSwap')}</div>
                                                                             )}
                                                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                                                                                 <div className="border-4 border-transparent border-t-gray-900"></div>
@@ -239,7 +241,7 @@ export default function TeamView(props: WeekViewProps) {
                                                             {hoveredShift === `timeoff-${member.id}-${dateKey}` && (
                                                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 text-white text-[10px] rounded whitespace-nowrap z-20 shadow-lg">
                                                                     <div className="font-semibold">{typeInfo.icon} {typeInfo.label}</div>
-                                                                    <div className="text-gray-300 mt-0.5">Time Off</div>
+                                                                    <div className="text-gray-300 mt-0.5">{t('schedule.tooltips.timeOff')}</div>
                                                                     {timeOff.notes && (
                                                                         <div className="text-gray-400 mt-1">{timeOff.notes}</div>
                                                                     )}
@@ -301,13 +303,13 @@ export default function TeamView(props: WeekViewProps) {
                                                                             <div className="font-semibold">{shiftInfo.label}</div>
                                                                             <div className="text-gray-300 mt-0.5">{shiftInfo.time}</div>
                                                                             {isPending && (
-                                                                                <div className="text-yellow-300 mt-1 font-semibold">Swap Pending</div>
+                                                                                <div className="text-yellow-300 mt-1 font-semibold">{t('schedule.tooltips.swapPending')}</div>
                                                                             )}
                                                                             {isSelected && (
-                                                                                <div className="text-blue-300 mt-1 font-semibold">Selected - Click to deselect</div>
+                                                                                <div className="text-blue-300 mt-1 font-semibold">{t('schedule.tooltips.selectedClickToDeselect')}</div>
                                                                             )}
                                                                             {isClickable && !isPending && !isSelected && (
-                                                                                <div className="text-blue-300 mt-1">Click to select for swap</div>
+                                                                                <div className="text-blue-300 mt-1">{t('schedule.tooltips.clickToSelectForSwap')}</div>
                                                                             )}
                                                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                                                                                 <div className="border-4 border-transparent border-t-gray-900"></div>

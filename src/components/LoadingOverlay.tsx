@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /* Usage example:
 <LoadingOverlay
@@ -19,6 +20,7 @@ interface LoadingOverlayProps {
 }
 
 export function LoadingOverlay({ isLoading, timeout = 5000, onTimeout }: LoadingOverlayProps) {
+    const { t } = useTranslation();
     const [showTimeout, setShowTimeout] = useState(false);
 
     useEffect(() => {
@@ -45,7 +47,7 @@ export function LoadingOverlay({ isLoading, timeout = 5000, onTimeout }: Loading
                 {!showTimeout ? (
                     <>
                         <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        <div className="text-gray-700 font-medium">Loading...</div>
+                        <div className="text-gray-700 font-medium">{t('common.loading')}</div>
                     </>
                 ) : (
                     <>
@@ -53,10 +55,10 @@ export function LoadingOverlay({ isLoading, timeout = 5000, onTimeout }: Loading
                             <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Request timed out
+                            {t('common.requestTimeout')}
                         </div>
                         <div className="text-sm text-gray-600">
-                            The server is taking too long to respond
+                            {t('common.serverTakingTooLong')}
                         </div>
                     </>
                 )}

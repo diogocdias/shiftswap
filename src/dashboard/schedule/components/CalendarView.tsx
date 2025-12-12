@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { SHIFT_LEGENDS } from "../ShiftConstants.ts";
 import { ShiftData } from "../Types.ts";
 import { VacationRecord } from "../../../types/domain";
@@ -13,15 +14,27 @@ interface CalendarViewProps {
 }
 
 export default function CalendarView(props: CalendarViewProps) {
+    const { t } = useTranslation();
     const { getDaysInMonth, monthShifts, LOGGED_IN_USER_ID, isToday, setSelectedDate, getTimeOffForDate } = props;
 
     const days = getDaysInMonth();
+
+    // Localized day names
+    const dayNames = [
+        t('schedule.weekDays.mon'),
+        t('schedule.weekDays.tue'),
+        t('schedule.weekDays.wed'),
+        t('schedule.weekDays.thu'),
+        t('schedule.weekDays.fri'),
+        t('schedule.weekDays.sat'),
+        t('schedule.weekDays.sun')
+    ];
 
     return (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {/* Header */}
             <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
-                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                {dayNames.map((d) => (
                     <div
                         key={d}
                         className="px-2 py-3 text-center text-xs font-semibold text-gray-700"
@@ -56,7 +69,7 @@ export default function CalendarView(props: CalendarViewProps) {
                                 >
                                     {today ? (
                                         <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded">
-                                            Today
+                                            {t('common.today')}
                                         </span>
                                     ) : (
                                         date.getDate()
@@ -101,7 +114,7 @@ export default function CalendarView(props: CalendarViewProps) {
                                     >
                                         {today ? (
                                             <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded">
-                                                Today
+                                                {t('common.today')}
                                             </span>
                                         ) : (
                                             date.getDate()

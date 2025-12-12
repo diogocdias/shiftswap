@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {SwapRequest} from "../Types.ts";
 
 interface RenderRequestCardProps {
@@ -7,8 +8,8 @@ interface RenderRequestCardProps {
     setRequests: React.Dispatch<React.SetStateAction<SwapRequest[]>>;
     setSelectedRequest: React.Dispatch<React.SetStateAction<SwapRequest | null>>;
     setShowShareModal: React.Dispatch<React.SetStateAction<boolean>>;
-    onApproveSuccess?: (message: string) => void;
-    onDeclineSuccess?: (message: string) => void;
+    onApproveSuccess?: () => void;
+    onDeclineSuccess?: () => void;
 }
 
 // Avatar component with initials
@@ -103,17 +104,18 @@ const getShiftTypeColor = (shiftType: string) => {
     return 'text-gray-500';
 };
 
-// Render a single request card
-export const renderRequestCard = ({
-                                      request,
-                                      showActions,
-                                      canShare,
-                                      setRequests,
-                                      setSelectedRequest,
-                                      setShowShareModal,
-                                      onApproveSuccess,
-                                      onDeclineSuccess
-                                  }: RenderRequestCardProps) => {
+// RequestCard component that can use hooks
+const RequestCard = ({
+                         request,
+                         showActions,
+                         canShare,
+                         setRequests,
+                         setSelectedRequest,
+                         setShowShareModal,
+                         onApproveSuccess,
+                         onDeclineSuccess
+                     }: RenderRequestCardProps) => {
+    const { t } = useTranslation();
 
     const handleApprove = async (requestId: number) => {
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -123,7 +125,7 @@ export const renderRequestCard = ({
             req.id === requestId ? {...req, status: 'approved' as const} : req
         ));
 
-        onApproveSuccess?.('Swap request approved successfully!');
+        onApproveSuccess?.();
     };
 
     const handleDecline = async (requestId: number) => {
@@ -134,7 +136,7 @@ export const renderRequestCard = ({
             req.id === requestId ? {...req, status: 'declined' as const} : req
         ));
 
-        onDeclineSuccess?.('Swap request declined.');
+        onDeclineSuccess?.();
     };
 
     const handleShare = (request: SwapRequest) => {
@@ -191,7 +193,7 @@ export const renderRequestCard = ({
                 <button
                     onClick={() => handleShare(request)}
                     className="p-2 text-gray-400 hover:text-gray-600 transition"
-                    title="Share"
+                    title={t('requests.card.share')}
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -206,7 +208,7 @@ export const renderRequestCard = ({
                     <button
                         onClick={() => handleApprove(request.id)}
                         className="p-2 text-green-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-                        title="Accept"
+                        title={t('requests.card.accept')}
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
@@ -215,7 +217,7 @@ export const renderRequestCard = ({
                     <button
                         onClick={() => handleDecline(request.id)}
                         className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
-                        title="Decline"
+                        title={t('requests.card.decline')}
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/>
@@ -230,7 +232,7 @@ export const renderRequestCard = ({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
                     </svg>
-                    <span className="text-xs font-medium">Approved</span>
+                    <span className="text-xs font-medium">{t('requests.card.approved')}</span>
                 </div>
             )}
 
@@ -239,7 +241,7 @@ export const renderRequestCard = ({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                    <span className="text-xs font-medium">Declined</span>
+                    <span className="text-xs font-medium">{t('requests.card.declined')}</span>
                 </div>
             )}
 
@@ -249,14 +251,14 @@ export const renderRequestCard = ({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span className="text-xs font-medium">Pending</span>
+                    <span className="text-xs font-medium">{t('requests.card.pending')}</span>
                 </div>
             )}
         </div>
     );
 
     return (
-        <div key={request.id} className="mx-4 my-3 px-6 py-5 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition">
+        <div className="mx-4 my-3 px-6 py-5 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition">
             {/* Desktop/Landscape Layout - Hidden on small portrait screens */}
             <div className="hidden landscape:flex md:flex items-center">
                 {/* Left Shift Section */}
@@ -273,7 +275,7 @@ export const renderRequestCard = ({
                         </div>
                         <ShiftList shifts={fromShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Your Shift{fromShifts.length > 1 ? 's' : ''}
+                            {fromShifts.length > 1 ? t('requests.card.yourShifts') : t('requests.card.yourShift')}
                         </span>
                     </div>
                 </div>
@@ -295,7 +297,7 @@ export const renderRequestCard = ({
                         </div>
                         <ShiftList shifts={toShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Proposed Swap{toShifts.length > 1 ? 's' : ''}
+                            {toShifts.length > 1 ? t('requests.card.proposedSwaps') : t('requests.card.proposedSwap')}
                         </span>
                     </div>
                 </div>
@@ -320,7 +322,7 @@ export const renderRequestCard = ({
                         </div>
                         <ShiftList shifts={fromShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Your Shift{fromShifts.length > 1 ? 's' : ''}
+                            {fromShifts.length > 1 ? t('requests.card.yourShifts') : t('requests.card.yourShift')}
                         </span>
                     </div>
                 </div>
@@ -342,7 +344,7 @@ export const renderRequestCard = ({
                         </div>
                         <ShiftList shifts={toShifts} />
                         <span className="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full uppercase tracking-wide">
-                            Proposed Swap{toShifts.length > 1 ? 's' : ''}
+                            {toShifts.length > 1 ? t('requests.card.proposedSwaps') : t('requests.card.proposedSwap')}
                         </span>
                     </div>
                 </div>
@@ -354,4 +356,9 @@ export const renderRequestCard = ({
             </div>
         </div>
     );
+};
+
+// Render a single request card (wrapper function for backwards compatibility)
+export const renderRequestCard = (props: RenderRequestCardProps) => {
+    return <RequestCard key={props.request.id} {...props} />;
 };

@@ -7,6 +7,18 @@ import { jsPDF } from 'jspdf';
 import { ShiftData, TeamMember, ShiftType, VacationType } from '../types/domain';
 import { getDaysInMonth, getMonthYear } from './dateUtils';
 import { getTimeOffForDate } from '../services/timeOffService';
+import i18n from '../i18n';
+import { getCurrentLanguage } from '../i18n';
+
+// Get locale for date formatting
+function getLocale(): string {
+    const lang = getCurrentLanguage();
+    const localeMap: Record<string, string> = {
+        'en': 'en-US',
+        'pt': 'pt-PT',
+    };
+    return localeMap[lang] || 'en-US';
+}
 
 // Shift labels for PDF display
 const SHIFT_LABELS: Record<ShiftType, string> = {
@@ -71,7 +83,7 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
     // Title
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text(`Team Schedule - ${monthTitle}`, pageWidth / 2, margin + 6, { align: 'center' });
+    doc.text(`${i18n.t('pdf.teamSchedule')} - ${monthTitle}`, pageWidth / 2, margin + 6, { align: 'center' });
 
     // Set up table styling
     doc.setFontSize(7);
@@ -84,13 +96,13 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
     // Name column header
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text('Name', margin + 2, tableTop + headerHeight / 2 + 2);
+    doc.text(i18n.t('pdf.name'), margin + 2, tableTop + headerHeight / 2 + 2);
 
     // Day headers
     for (let day = 1; day <= daysInMonth; day++) {
         const x = margin + nameColumnWidth + (day - 1) * dayColumnWidth;
         const date = new Date(year, month, day);
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0);
+        const dayName = date.toLocaleDateString(getLocale(), { weekday: 'short' }).charAt(0);
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
         // Draw cell border
@@ -195,11 +207,11 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
     doc.setTextColor(80, 80, 80);
 
     const legendItems = [
-        'M = Morning (6:00-14:00)',
-        'A = Afternoon (14:00-22:00)',
-        'N = Night (22:00-6:00)',
-        'R = Rest Day',
-        'D = Day Off',
+        i18n.t('pdf.legend.morning'),
+        i18n.t('pdf.legend.afternoon'),
+        i18n.t('pdf.legend.night'),
+        i18n.t('pdf.legend.restDay'),
+        i18n.t('pdf.legend.dayOff'),
     ];
 
     const legendText = legendItems.join('    ');
@@ -208,11 +220,11 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
     // Time-off legend (second line)
     const timeOffLegendY = legendY + 4;
     const timeOffLegendItems = [
-        'VAC = Vacation',
-        'SICK = Sick Leave',
-        'PER = Personal Day',
-        'SPE = Special Day Off',
-        'OFF = Other Time Off',
+        i18n.t('pdf.legend.vacation'),
+        i18n.t('pdf.legend.sickLeave'),
+        i18n.t('pdf.legend.personalDay'),
+        i18n.t('pdf.legend.specialDayOff'),
+        i18n.t('pdf.legend.otherTimeOff'),
     ];
     const timeOffLegendText = timeOffLegendItems.join('    ');
     doc.text(timeOffLegendText, pageWidth / 2, timeOffLegendY, { align: 'center' });
@@ -220,7 +232,7 @@ export function exportScheduleToPDF({ year, month, shifts, teamMembers }: Export
     // Generated date
     doc.setFontSize(5);
     doc.text(
-        `Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`,
+        `${i18n.t('pdf.generated')}: ${new Date().toLocaleDateString(getLocale(), { year: 'numeric', month: 'short', day: 'numeric' })}`,
         pageWidth - margin,
         pageHeight - 5,
         { align: 'right' }

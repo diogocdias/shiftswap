@@ -40,6 +40,7 @@ export async function fetchUserProfile(_userId: string): Promise<UserProfile> {
         facility: userData?.facility || 'Memorial Hospital',
         startDate: userData?.startDate || '2023-06-15',
         profilePicture: userData?.profilePicture || null,
+        language: userData?.language || 'en',
     };
 }
 
