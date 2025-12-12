@@ -409,9 +409,21 @@
       "approve": "Aprovar",
       "cancel": "Cancelar",
       "share": "Partilhar",
+      "preview": "Pré-visualizar",
       "approved": "Aprovado",
       "declined": "Recusado",
       "pending": "Pendente"
+    },
+    "preview": {
+      "title": "Pré-visualização da Escala",
+      "subtitle": "Veja como ficará a escala após esta troca",
+      "removed": "Turno removido",
+      "added": "Turno adicionado",
+      "noChange": "Sem alteração",
+      "teamMember": "Membro da Equipa",
+      "summary": "Resumo",
+      "multiPersonSummary": "{{count}} transferências de turno entre {{participants}} participantes",
+      "twoPersonSummary": "{{from}} e {{to}} vão trocar turnos"
     },
     "shareModal": {
       "title": "Partilhar Pedido de Troca",

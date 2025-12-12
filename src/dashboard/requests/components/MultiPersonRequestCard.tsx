@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MultiPersonSwapRequest, AnySwapRequest } from '../Types';
+import { SwapPreviewModal } from './SwapPreviewModal';
 
 interface MultiPersonRequestCardProps {
     request: MultiPersonSwapRequest;
@@ -53,6 +55,7 @@ export const MultiPersonRequestCard = ({
     loggedInUserId,
 }: MultiPersonRequestCardProps) => {
     const { t } = useTranslation();
+    const [showPreview, setShowPreview] = useState(false);
 
     const handleApprove = async (requestId: number) => {
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -236,6 +239,20 @@ export const MultiPersonRequestCard = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                    {/* Preview button */}
+                    <button
+                        onClick={() => setShowPreview(true)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        title={t('requests.card.preview')}
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+
                     {/* Share button */}
                     {request.status === 'pending' && canShare && (
                         <button
@@ -303,6 +320,13 @@ export const MultiPersonRequestCard = ({
                     )}
                 </div>
             </div>
+
+            {/* Preview Modal */}
+            <SwapPreviewModal
+                isOpen={showPreview}
+                request={request}
+                onClose={() => setShowPreview(false)}
+            />
         </div>
     );
 };

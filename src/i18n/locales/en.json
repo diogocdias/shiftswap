@@ -409,9 +409,21 @@
       "approve": "Approve",
       "cancel": "Cancel",
       "share": "Share",
+      "preview": "Preview",
       "approved": "Approved",
       "declined": "Declined",
       "pending": "Pending"
+    },
+    "preview": {
+      "title": "Schedule Preview",
+      "subtitle": "See how the schedule will look after this swap",
+      "removed": "Shift removed",
+      "added": "Shift added",
+      "noChange": "No change",
+      "teamMember": "Team Member",
+      "summary": "Summary",
+      "multiPersonSummary": "{{count}} shift transfers between {{participants}} participants",
+      "twoPersonSummary": "{{from}} and {{to}} will exchange shifts"
     },
     "shareModal": {
       "title": "Share Swap Request",
