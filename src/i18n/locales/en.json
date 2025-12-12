@@ -423,7 +423,9 @@
       "teamMember": "Team Member",
       "summary": "Summary",
       "multiPersonSummary": "{{count}} shift transfers between {{participants}} participants",
-      "twoPersonSummary": "{{from}} and {{to}} will exchange shifts"
+      "twoPersonSummary": "{{from}} and {{to}} will exchange shifts",
+      "willBeRemoved": "Will be removed",
+      "willBeAdded": "Will be added"
     },
     "shareModal": {
       "title": "Share Swap Request",

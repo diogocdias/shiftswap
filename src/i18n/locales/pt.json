@@ -423,7 +423,9 @@
       "teamMember": "Membro da Equipa",
       "summary": "Resumo",
       "multiPersonSummary": "{{count}} transferências de turno entre {{participants}} participantes",
-      "twoPersonSummary": "{{from}} e {{to}} vão trocar turnos"
+      "twoPersonSummary": "{{from}} e {{to}} vão trocar turnos",
+      "willBeRemoved": "Será removido",
+      "willBeAdded": "Será adicionado"
     },
     "shareModal": {
       "title": "Partilhar Pedido de Troca",
