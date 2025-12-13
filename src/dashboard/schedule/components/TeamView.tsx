@@ -6,6 +6,9 @@ import { useIsDesktop } from "../../../hooks/useIsDesktop";
 import { toISODateString } from "../../../utils/dateUtils";
 import { TIME_OFF_TYPES } from "../../../services/timeOffService";
 
+// Type for shift change highlighting in preview mode
+export type ShiftChangeType = 'removed' | 'added' | null;
+
 interface WeekViewProps {
     weekDays: Date[];
     filteredTeamMembers: TeamMember[];
@@ -21,6 +24,9 @@ interface WeekViewProps {
     currentMonth: Date;
     isExpanded?: boolean;
     getTimeOffForDate?: (userId: string, dateString: string) => VacationRecord | undefined;
+    // Optional: for preview mode to highlight changed shifts
+    getShiftChangeType?: (userId: string, date: string, shift: ShiftType) => ShiftChangeType;
+    isPreviewMode?: boolean;
 }
 
 export default function TeamView(props: WeekViewProps) {
@@ -39,7 +45,9 @@ export default function TeamView(props: WeekViewProps) {
         nameFilter,
         currentMonth,
         isExpanded = false,
-        getTimeOffForDate
+        getTimeOffForDate,
+        getShiftChangeType,
+        isPreviewMode = false,
     } = props;
 
     // Function to get all days in the current month
@@ -159,7 +167,15 @@ export default function TeamView(props: WeekViewProps) {
                                                         const shiftKey = `${member.id}-${dateKey}-${shiftIndex}`;
                                                         const isPending = hasPendingSwap(member.id, dateKey, shift);
                                                         const isSelected = isShiftSelected(member.id, dateKey, shift);
-                                                        const isClickable = shift !== "R" && shift !== "D";
+                                                        const isClickable = shift !== "R" && shift !== "D" && !isPreviewMode;
+                                                        const changeType = getShiftChangeType?.(member.id, dateKey, shift);
+
+                                                        // In preview mode, determine styling based on change type
+                                                        const getChangeStyles = () => {
+                                                            if (changeType === 'removed') return 'ring-2 ring-red-400 ring-offset-1 opacity-60';
+                                                            if (changeType === 'added') return 'ring-2 ring-green-500 ring-offset-1';
+                                                            return '';
+                                                        };
 
                                                         return (
                                                             <div key={shiftIndex} className="relative inline-block">
@@ -168,9 +184,9 @@ export default function TeamView(props: WeekViewProps) {
                                                                         isClickable
                                                                             ? "cursor-pointer hover:scale-110"
                                                                             : "cursor-default"
-                                                                    } ${isPending ? "ring-2 ring-yellow-400 ring-offset-1" : ""} ${
-                                                                        isSelected ? "ring-2 ring-blue-600 ring-offset-1 scale-110" : ""
-                                                                    }`}
+                                                                    } ${isPending && !isPreviewMode ? "ring-2 ring-yellow-400 ring-offset-1" : ""} ${
+                                                                        isSelected && !isPreviewMode ? "ring-2 ring-blue-600 ring-offset-1 scale-110" : ""
+                                                                    } ${getChangeStyles()}`}
                                                                     onMouseEnter={() => setHoveredShift(shiftKey)}
                                                                     onMouseLeave={() => setHoveredShift(null)}
                                                                     onClick={() =>
@@ -178,30 +194,51 @@ export default function TeamView(props: WeekViewProps) {
                                                                         handleShiftClick(member.id, dateKey, shift)
                                                                     }
                                                                 >
-                                                                    {shift}
-                                                                    {isSelected && (
+                                                                    {changeType === 'removed' ? <span className="line-through">{shift}</span> : shift}
+                                                                    {isSelected && !isPreviewMode && (
                                                                         <span className="ml-0.5 text-blue-600">
                                                                             <svg className="w-3 h-3 inline" fill="currentColor" viewBox="0 0 20 20">
                                                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                                             </svg>
                                                                         </span>
                                                                     )}
-                                                                    {isPending && !isSelected && (
+                                                                    {isPending && !isSelected && !isPreviewMode && (
                                                                         <span className="ml-1 text-yellow-600">
                                                                                 ⏳
                                                                             </span>
+                                                                    )}
+                                                                    {/* Change indicator badges for preview mode */}
+                                                                    {changeType === 'removed' && (
+                                                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                                                                            <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M20 12H4" />
+                                                                            </svg>
+                                                                        </span>
+                                                                    )}
+                                                                    {changeType === 'added' && (
+                                                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+                                                                            <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                                                                            </svg>
+                                                                        </span>
                                                                     )}
                                                                     {hoveredShift === shiftKey && (
                                                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 text-white text-[10px] rounded whitespace-nowrap z-20 shadow-lg">
                                                                             <div className="font-semibold">{shiftInfo.label}</div>
                                                                             <div className="text-gray-300 mt-0.5">{shiftInfo.time}</div>
-                                                                            {isPending && (
+                                                                            {changeType === 'removed' && (
+                                                                                <div className="text-red-300 mt-1 font-semibold">{t('requests.preview.willBeRemoved')}</div>
+                                                                            )}
+                                                                            {changeType === 'added' && (
+                                                                                <div className="text-green-300 mt-1 font-semibold">{t('requests.preview.willBeAdded')}</div>
+                                                                            )}
+                                                                            {isPending && !isPreviewMode && (
                                                                                 <div className="text-yellow-300 mt-1 font-semibold">{t('schedule.tooltips.swapPending')}</div>
                                                                             )}
-                                                                            {isSelected && (
+                                                                            {isSelected && !isPreviewMode && (
                                                                                 <div className="text-blue-300 mt-1 font-semibold">{t('schedule.tooltips.selectedClickToDeselect')}</div>
                                                                             )}
-                                                                            {isClickable && !isPending && !isSelected && (
+                                                                            {isClickable && !isPending && !isSelected && !isPreviewMode && (
                                                                                 <div className="text-blue-300 mt-1">{t('schedule.tooltips.clickToSelectForSwap')}</div>
                                                                             )}
                                                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
@@ -266,7 +303,15 @@ export default function TeamView(props: WeekViewProps) {
                                                         const shiftKey = `${member.id}-${dateKey}-${shiftIndex}`;
                                                         const isPending = hasPendingSwap(member.id, dateKey, shift);
                                                         const isSelected = isShiftSelected(member.id, dateKey, shift);
-                                                        const isClickable = shift !== "R" && shift !== "D";
+                                                        const isClickable = shift !== "R" && shift !== "D" && !isPreviewMode;
+                                                        const changeType = getShiftChangeType?.(member.id, dateKey, shift);
+
+                                                        // In preview mode, determine styling based on change type
+                                                        const getChangeStyles = () => {
+                                                            if (changeType === 'removed') return 'ring-2 ring-red-400 ring-offset-1 opacity-60';
+                                                            if (changeType === 'added') return 'ring-2 ring-green-500 ring-offset-1';
+                                                            return '';
+                                                        };
 
                                                         return (
                                                             <div key={shiftIndex} className="relative inline-block">
@@ -275,9 +320,9 @@ export default function TeamView(props: WeekViewProps) {
                                                                         isClickable
                                                                             ? "cursor-pointer hover:scale-110"
                                                                             : "cursor-default"
-                                                                    } ${isPending ? "ring-2 ring-yellow-400 ring-offset-1" : ""} ${
-                                                                        isSelected ? "ring-2 ring-blue-600 ring-offset-1 scale-110" : ""
-                                                                    }`}
+                                                                    } ${isPending && !isPreviewMode ? "ring-2 ring-yellow-400 ring-offset-1" : ""} ${
+                                                                        isSelected && !isPreviewMode ? "ring-2 ring-blue-600 ring-offset-1 scale-110" : ""
+                                                                    } ${getChangeStyles()}`}
                                                                     onMouseEnter={() => setHoveredShift(shiftKey)}
                                                                     onMouseLeave={() => setHoveredShift(null)}
                                                                     onClick={() =>
@@ -285,30 +330,51 @@ export default function TeamView(props: WeekViewProps) {
                                                                         handleShiftClick(member.id, dateKey, shift)
                                                                     }
                                                                 >
-                                                                    {shift}
-                                                                    {isSelected && (
+                                                                    {changeType === 'removed' ? <span className="line-through">{shift}</span> : shift}
+                                                                    {isSelected && !isPreviewMode && (
                                                                         <span className={`${isMonthView && !isExpanded ? 'ml-0' : 'ml-0.5'} text-blue-600`}>
                                                                             <svg className={`${isMonthView && !isExpanded ? 'w-2 h-2' : 'w-3 h-3'} inline`} fill="currentColor" viewBox="0 0 20 20">
                                                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                                             </svg>
                                                                         </span>
                                                                     )}
-                                                                    {isPending && !isSelected && (
+                                                                    {isPending && !isSelected && !isPreviewMode && (
                                                                         <span className="ml-1 text-yellow-600">
                                                                                 ⏳
                                                                             </span>
+                                                                    )}
+                                                                    {/* Change indicator badges for preview mode */}
+                                                                    {changeType === 'removed' && (
+                                                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                                                                            <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M20 12H4" />
+                                                                            </svg>
+                                                                        </span>
+                                                                    )}
+                                                                    {changeType === 'added' && (
+                                                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+                                                                            <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                                                                            </svg>
+                                                                        </span>
                                                                     )}
                                                                     {hoveredShift === shiftKey && (
                                                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-gray-900 text-white text-[10px] rounded whitespace-nowrap z-20 shadow-lg">
                                                                             <div className="font-semibold">{shiftInfo.label}</div>
                                                                             <div className="text-gray-300 mt-0.5">{shiftInfo.time}</div>
-                                                                            {isPending && (
+                                                                            {changeType === 'removed' && (
+                                                                                <div className="text-red-300 mt-1 font-semibold">{t('requests.preview.willBeRemoved')}</div>
+                                                                            )}
+                                                                            {changeType === 'added' && (
+                                                                                <div className="text-green-300 mt-1 font-semibold">{t('requests.preview.willBeAdded')}</div>
+                                                                            )}
+                                                                            {isPending && !isPreviewMode && (
                                                                                 <div className="text-yellow-300 mt-1 font-semibold">{t('schedule.tooltips.swapPending')}</div>
                                                                             )}
-                                                                            {isSelected && (
+                                                                            {isSelected && !isPreviewMode && (
                                                                                 <div className="text-blue-300 mt-1 font-semibold">{t('schedule.tooltips.selectedClickToDeselect')}</div>
                                                                             )}
-                                                                            {isClickable && !isPending && !isSelected && (
+                                                                            {isClickable && !isPending && !isSelected && !isPreviewMode && (
                                                                                 <div className="text-blue-300 mt-1">{t('schedule.tooltips.clickToSelectForSwap')}</div>
                                                                             )}
                                                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
